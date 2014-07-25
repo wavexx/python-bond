@@ -18,9 +18,6 @@ assert(php.call('test_bool') is False)
 php.eval(r'function test_nothing() { return null; }')
 assert(php.call('test_nothing') is None)
 
-php.eval(r'function test_nothing() { return null; }')
-assert(php.call('test_nothing') is None)
-
 php.eval(r'function test_identity($arg) { return $arg; }')
 php_identity = php.callable('test_identity')
 for value in [True, False, 0, 1, "String", [], [u"String"]]:
