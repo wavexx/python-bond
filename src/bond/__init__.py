@@ -75,3 +75,7 @@ class bond(object):
     def callable(self, name):
         '''Return a function calling "name"'''
         return lambda *args: self.call(name, *args)
+
+    def proxy(self, name, other, remote=None):
+        '''Export a function "name" to the "other" bond, named as "remote"'''
+        other.export(self.callable(name), remote or name)
