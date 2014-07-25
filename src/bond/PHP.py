@@ -112,7 +112,7 @@ class PHP(bond):
         super(PHP, self).__init__(proc)
 
     def eval_block(self, code):
-        code = r'call_user_func(function(){ %(code)s; });' % {'code': code}
+        code = r'return call_user_func(function(){ %(code)s });' % {'code': code}
         return self.eval(code)
 
     def export(self, func, name):
