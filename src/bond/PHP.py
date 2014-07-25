@@ -97,7 +97,7 @@ def _strip_newlines(code):
 
 class PHP(bond):
     def __init__(self, php="php -a", timeout=None):
-        proc = spawn(php, timeout=timeout, logfile=open('log', 'w'))
+        proc = spawn(php, timeout=timeout)
         proc.silent_expect(PHP_PROMPT)
 
         # inject our prelude
