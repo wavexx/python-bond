@@ -7,7 +7,6 @@ PHP_PROMPT    = r'php > '
 PHP_WRAP_PREFIX = '__PY_BOND'
 
 # Some local constants and definitions
-_PHP_FUN_DECL = re.compile(r'^\s*function\s+(\w+)')
 _PHP_PRELUDE = r'''
 
 # Define STDIN/STDOUT
