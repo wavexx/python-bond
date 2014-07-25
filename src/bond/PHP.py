@@ -14,11 +14,12 @@ define("%(PHP_WRAP_PREFIX)s_STDIN", fopen("php://stdin","r"));
 define("%(PHP_WRAP_PREFIX)s_STDOUT", fopen("php://stdout","w"));
 
 # Use a custom output filter to redirect normal output
+$%(PHP_WRAP_PREFIX)s_BUFFER = '';
+
 function %(PHP_WRAP_PREFIX)s_output($buffer, $phase)
 {
-  if(!strlen($buffer)) return;
-  $enc_ret = json_encode($buffer);
-  %(PHP_WRAP_PREFIX)s_sendline("OUTPUT $enc_ret");
+  global $%(PHP_WRAP_PREFIX)s_BUFFER;
+  $%(PHP_WRAP_PREFIX)s_BUFFER .= $buffer;
 }
 
 ob_start('%(PHP_WRAP_PREFIX)s_output');
@@ -45,6 +46,7 @@ function %(PHP_WRAP_PREFIX)s_remote($name, $args)
 
 function %(PHP_WRAP_PREFIX)s_repl()
 {
+  global $%(PHP_WRAP_PREFIX)s_BUFFER;
   while($line = %(PHP_WRAP_PREFIX)s_getline())
   {
     $line = explode(" ", $line, 2);
@@ -70,6 +72,10 @@ function %(PHP_WRAP_PREFIX)s_repl()
     }
 
     ob_flush();
+    $enc_out = json_encode($%(PHP_WRAP_PREFIX)s_BUFFER);
+    %(PHP_WRAP_PREFIX)s_sendline("OUTPUT $enc_out");
+    $%(PHP_WRAP_PREFIX)s_BUFFER = '';
+
     $enc_ret = json_encode($ret);
     %(PHP_WRAP_PREFIX)s_sendline("RETURN $enc_ret");
   }
