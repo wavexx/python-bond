@@ -66,7 +66,7 @@ class Bond(object):
 
 
     def eval(self, code):
-        '''Evaluate "code" inside the interpreter'''
+        '''Evaluate "code" inside the interpreter within the main scope (if possible)'''
         code = json.dumps(code)
         self._proc.sendline('EVAL {code}'.format(code=code))
         return self._repl()
