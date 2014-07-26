@@ -30,8 +30,8 @@ A simple  example
 
   >>> # Make an expensive split function using PHP's explode
   >>> split = php.callable('explode')
-  >>> split('=', "Mind=blown!")
-  [u'Mind', u'blown!']
+  >>> split(' ', "Hello world splitted by PHP!")
+  [u'Hello', u'world', u'splitted', u'by', u'PHP']
 
   >>> # Call Python from PHP
   >>> def call_me():
@@ -52,8 +52,8 @@ A simple  example
   >>> perl = Perl()
   >>> php.proxy('explode', perl)
   >>> # note: explode is now available to Perl
-  >>> perl.eval('explode(' ', "Hello world splitted by PHP using Perl");')
-  [u'Hello', u'world', u'splitted', u'by', u'PHP', u'using', u'Perl']
+  >>> perl.eval('explode("=", "Mind=blown!");')
+  [u'Mind', u'blown!']
 
 
 Why?
@@ -90,7 +90,7 @@ Language support
 PHP:
 
 * The PHP's ``readline`` module needs to be installed for the interactive
-  interpreter to work properly. The PHP modules calls ``php -a`` and expects an
+  interpreter to work properly. The PHP class calls ``php -a`` and expects an
   interactive prompt.
 
 * A syntax error will not currently return a proper exception.
