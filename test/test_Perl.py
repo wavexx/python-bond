@@ -51,10 +51,44 @@ def test_basic():
 
 def test_call_simple():
     perl = Perl(timeout=1)
-    perl.eval('sub test_perl() { return "Hello world!"; }')
-    perl_func = perl.callable('test_perl')
-    ret = perl_func();
+    perl.eval('sub test_simple { "Hello world!"; }')
+    perl_simple = perl.callable('test_simple')
+    ret = perl_simple()
     assert(str(ret) == "Hello world!")
+
+    perl.eval('sub test_proto() { "Hello world!"; }')
+    perl_proto = perl.callable('test_proto')
+    ret = perl_proto()
+    assert(str(ret) == "Hello world!")
+
+
+def test_call_proto():
+    perl = Perl(timeout=1)
+
+    # without prototypes
+    perl.eval('sub test_simple { "Hello world!"; }')
+    perl_simple = perl.callable('test_simple')
+    ret = perl_simple()
+    assert(str(ret) == "Hello world!")
+    ret = perl_simple(1)
+    assert(str(ret) == "Hello world!")
+    ret = perl_simple(1, 2)
+    assert(str(ret) == "Hello world!")
+
+    # with prototypes
+    perl.eval('sub test_proto() { "Hello world!"; }')
+    perl_proto = perl.callable('test_proto')
+    ret = perl_proto()
+    assert(str(ret) == "Hello world!")
+
+    # broken statement
+    failed = False
+    try:
+        perl_proto(1)
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
 
 
 def test_call_builtin():
