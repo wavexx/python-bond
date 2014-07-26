@@ -56,6 +56,9 @@ function %(PHP_WRAP_PREFIX)s_repl()
     $ret = null;
     switch($cmd)
     {
+    case "EVAL_BLOCK":
+      $args = "return call_user_func(function(){ $args });";
+
     case "EVAL":
       # TODO: handle eval errors
       $ret = eval($args);
@@ -125,9 +128,6 @@ class PHP(Bond):
             PHP_WRAP_PREFIX=PHP_WRAP_PREFIX))
         super(PHP, self).__init__(proc)
 
-    def eval_block(self, code):
-        code = r'return call_user_func(function(){ %(code)s });' % {'code': code}
-        return self.eval(code)
 
     def export(self, func, name):
         code = r'function %(name)s() { return %(PHP_WRAP_PREFIX)s_remote("%(name)s", func_get_args()); }' % {

@@ -75,7 +75,9 @@ class Bond(object):
 
     def eval_block(self, code):
         '''Evaluate "code" inside the interpreter, within an anonymous block'''
-        raise Exception("method not implemented")
+        code = json.dumps(code)
+        self._proc.sendline('EVAL_BLOCK {code}'.format(code=code))
+        return self._repl()
 
     def close(self):
         '''Terminate the underlying interpreter'''
