@@ -97,7 +97,7 @@ The ``bond`` class supports the following methods:
 
   Execute "code" (which is a normal string) inside the interpreter, but within
   an anonymous block. Local variables will be not visible to the main code,
-  unless they are explicitly declared as such.
+  unless they are explicitly declared as global.
 
 ``close()``:
 
@@ -123,14 +123,15 @@ The ``bond`` class supports the following methods:
 ``export(func, name)``:
 
   Export a local function "func" so that can be called on the remote language
-  as "name".
+  as "name". Note that "func" must be a function *reference*, not a function
+  name.
 
 ``proxy(name, other, remote)``:
 
   Export a function "name" from the current ``bond`` to "other", named as
   "remote". If "remote" is not provided, the same value as "name" is used.
 
-You can construct the appropriate ``bond`` by doing:
+You can construct the appropriate ``bond`` by using the appropriate subclass:
 
 .. code:: python
 
