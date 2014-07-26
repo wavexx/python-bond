@@ -3,26 +3,26 @@ import pexpect
 import sys
 
 
-class spawn(pexpect.spawn):
-    def silent_sendline(self, *args, **kwargs):
+class Spawn(pexpect.spawn):
+    def sendline(self, *args, **kwargs):
         self.setecho(False)
         self.waitnoecho()
-        return self.sendline(*args, **kwargs)
+        return super(Spawn, self).sendline(*args, **kwargs)
 
-    def silent_expect(self, *args, **kwargs):
+    def expect(self, *args, **kwargs):
         self.setecho(False)
         self.waitnoecho()
-        return self.expect(*args, **kwargs)
+        return super(Spawn, self).expect(*args, **kwargs)
 
 
-class bond(object):
+class Bond(object):
     def __init__(self, proc):
         self._proc = proc
-        self._proc.silent_expect("READY\r\n")
+        self._proc.expect("READY\r\n")
         self.local_bindings = {}
 
     def _repl(self):
-        while self._proc.silent_expect("(\S*)(?: ([^\r\n]+))?\r\n") == 0:
+        while self._proc.expect("(\S*)(?: ([^\r\n]+))?\r\n") == 0:
             cmd = str(self._proc.match.group(1))
             args = self._proc.match.group(2)
             if args is not None:
@@ -35,7 +35,7 @@ class bond(object):
             elif cmd == "REMOTE":
                 ret = self.local_bindings[args[0]](*args[1])
                 ret = json.dumps(ret) if ret else None
-                self._proc.silent_sendline('RETURN {ret}'.format(ret=ret))
+                self._proc.sendline('RETURN {ret}'.format(ret=ret))
                 continue
             elif cmd == "RETURN":
                 return args
@@ -46,13 +46,13 @@ class bond(object):
     def eval(self, code):
         '''Evaluate "code" inside the interpreter'''
         code = json.dumps(code)
-        self._proc.silent_sendline('EVAL {code}'.format(code=code))
+        self._proc.sendline('EVAL {code}'.format(code=code))
         return self._repl()
 
     def call(self, name, *args):
         '''Call a function "name" using *args'''
         code = json.dumps([name, args])
-        self._proc.silent_sendline('CALL {code}'.format(code=code))
+        self._proc.sendline('CALL {code}'.format(code=code))
         return self._repl()
 
     def eval_block(self, code):

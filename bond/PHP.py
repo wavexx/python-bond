@@ -100,19 +100,19 @@ def _strip_newlines(code):
     return re.sub(r'(?:#.*)?\n\s*', '', code)
 
 
-class PHP(bond):
+class PHP(Bond):
     def __init__(self, php="php -a", timeout=None):
-        proc = spawn(php, timeout=timeout)
-        proc.silent_expect(PHP_PROMPT)
+        proc = Spawn(php, timeout=timeout)
+        proc.expect(PHP_PROMPT)
 
         # inject our prelude
         code = _strip_newlines(_PHP_PRELUDE)
-        proc.silent_sendline(r'{code}; {PHP_WRAP_PREFIX}_sendline();'.format(
+        proc.sendline(r'{code}; {PHP_WRAP_PREFIX}_sendline();'.format(
             PHP_WRAP_PREFIX=PHP_WRAP_PREFIX, code=code))
-        proc.silent_expect(r'\r\n{prompt}'.format(prompt=PHP_PROMPT))
+        proc.expect(r'\r\n{prompt}'.format(prompt=PHP_PROMPT))
 
         # start the inner repl
-        proc.silent_sendline(r'{PHP_WRAP_PREFIX}_start();'.format(
+        proc.sendline(r'{PHP_WRAP_PREFIX}_start();'.format(
             PHP_WRAP_PREFIX=PHP_WRAP_PREFIX))
         super(PHP, self).__init__(proc)
 
