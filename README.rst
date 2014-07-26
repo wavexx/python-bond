@@ -31,7 +31,7 @@ A simple  example
   >>> # Make an expensive split function using PHP's explode
   >>> split = php.callable('explode')
   >>> split(' ', "Hello world splitted by PHP!")
-  [u'Hello', u'world', u'splitted', u'by', u'PHP']
+  [u'Hello', u'world', u'splitted', u'by', u'PHP!']
 
   >>> # Call Python from PHP
   >>> def call_me():
@@ -42,11 +42,9 @@ A simple  example
 
   >>> # Use some remote resources
   >>> remote_php = PHP('ssh remote php -a')
-  >>> php.eval('function local_php() { echo "Hi from " . system("hostname") . "!"; }')
-  >>> php.proxy('local_php', remote_php)
-  >>> # note: we call the remote host
-  >>> remote_php.eval('local_php();')
-  Hi from localhost!
+  >>> remote_php.eval('function call_me() { echo "Hi from " . system("hostname") . "!"; }')
+  >>> remote_php.eval('call_me();')
+  Hi from remote!
 
   >>> # Bridge two worlds!
   >>> from bond.Perl import Perl
