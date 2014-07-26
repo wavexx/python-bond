@@ -15,8 +15,6 @@ function __PY_BOND_output($buffer, $phase)
   $__PY_BOND_BUFFER .= $buffer;
 }
 
-ob_start('__PY_BOND_output');
-
 
 /// Define our own i/o methods
 function __PY_BOND_getline()
@@ -79,9 +77,12 @@ function __PY_BOND_repl()
     }
 
     ob_flush();
-    $enc_out = json_encode($__PY_BOND_BUFFER);
-    __PY_BOND_sendline("OUTPUT $enc_out");
-    $__PY_BOND_BUFFER = '';
+    if(strlen($__PY_BOND_BUFFER))
+    {
+      $enc_out = json_encode($__PY_BOND_BUFFER);
+      __PY_BOND_sendline("OUTPUT $enc_out");
+      $__PY_BOND_BUFFER = '';
+    }
 
     $enc_ret = json_encode($ret);
     __PY_BOND_sendline("RETURN $enc_ret");
@@ -91,6 +92,7 @@ function __PY_BOND_repl()
 
 function __PY_BOND_start()
 {
+  ob_start('__PY_BOND_output');
   __PY_BOND_sendline("READY");
   exit(__PY_BOND_repl());
 }
