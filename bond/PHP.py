@@ -57,6 +57,7 @@ function %(PHP_WRAP_PREFIX)s_repl()
     switch($cmd)
     {
     case "EVAL":
+      # TODO: handle eval errors
       $ret = eval($args);
       break;
 
@@ -101,15 +102,23 @@ def _strip_newlines(code):
 
 
 class PHP(Bond):
+    LANG = 'PHP'
+
     def __init__(self, php="php -a", timeout=None):
         proc = Spawn(php, timeout=timeout)
-        proc.expect(PHP_PROMPT)
+        try:
+            proc.expect(PHP_PROMPT)
+        except pexpect.ExceptionPexpect as e:
+            raise StateException('cannot start PHP')
 
         # inject our prelude
         code = _strip_newlines(_PHP_PRELUDE)
         proc.sendline(r'{code}; {PHP_WRAP_PREFIX}_sendline();'.format(
             PHP_WRAP_PREFIX=PHP_WRAP_PREFIX, code=code))
-        proc.expect(r'\r\n{prompt}'.format(prompt=PHP_PROMPT))
+        try:
+            proc.expect(r'\r\n{prompt}'.format(prompt=PHP_PROMPT))
+        except pexpect.ExceptionPexpect as e:
+            raise StateException('cannot initialize PHP')
 
         # start the inner repl
         proc.sendline(r'{PHP_WRAP_PREFIX}_start();'.format(

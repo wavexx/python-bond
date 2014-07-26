@@ -1,3 +1,4 @@
+import exceptions
 import json
 import pexpect
 import sys
@@ -15,11 +16,26 @@ class Spawn(pexpect.spawn):
         return super(Spawn, self).expect(*args, **kwargs)
 
 
+class BondException(exceptions.IOError):
+    pass
+
+class StateException(BondException):
+    pass
+
+class RemoteException(BondException):
+    pass
+
+
 class Bond(object):
+    LANG = '<unknown>'
+
     def __init__(self, proc):
-        self._proc = proc
-        self._proc.expect("READY\r\n")
         self.local_bindings = {}
+        self._proc = proc
+        try:
+            self._proc.expect("READY\r\n")
+        except pexpect.ExceptionPexpect as e:
+            raise StateException('unknown "{lang}" interpreter state'.format(lang=self.LANG))
 
     def _repl(self):
         while self._proc.expect("(\S*)(?: ([^\r\n]+))?\r\n") == 0:
@@ -37,10 +53,12 @@ class Bond(object):
                 ret = json.dumps(ret) if ret else None
                 self._proc.sendline('RETURN {ret}'.format(ret=ret))
                 continue
+            elif cmd == "ERROR":
+                raise RemoteException('{lang}: {error}'.format(lang=LANG, error=str(args)))
             elif cmd == "RETURN":
                 return args
 
-            raise IOError("unknown interpreter state")
+            raise StateException('unknown "{lang}" interpreter state'.format(lang=self.LANG))
 
 
     def eval(self, code):
