@@ -30,7 +30,7 @@ A ``PHP`` example
   >>> def call_me():
   ...     print("Hi, this is Python talking!")
   >>> php.export(call_me, 'call_me')
-  >>> php.eval('call_me()')
+  >>> php.eval('call_me();')
   Hi, this is Python talking!
 
   >>> # Bridge two worlds!
