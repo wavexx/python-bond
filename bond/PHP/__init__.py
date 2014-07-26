@@ -13,8 +13,8 @@ def _strip_newlines(code):
     """Turn a PHP code block into one line, so that an interactive PHP prompt
     does not output cruft while interpreting it"""
     # TODO: this is buggy on several levels. We could pre-process code using
-    #       `php -w`, but it sounds prohibitive. But it's good enough for our
-    #       prelude.
+    #       `php -w`, but it sounds prohibitive. It's good enough for our
+    #       prelude though, where we control the source.
     return re.sub(r'(?:///.*)?\n\s*', '', code)
 
 
