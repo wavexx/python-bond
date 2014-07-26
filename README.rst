@@ -44,6 +44,7 @@ A simple  example
   >>> remote_php = PHP('ssh remote php -a')
   >>> php.eval('function local_php() { echo "Hi from " . system("hostname") . "!"; }')
   >>> php.proxy('local_php', remote_php)
+  >>> # note: we call the remote host
   >>> remote_php.eval('local_php();')
   Hi from localhost!
 
@@ -82,6 +83,61 @@ function:
 It turns out that the same approach can be useful to perform remote computation
 as well, and the wire protocol is simple enough to be extended to any language
 supporting an interactive interpreter.
+
+API
+===
+
+The ``bond`` class supports the following methods:
+
+``eval(code)``:
+
+  Execute "code" (which is a normal string) inside the interpreter within the
+  main scope (if possible). Any construct which is legal by the current
+  interpreter is allowed.
+
+``eval_block(code)``:
+
+  Execute "code" (which is a normal string) inside the interpreter, but within
+  an anonymous block. Local variables will be not visible to the main code,
+  unless they are explicitly declared as such.
+
+``close()``:
+
+  Terminate the communication with the interpreter.
+
+``call(name, *args)``:
+
+  Call a function "name" in the interpreter using the supplied list of
+  arguments \*args. The arguments are automatically converted to their other
+  language's counterpart. The return value is captured and converted back to
+  Python as well.
+
+``callable(name)``:
+
+  Return a function that calls "name":
+
+  .. code:: python
+
+    explode = php.callable('explode')
+    # Now you can call explode as a normal, local function
+    explode(' ', 'Hello world')
+
+``export(func, name)``:
+
+  Export a local function "func" so that can be called on the remote language
+  as "name".
+
+``proxy(name, other, remote)``:
+
+  Export a function "name" from the current ``bond`` to "other", named as
+  "remote". If "remote" is not provided, the same value as "name" is used.
+
+You can construct the appropriate ``bond`` by doing:
+
+.. code:: python
+
+  from bond.<language> import <language>
+  interpreter = <language>().
 
 
 Language support
