@@ -7,46 +7,37 @@ def test_basic():
     perl.close()
 
 
-## def test_call():
-##     perl = Perl(timeout=1)
-##     ret = perl.call('sprintf', "Hello world!")
-##     assert(str(ret) == "Hello world!")
+def test_call_marshalling():
+    perl = Perl(timeout=1)
 
+    perl.eval(r'sub test_str { "Hello world!"; }')
+    assert(str(perl.call('test_str')) == "Hello world!")
 
-## def test_call_marshalling():
-##     perl = Perl(timeout=1)
+    perl.eval(r'sub test_array { [42]; }')
+    assert(perl.call('test_array') == [42])
 
-##     perl.eval(r'function test_str() { return "Hello world!"; }')
-##     assert(str(perl.call('test_str')) == "Hello world!")
+    perl.eval(r'sub test_number { 42; }')
+    assert(perl.call('test_number') == 42)
 
-##     perl.eval(r'function test_array() { return [42]; }')
-##     assert(perl.call('test_array') == [42])
+    perl.eval(r'sub test_nothing { undef; }')
+    assert(perl.call('test_nothing') is None)
 
-##     perl.eval(r'function test_number() { return 42; }')
-##     assert(perl.call('test_number') == 42)
+    perl.eval(r'sub test_identity { shift(); }')
+    perl_identity = perl.callable('test_identity')
+    for value in [True, False, 0, 1, "String", [], [u"String"]]:
+        ret = perl_identity(value)
+        print("{} => {}".format(value, ret))
+        assert(str(ret) == str(value))
 
-##     perl.eval(r'function test_bool() { return false; }')
-##     assert(perl.call('test_bool') is False)
+    perl.eval(r'sub test_multi_arg { sprintf("%s %s", @_); }')
+    assert(str(perl.call('test_multi_arg', "Hello", "world!")) == "Hello world!")
 
-##     perl.eval(r'function test_nothing() { return null; }')
-##     assert(perl.call('test_nothing') is None)
-
-##     perl.eval(r'function test_identity($arg) { return $arg; }')
-##     perl_identity = perl.callable('test_identity')
-##     for value in [True, False, 0, 1, "String", [], [u"String"]]:
-##         ret = perl_identity(value)
-##         print("{} => {}".format(value, ret))
-##         assert(str(ret) == str(value))
-
-##     perl.eval(r'function test_multi_arg($arg1, $arg2) { return sprintf("%s %s", $arg1, $arg2); }')
-##     assert(str(perl.call('test_multi_arg', "Hello", "world!")) == "Hello world!")
-
-##     perl.eval(r'function test_nested($arg) { return test_identity($arg); }')
-##     perl_nested = perl.callable('test_nested')
-##     for value in [True, False, 0, 1, "String", [], [u"String"]]:
-##         ret = perl_nested(value)
-##         print("{} => {}".format(value, ret))
-##         assert(str(ret) == str(value))
+    perl.eval(r'sub test_nested { test_identity(shift()); }')
+    perl_nested = perl.callable('test_nested')
+    for value in [True, False, 0, 1, "String", [], [u"String"]]:
+        ret = perl_nested(value)
+        print("{} => {}".format(value, ret))
+        assert(str(ret) == str(value))
 
 
 def test_call_simple():
