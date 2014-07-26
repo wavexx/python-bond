@@ -15,6 +15,9 @@ my $__PY_BOND_STDOUT = *STDOUT;
 
 
 # Define our own i/o methods
+my $__PY_BOND_JSON = JSON->new();
+$__PY_BOND_JSON->allow_nonref();
+
 sub __PY_BOND_getline()
 {
   my $line = <$__PY_BOND_STDIN>;
@@ -34,20 +37,17 @@ sub __PY_BOND_sendline
 sub __PY_BOND_remote($$)
 {
   my ($name, $args) = @_;
-  #$json = json_encode(array($name, $args));
-  #__PY_BOND_sendline("REMOTE $json");
-  #return __PY_BOND_repl();
+  my $json = $__PY_BOND_JSON->encode([$name, $args]);
+  __PY_BOND_sendline("REMOTE $json");
+  return __PY_BOND_repl();
 }
 
 sub __PY_BOND_repl()
 {
-  my $json = JSON->new();
-  $json->allow_nonref();
-
   while(my $line = __PY_BOND_getline())
   {
     my ($cmd, $args) = split(/ /, $line, 2);
-    $args = $json->decode($args) if(defined($args));
+    $args = $__PY_BOND_JSON->decode($args) if(defined($args));
 
     my $ret = undef;
     my $err = undef;
@@ -60,8 +60,8 @@ sub __PY_BOND_repl()
     }
     elsif($cmd eq "EXPORT")
     {
-      # $code = "function $args() { return __PY_BOND_remote('$args', func_get_args()); }";
-      # $ret = eval($code);
+      my $code = "sub $args { __PY_BOND_remote('$args', \\\@_); }";
+      $ret = eval($code);
     }
     elsif($cmd eq "CALL")
     {
@@ -90,7 +90,7 @@ sub __PY_BOND_repl()
     # redirected output
     if(tell($__PY_BOND_BUFFER))
     {
-      my $enc_out = $json->encode(${$__PY_BOND_BUFFER->string_ref});
+      my $enc_out = $__PY_BOND_JSON->encode(${$__PY_BOND_BUFFER->string_ref});
       __PY_BOND_sendline("OUTPUT $enc_out");
       truncate($__PY_BOND_BUFFER, 0);
     }
@@ -106,7 +106,7 @@ sub __PY_BOND_repl()
       $ret = $err;
     }
 
-    my $enc_ret = $json->encode($ret);
+    my $enc_ret = $__PY_BOND_JSON->encode($ret);
     __PY_BOND_sendline("$state $enc_ret");
   }
   exit(0);
@@ -121,5 +121,3 @@ sub __PY_BOND_start()
   __PY_BOND_sendline("READY");
   exit(__PY_BOND_repl());
 }
-
-#__PY_BOND_start();

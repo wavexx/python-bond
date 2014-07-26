@@ -20,7 +20,7 @@ class Perl(Bond):
     LANG = 'Perl'
 
     def __init__(self, php="perlsh", timeout=None):
-        proc = Spawn(php, timeout=timeout, logfile=open("log", "w"))
+        proc = Spawn(php, timeout=timeout)
         try:
             proc.expect(PERL_PROMPT)
         except pexpect.ExceptionPexpect as e:

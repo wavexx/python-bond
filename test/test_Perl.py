@@ -143,47 +143,47 @@ def test_eval_block():
     assert(perl.eval_block('$y // -1') == -1)
 
 
-## def test_export():
-##     def call_me():
-##         return 42
+def test_export():
+    def call_me():
+        return 42
 
-##     perl = Perl(timeout=1)
-##     perl.export(call_me, 'call_me')
-##     assert(perl.call('call_me') == 42)
+    perl = Perl(timeout=1)
+    perl.export(call_me, 'call_me')
+    assert(perl.call('call_me') == 42)
 
 
-## def test_export_recursive():
-##     perl = Perl(timeout=1)
+def test_export_recursive():
+    perl = Perl(timeout=1)
 
-##     # define a remote function
-##     perl.eval(r'function func_perl($arg) { return $arg + 1; }')
-##     func_perl = perl.callable('func_perl')
-##     assert(func_perl(0) == 1)
+    # define a remote function
+    perl.eval(r'sub func_perl { shift() + 1; }')
+    func_perl = perl.callable('func_perl')
+    assert(func_perl(0) == 1)
 
-##     # define a local function that calls the remote
-##     def func_python(arg):
-##         return func_perl(arg + 1)
+    # define a local function that calls the remote
+    def func_python(arg):
+        return func_perl(arg + 1)
 
-##     assert(func_python(0) == 2)
+    assert(func_python(0) == 2)
 
-##     # export the function remotely and call it
-##     perl.export(func_python, 'remote_func_python')
-##     remote_func_python = perl.callable('remote_func_python')
-##     assert(remote_func_python(0) == 2)
+    # export the function remotely and call it
+    perl.export(func_python, 'remote_func_python')
+    remote_func_python = perl.callable('remote_func_python')
+    assert(remote_func_python(0) == 2)
 
-##     # define a remote function that calls us recursively
-##     perl.eval(r'function func_perl_rec($arg) { return remote_func_python($arg) + 1; }')
-##     func_perl_rec = perl.callable('func_perl_rec')
-##     assert(func_perl_rec(0) == 3)
+    # define a remote function that calls us recursively
+    perl.eval(r'sub func_perl_rec { remote_func_python(shift()) + 1; }')
+    func_perl_rec = perl.callable('func_perl_rec')
+    assert(func_perl_rec(0) == 3)
 
-##     # inception
-##     def func_python_rec(arg):
-##         return func_perl_rec(arg) + 1
+    # inception
+    def func_python_rec(arg):
+        return func_perl_rec(arg) + 1
 
-##     perl.export(func_python_rec, 'remote_func_python_rec')
-##     perl.eval(r'function func_perl_rec_2($arg) { return remote_func_python_rec($arg) + 1; }')
-##     func_perl_rec_2 = perl.callable('func_perl_rec_2')
-##     assert(func_perl_rec_2(0) == 5)
+    perl.export(func_python_rec, 'remote_func_python_rec')
+    perl.eval(r'sub func_perl_rec_2 { remote_func_python_rec(shift()) + 1; }')
+    func_perl_rec_2 = perl.callable('func_perl_rec_2')
+    assert(func_perl_rec_2(0) == 5)
 
 
 def test_output_redirect():
@@ -191,11 +191,11 @@ def test_output_redirect():
     perl.eval_block(r'print "Hello world!\n";')
 
 
-## def test_proxy():
-##     perl1 = Perl(timeout=1)
-##     perl1.eval(r'function func_perl1($arg) { return $arg + 1; }')
+def test_proxy():
+    perl1 = Perl(timeout=1)
+    perl1.eval(r'sub func_perl1 { shift() + 1; }')
 
-##     perl2 = Perl(timeout=1)
-##     perl1.proxy('func_perl1', perl2)
+    perl2 = Perl(timeout=1)
+    perl1.proxy('func_perl1', perl2)
 
-##     assert(perl2.call('func_perl1', 0) == 1)
+    assert(perl2.call('func_perl1', 0) == 1)
