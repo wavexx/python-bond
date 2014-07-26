@@ -1,4 +1,3 @@
-from abc import ABCMeta, abstractmethod
 import json
 import pexpect
 import sys
@@ -17,14 +16,10 @@ class spawn(pexpect.spawn):
 
 
 class bond(object):
-    __metaclass__ = ABCMeta
-
-    @abstractmethod
     def __init__(self, proc):
         self._proc = proc
         self._proc.silent_expect("READY\r\n")
         self.local_bindings = {}
-
 
     def _repl(self):
         while self._proc.silent_expect("(\S*)(?: ([^\r\n]+))?\r\n") == 0:

@@ -1,9 +1,8 @@
 #!/usr/bin/env python
-from setuptools import setup, find_packages
+from setuptools import setup
 setup(name='bond',
       version='0.1',
-      packages=find_packages('src'),
-      package_dir={'':'src'},
+      packages=['bond'],
       setup_requires=['nose'],
       test_suite='nose.collector',
       install_requires=['pexpect'])
