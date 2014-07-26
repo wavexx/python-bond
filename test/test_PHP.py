@@ -77,8 +77,8 @@ def test_eval_block():
     assert(php.eval('return $x;') == 1)
 
     # check eval_block
-    php.eval_block('$x = 1;')
-    assert(php.eval_block('return isset($x)? $x: -1;') == -1)
+    php.eval_block('$y = 1;')
+    assert(php.eval_block('return isset($y)? $y: -1;') == -1)
 
 
 def test_export():
