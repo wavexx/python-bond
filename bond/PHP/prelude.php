@@ -56,8 +56,7 @@ function __PY_BOND_repl()
 
     case "EVAL_BLOCK":
       /// TODO: handle eval errors
-      $args = "return call_user_func(function(){ $args });";
-      $ret = eval($args);
+      $ret = call_user_func(function($args){ return eval($args); }, $args);
       break;
 
     case "EXPORT":
