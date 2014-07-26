@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from setuptools import setup, find_packages
 setup(name='python-bond',
-      description='Ambivalent bonds between Python and other languages',
+      description='transparent remote/recursive evaluation between Python and other languages',
       version='0.1',
       url="https://github.com/wavexx/python-bond",
       author="Yuri D'Elia",

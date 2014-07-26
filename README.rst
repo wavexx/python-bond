@@ -10,11 +10,12 @@ The Python module ``bond`` supports transparent remote/recursive evaluation
 between Python and another interpreter through automatic call serialization.
 
 In poorer words, a ``bond`` lets you call functions in other languages as they
-were native to Python. It *also* allows other languages to *call Python
-functions* as if they were local.
+were normal Python functions. It *also* allows other languages to *call Python
+functions* as if they were native.
 
-And since the evaluation is performed through a persistent co-process, you can
-actually spawn remote interpreters as if they were running on the same host!
+Remote output is also transparently redirected locally, and since the
+evaluation is performed through a persistent co-process, you can actually spawn
+interpreters on different hosts through "ssh" efficiently.
 
 
 A simple  example
@@ -79,8 +80,9 @@ function:
   php.call('main', sys.argv)
 
 It turns out that the same approach can be useful to perform remote computation
-as well, and the wire protocol is simple enough to be extended to any language
+as well. The wire protocol is simple enough to be extended to any language
 supporting an interactive interpreter.
+
 
 API
 ===
@@ -144,9 +146,9 @@ Language support
 
 PHP:
 
-* The PHP's ``readline`` module needs to be installed for the interactive
-  interpreter to work properly. The PHP class calls ``php -a`` and expects an
-  interactive prompt.
+* The PHP's command line and the ``readline`` module needs to be installed for
+  the interactive interpreter to work properly. On Debian/Ubuntu, you'll need
+  ``php5-cli`` and ``php5-readline``.
 
 * A syntax error will not currently return a proper exception.
 
@@ -159,20 +161,11 @@ Perl:
   Debian/Ubuntu as ``libterm-readline-gnu-perl``).
 
 * There's no distinction between ``eval`` and ``eval_block`` in Perl. Both
-  calls execute the evaluated code in a local scope. If you need to *create*
-  global variables, you need to use a qualified prefix.
+  calls execute the evaluated code in an anonymous scope. If you need to
+  *create* global variables, you need to use a qualified prefix.
 
-* Not all built-in functions are callable directly using ``bond.call``, due to
-  the syntax semantics of Perl. For example, ``print`` can only be called
-  directly as ``print("string")``:
-
-  .. code:: python
-
-    perl.call('print', "Hello world!\n")
-
-  but not in the special syntax form accepting a file handle: ``print HANDLE
-  "string"``. To do that, you'll need to use ``eval``, or construct a regular
-  function.
+* Not all built-in functions are callable directly using ``bond.call`` due to
+  the syntax semantics of Perl: you can only call function-like builtins.
 
 
 Common limitations
