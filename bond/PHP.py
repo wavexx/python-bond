@@ -56,12 +56,20 @@ function %(PHP_WRAP_PREFIX)s_repl()
     $ret = null;
     switch($cmd)
     {
-    case "EVAL_BLOCK":
-      $args = "return call_user_func(function(){ $args });";
-
     case "EVAL":
       # TODO: handle eval errors
       $ret = eval($args);
+      break;
+
+    case "EVAL_BLOCK":
+      # TODO: handle eval errors
+      $args = "return call_user_func(function(){ $args });";
+      $ret = eval($args);
+      break;
+
+    case "EXPORT":
+      $code = "function $args() { return %(PHP_WRAP_PREFIX)s_remote('$args', func_get_args()); }";
+      $ret = eval($code);
       break;
 
     case "CALL":
@@ -127,11 +135,3 @@ class PHP(Bond):
         proc.sendline(r'{PHP_WRAP_PREFIX}_start();'.format(
             PHP_WRAP_PREFIX=PHP_WRAP_PREFIX))
         super(PHP, self).__init__(proc)
-
-
-    def export(self, func, name):
-        code = r'function %(name)s() { return %(PHP_WRAP_PREFIX)s_remote("%(name)s", func_get_args()); }' % {
-            'PHP_WRAP_PREFIX': PHP_WRAP_PREFIX,
-            'name': name}
-        self.eval(code)
-        super(PHP, self).export(func, name)

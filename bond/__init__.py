@@ -86,6 +86,8 @@ class Bond(object):
     def export(self, func, name):
         '''Export a local function "func" to be callable in the interpreter as "name"'''
         self.local_bindings[name] = func
+        self._proc.sendline('EXPORT {name}'.format(name=json.dumps(name)))
+        return self._repl()
 
     def callable(self, name):
         '''Return a function calling "name"'''
