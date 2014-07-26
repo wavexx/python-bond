@@ -14,7 +14,7 @@ were native to Python. It *also* allows other languages to *call Python
 functions* as if they were local.
 
 And since the evaluation is performed through a persistent co-process, you can
-actually spawn remote interpreters as if they were running locally!
+actually spawn remote interpreters as if they were running on the same host!
 
 
 A simple  example
