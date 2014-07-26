@@ -58,7 +58,7 @@ class Bond(object):
                 self._proc.sendline('RETURN {ret}'.format(ret=ret))
                 continue
             elif cmd == "ERROR":
-                raise RemoteException('{lang}: {error}'.format(lang=LANG, error=str(args)))
+                raise RemoteException('{lang}: {error}'.format(lang=self.LANG, error=str(args)))
             elif cmd == "RETURN":
                 return args
 
