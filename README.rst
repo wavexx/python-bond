@@ -131,7 +131,7 @@ The ``bond`` class supports the following methods:
   Export a function "name" from the current ``bond`` to "other", named as
   "remote". If "remote" is not provided, the same value as "name" is used.
 
-You can construct the appropriate ``bond`` by using the appropriate subclass:
+You can construct a ``bond`` by using the appropriate subclass:
 
 .. code:: python
 
