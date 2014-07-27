@@ -170,11 +170,10 @@ Only basic types (booleans, numbers, strings, lists, arrays and
 maps/dictionaries) can be transferred between the interpreters. References are
 implicitly broken as *objects are transferred by value*.
 
-Calling functions across the bridge is slow, but the execution speed of
-function itself is *not affected*. This might be perfectly reasonable if there
-are only occasional calls between languages, and the calls themselves take a
-significant fraction of time. Calling functions recursively between
-interpreters though might be prohibitive.
+Calling functions across the bridge is slow due to the serialization, but the
+execution speed of the functions themselves is *not affected*. This might be
+perfectly reasonable if there are only occasional calls between languages,
+and/or the calls themselves take a significant fraction of time.
 
 
 Authors and Copyright
