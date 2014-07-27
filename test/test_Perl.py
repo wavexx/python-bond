@@ -53,6 +53,22 @@ def test_call_simple():
     assert(str(ret) == "Hello world!")
 
 
+def test_call_error():
+    perl = Perl(timeout=1)
+    perl.eval('sub test_simple { 1 / shift() }')
+    ret = perl.call('test_simple', 1)
+    assert(ret == 1)
+
+    # make it fail
+    fail = False
+    try:
+        perl.call('test_simple', 0)
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
+
+
 def test_call_proto():
     perl = Perl(timeout=1)
 

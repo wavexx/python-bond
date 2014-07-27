@@ -40,17 +40,46 @@ def test_basic():
 #         assert(str(ret) == str(value))
 
 
-# def test_call_simple():
-#     py = Python(timeout=1)
-#     py.eval('sub test_simple { "Hello world!"; }')
-#     perl_simple = py.callable('test_simple')
-#     ret = perl_simple()
-#     assert(str(ret) == "Hello world!")
+def test_call_simple():
+    py = Python(timeout=1)
 
-#     py.eval('sub test_proto() { "Hello world!"; }')
-#     perl_proto = py.callable('test_proto')
-#     ret = perl_proto()
-#     assert(str(ret) == "Hello world!")
+    # define a function and call it
+    py.eval_block(r'''def test_simple():
+        return "Hello world!"
+    ''')
+    py.eval('test_simple()')
+
+    # test the call interface
+    ret = py.call('test_simple')
+    assert(str(ret) == "Hello world!")
+
+    # call a built-in
+    ret = py.eval('str("Hello world!")')
+    assert(str(ret) == "Hello world!")
+
+    # try 'callable'
+    py_simple = py.callable('test_simple')
+    ret = py_simple()
+    assert(str(ret) == "Hello world!")
+
+
+def test_call_error():
+    py = Python(timeout=1)
+
+    # define a function and call it
+    py.eval_block(r'''def test_simple(arg):
+        return 1 / arg
+    ''')
+    py.eval('test_simple(1)')
+
+    # make it fail
+    fail = False
+    try:
+        py.call('test_simple', 0)
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
 
 
 # def test_call_proto():

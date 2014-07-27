@@ -52,32 +52,28 @@ def __PY_BOND_repl():
                 ret = eval(compile(args, '<string>', mode))
             except Exception as e:
                 err = str(e)
+
         elif cmd == "EXPORT":
+            pass
 #    elsif($cmd eq "EXPORT")
 #    {
 #      my $code = "sub $args { __PY_BOND_remote('$args', \\\@_); }"
 #      $ret = eval($code)
 #    }
-            pass
+
         elif cmd == "CALL":
-#    elsif($cmd eq "CALL")
-#    {
-#      no strict 'refs'
-#      my $name = $args->[0]
-#
-#      # NOTE: note that we use "dump" to evaluate the command as a pure string.
-#      #       This allows us to execute *some* perl special forms consistenly.
-#      # TODO: special-case builtins to allow transparent invocation and higher
-#      #       performance with regular functions.
-#      my @args = @{$args->[1]}
-#      my $args_ = dump(@args)
-#      $args_ = "($args_)" if(@args == 1)
-#      $ret = eval($name . $args_)
-#      $err = $@
-#    }
-            pass
+            name = args[0]
+            func = locals().get(name)
+            if func is None:
+                func = globals().get(name)
+            try:
+                ret = func(*args[1])
+            except Exception as e:
+                err = str(e)
+
         elif cmd == "RETURN":
             return args
+
         else:
             exit(1)
 
