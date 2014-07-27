@@ -17,6 +17,8 @@ Remote output is also transparently redirected locally, and since the
 evaluation is performed through a persistent co-process, you can actually spawn
 interpreters on different hosts through "ssh" efficiently.
 
+``bond`` currently supports PHP, Perl and Python itself.
+
 
 A simple  example
 =================
