@@ -19,8 +19,9 @@ def _strip_newlines(code):
 class Perl(Bond):
     LANG = 'Perl'
 
-    def __init__(self, php="perlsh", timeout=None):
-        proc = Spawn(php, timeout=timeout)
+    def __init__(self, perl="perlsh", args="", xargs="", timeout=None):
+        cmd = ' '.join([perl, args, xargs])
+        proc = Spawn(cmd, timeout=timeout)
         try:
             proc.expect(PERL_PROMPT)
         except pexpect.ExceptionPexpect as e:

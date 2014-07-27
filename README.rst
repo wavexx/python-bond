@@ -42,7 +42,7 @@ A simple  example
   Hi, this is Python talking!
 
   >>> # Use some remote resources
-  >>> remote_php = PHP('ssh remote php -a')
+  >>> remote_php = PHP('ssh remote php')
   >>> remote_php.eval('function call_me() { echo "Hi from " . system("hostname") . "!"; }')
   >>> remote_php.eval('call_me();')
   Hi from remote!
