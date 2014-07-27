@@ -78,7 +78,7 @@ function __PY_BOND_repl()
     ob_flush();
     if(strlen($__PY_BOND_BUFFER))
     {
-      $enc_out = json_encode($__PY_BOND_BUFFER);
+      $enc_out = json_encode(array("STDOUT", $__PY_BOND_BUFFER));
       __PY_BOND_sendline("OUTPUT $enc_out");
       $__PY_BOND_BUFFER = '';
     }

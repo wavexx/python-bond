@@ -90,7 +90,8 @@ sub __PY_BOND_repl()
     # redirected output
     if(tell($__PY_BOND_BUFFER))
     {
-      my $enc_out = $__PY_BOND_JSON->encode(${$__PY_BOND_BUFFER->string_ref});
+      my $output = ${$__PY_BOND_BUFFER->string_ref};
+      my $enc_out = $__PY_BOND_JSON->encode(["STDOUT", $output]);
       __PY_BOND_sendline("OUTPUT $enc_out");
       truncate($__PY_BOND_BUFFER, 0);
     }

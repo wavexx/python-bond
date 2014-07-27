@@ -34,12 +34,15 @@ class Bond(object):
     LANG = '<unknown>'
 
     def __init__(self, proc):
-        self.local_bindings = {}
+        self.channels = {'STDOUT': sys.stdout}
+        self.bindings = {}
+
         self._proc = proc
         try:
             self._proc.expect("READY\r\n")
         except pexpect.ExceptionPexpect as e:
             raise StateException('unknown "{lang}" interpreter state'.format(lang=self.LANG))
+
 
     def _repl(self):
         while self._proc.expect("(\S*)(?: ([^\r\n]+))?\r\n") == 0:
@@ -50,10 +53,10 @@ class Bond(object):
 
             # interpret the serial protocol
             if cmd == "OUTPUT":
-                sys.stdout.write(args)
+                self.channels[args[0]].write(args[1])
                 continue
             elif cmd == "REMOTE":
-                ret = self.local_bindings[args[0]](*args[1])
+                ret = self.bindings[args[0]](*args[1])
                 ret = json.dumps(ret) if ret else None
                 self._proc.sendline('RETURN {ret}'.format(ret=ret))
                 continue
@@ -89,7 +92,7 @@ class Bond(object):
 
     def export(self, func, name):
         '''Export a local function "func" to be callable in the interpreter as "name"'''
-        self.local_bindings[name] = func
+        self.bindings[name] = func
         self._proc.sendline('EXPORT {name}'.format(name=json.dumps(name)))
         return self._repl()
 
