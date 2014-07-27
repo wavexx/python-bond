@@ -131,47 +131,56 @@ def test_eval_error():
     assert(py.eval('1') == 1)
 
 
-# def test_export():
-#     def call_me():
-#         return 42
+def test_export():
+    def call_me():
+        return 42
 
-#     py = Python(timeout=1)
-#     py.export(call_me, 'call_me')
-#     assert(py.call('call_me') == 42)
+    py = Python(timeout=1)
+    py.export(call_me, 'call_me')
+    assert(py.call('call_me') == 42)
 
 
-# def test_export_recursive():
-#     py = Python(timeout=1)
+def test_export_recursive():
+    py = Python(timeout=1)
 
-#     # define a remote function
-#     py.eval(r'sub func_perl { shift() + 1; }')
-#     func_py = py.callable('func_perl')
-#     assert(func_perl(0) == 1)
+    # define a remote function
+    py.eval_block(r'''def func_remote(arg):
+        return arg + 1
+    ''')
+    func_remote = py.callable('func_remote')
+    assert(func_remote(0) == 1)
 
-#     # define a local function that calls the remote
-#     def func_python(arg):
-#         return func_perl(arg + 1)
+    # define a local function that calls the remote
+    def func_local(arg):
+        return func_remote(arg + 1)
 
-#     assert(func_python(0) == 2)
+    assert(func_local(0) == 2)
 
-#     # export the function remotely and call it
-#     py.export(func_python, 'remote_func_python')
-#     remote_func_python = py.callable('remote_func_python')
-#     assert(remote_func_python(0) == 2)
+    # export the function remotely and call it
+    py.export(func_local, 'exported_func_local')
+    exported_func_local = py.callable('exported_func_local')
+    assert(exported_func_local(0) == 2)
 
-#     # define a remote function that calls us recursively
-#     py.eval(r'sub func_perl_rec { remote_func_python(shift()) + 1; }')
-#     func_perl_rec = py.callable('func_perl_rec')
-#     assert(func_perl_rec(0) == 3)
+    # define a remote function that calls us recursively
+    py.eval_block(r'''def func_remote_rec(arg):
+        return exported_func_local(arg) + 1
+    ''')
+    assert(py.eval('func_remote_rec(0)')) == 3
+    assert(py.call('func_remote_rec', 0)) == 3
 
-#     # inception
-#     def func_python_rec(arg):
-#         return func_perl_rec(arg) + 1
+    func_remote_rec = py.callable('func_remote_rec')
+    assert(func_remote_rec(0) == 3)
 
-#     py.export(func_python_rec, 'remote_func_python_rec')
-#     py.eval(r'sub func_perl_rec_2 { remote_func_python_rec(shift()) + 1; }')
-#     func_perl_rec_2 = py.callable('func_perl_rec_2')
-#     assert(func_perl_rec_2(0) == 5)
+    # inception
+    def func_local_rec(arg):
+       return func_remote_rec(arg) + 1
+
+    py.export(func_local_rec, 'exported_func_local_rec')
+    py.eval_block(r'''def func_remote_rec_2(arg):
+        return exported_func_local_rec(arg) + 1
+    ''')
+    func_remote_rec_2 = py.callable('func_remote_rec_2')
+    assert(func_remote_rec_2(0) == 5)
 
 
 def test_output_redirect():

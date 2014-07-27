@@ -29,14 +29,12 @@ def __PY_BOND_sendline(line=""):
 
 # Recursive repl
 def __PY_BOND_remote(name, args):
-    pass
-#sub __PY_BOND_remote($$)
-#{
-#  my ($name, $args) = @_
-#  my $json = $__PY_BOND_JSON->encode([$name, $args])
-#  __PY_BOND_sendline("REMOTE $json")
-#  return __PY_BOND_repl()
-#}
+    code = __PY_BOND_dumps([name, args])
+    __PY_BOND_sendline("REMOTE {code}".format(code=code))
+    return __PY_BOND_repl()
+
+def __PY_BOND_export(name):
+    globals()[name] = lambda *args: __PY_BOND_remote(name, args)
 
 def __PY_BOND_repl():
     while True:
@@ -58,17 +56,11 @@ def __PY_BOND_repl():
                 err = str(e)
 
         elif cmd == "EXPORT":
-            pass
-#    elsif($cmd eq "EXPORT")
-#    {
-#      my $code = "sub $args { __PY_BOND_remote('$args', \\\@_); }"
-#      $ret = eval($code)
-#    }
+            __PY_BOND_export(args)
 
         elif cmd == "CALL":
-            name = args[0]
-            func = globals().get(name)
             try:
+                func = globals()[args[0]]
                 ret = func(*args[1])
             except Exception as e:
                 err = str(e)

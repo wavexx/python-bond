@@ -15,7 +15,7 @@ class Python(Bond):
 
     def __init__(self, python="python", args="", xargs="", timeout=None):
         cmd = ' '.join([python, args, xargs])
-        proc = Spawn(cmd, timeout=timeout, logfile=open("log", "w"))
+        proc = Spawn(cmd, timeout=timeout)
         try:
             proc.expect(PY_PROMPT)
         except pexpect.ExceptionPexpect as e:
