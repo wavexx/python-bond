@@ -44,12 +44,19 @@ class Bond(object):
             raise StateException('unknown "{lang}" interpreter state'.format(lang=self.LANG))
 
 
+    def _loads(self, *args):
+        return json.loads(*args)
+
+    def _dumps(self, *args):
+        return json.dumps(*args)
+
+
     def _repl(self):
         while self._proc.expect("(\S*)(?: ([^\r\n]+))?\r\n") == 0:
             cmd = str(self._proc.match.group(1))
             args = self._proc.match.group(2)
             if args is not None:
-                args = json.loads(args)
+                args = self._loads(args)
 
             # interpret the serial protocol
             if cmd == "OUTPUT":
@@ -57,7 +64,7 @@ class Bond(object):
                 continue
             elif cmd == "REMOTE":
                 ret = self.bindings[args[0]](*args[1])
-                ret = json.dumps(ret) if ret else None
+                ret = self._dumps(ret) if ret else None
                 self._proc.sendline('RETURN {ret}'.format(ret=ret))
                 continue
             elif cmd == "ERROR":
@@ -70,19 +77,19 @@ class Bond(object):
 
     def eval(self, code):
         '''Evaluate "code" inside the interpreter within the main scope (if possible)'''
-        code = json.dumps(code)
+        code = self._dumps(code)
         self._proc.sendline('EVAL {code}'.format(code=code))
         return self._repl()
 
     def call(self, name, *args):
         '''Call a function "name" using *args'''
-        code = json.dumps([name, args])
+        code = self._dumps([name, args])
         self._proc.sendline('CALL {code}'.format(code=code))
         return self._repl()
 
     def eval_block(self, code):
         '''Evaluate "code" inside the interpreter, within an anonymous block'''
-        code = json.dumps(code)
+        code = self._dumps(code)
         self._proc.sendline('EVAL_BLOCK {code}'.format(code=code))
         return self._repl()
 
@@ -93,7 +100,7 @@ class Bond(object):
     def export(self, func, name):
         '''Export a local function "func" to be callable in the interpreter as "name"'''
         self.bindings[name] = func
-        self._proc.sendline('EXPORT {name}'.format(name=json.dumps(name)))
+        self._proc.sendline('EXPORT {name}'.format(name=self._dumps(name)))
         return self._repl()
 
     def callable(self, name):
