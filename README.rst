@@ -26,7 +26,7 @@ A simple  example
   >>> # Let's bond with a PHP interpreter
   >>> from bond.PHP import PHP
   >>> php = PHP()
-  >>> php.eval('echo "Hello world!\n";')
+  >>> php.eval_block('echo "Hello world!\n";')
   Hello world!
 
   >>> # Make an expensive split function using PHP's explode
@@ -38,13 +38,13 @@ A simple  example
   >>> def call_me():
   ...     print("Hi, this is Python talking!")
   >>> php.export(call_me, 'call_me')
-  >>> php.eval('call_me();')
+  >>> php.eval('call_me()')
   Hi, this is Python talking!
 
   >>> # Use some remote resources
   >>> remote_php = PHP('ssh remote php')
-  >>> remote_php.eval('function call_me() { echo "Hi from " . system("hostname") . "!"; }')
-  >>> remote_php.eval('call_me();')
+  >>> remote_php.eval_block('function call_me() { echo "Hi from " . system("hostname") . "!"; }')
+  >>> remote_php.eval('call_me()')
   Hi from remote!
 
   >>> # Bridge two worlds!
@@ -52,7 +52,7 @@ A simple  example
   >>> perl = Perl()
   >>> php.proxy('explode', perl)
   >>> # note: explode is now available to Perl
-  >>> perl.eval('explode("=", "Mind=blown!");')
+  >>> perl.eval('explode("=", "Mind=blown!")')
   [u'Mind', u'blown!']
 
 
@@ -70,7 +70,7 @@ function:
   import sys
 
   php = PHP()
-  php.eval('include("my_original_program.php");')
+  php.eval_block('include("my_original_program.php");')
 
   def new_function(arg)
      # do something here
@@ -91,15 +91,13 @@ The ``bond`` class supports the following methods:
 
 ``eval(code)``:
 
-  Execute "code" (which is a normal string) inside the interpreter within the
-  main scope (if possible). Any construct which is legal by the current
-  interpreter is allowed.
+  Evaluate and return the value of a *single statement* of code in the interpreter.
 
 ``eval_block(code)``:
 
-  Execute "code" (which is a normal string) inside the interpreter, but within
-  an anonymous block. Local variables will be not visible to the main code,
-  unless they are explicitly declared as global.
+  Execute a "code" block inside the interpreter. Any construct which is legal
+  by the current interpreter is allowed, but the return value may/may not
+  contain the result of the last statement.
 
 ``close()``:
 
@@ -144,6 +142,11 @@ You can construct a ``bond`` by using the appropriate subclass:
 Language support
 ================
 
+Python:
+
+* None.
+
+
 PHP:
 
 * The PHP's command line and the ``readline`` module needs to be installed for
@@ -156,8 +159,7 @@ PHP:
 Perl:
 
 * There's no distinction between ``eval`` and ``eval_block`` in Perl. Both
-  calls execute the evaluated code in an anonymous scope. If you need to
-  *create* global variables, you need to use a qualified prefix.
+  calls accept any number of statements and return the result of the last.
 
 * Not all built-in functions are callable directly using ``bond.call`` due to
   the syntax semantics of Perl: you can only call function-like builtins.

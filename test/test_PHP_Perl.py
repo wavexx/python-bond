@@ -6,7 +6,7 @@ def test_call_PHP_Perl():
     perl = bond.Perl.Perl(timeout=1)
     assert(php and perl)
 
-    php.eval(r'function func_php($arg) { return $arg + 1; }')
+    php.eval_block(r'function func_php($arg) { return $arg + 1; }')
     php.proxy('func_php', perl)
 
     func_perl = perl.callable('func_php')
@@ -19,7 +19,7 @@ def test_call_Perl_PHP():
     perl = bond.Perl.Perl(timeout=1)
     assert(php and perl)
 
-    perl.eval(r'sub func_perl { shift() + 1; }')
+    perl.eval_block(r'sub func_perl { shift() + 1; }')
     perl.proxy('func_perl', php)
 
     func_php = php.callable('func_perl')

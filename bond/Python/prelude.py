@@ -48,7 +48,7 @@ def __PY_BOND_repl():
         err = None
         if cmd == "EVAL" or cmd == "EVAL_BLOCK":
             try:
-                mode = 'exec' if cmd == "EVAL" else 'eval'
+                mode = 'eval' if cmd == "EVAL" else 'exec'
                 ret = eval(compile(args, '<string>', mode))
             except Exception as e:
                 err = str(e)

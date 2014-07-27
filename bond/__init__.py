@@ -76,21 +76,21 @@ class Bond(object):
 
 
     def eval(self, code):
-        '''Evaluate "code" inside the interpreter within the main scope (if possible)'''
+        '''Evaluate a single statement in the interpreter and return its value'''
         code = self._dumps(code)
         self._proc.sendline('EVAL {code}'.format(code=code))
+        return self._repl()
+
+    def eval_block(self, code):
+        '''Evaluate a "code" block inside the interpreter'''
+        code = self._dumps(code)
+        self._proc.sendline('EVAL_BLOCK {code}'.format(code=code))
         return self._repl()
 
     def call(self, name, *args):
         '''Call a function "name" using *args'''
         code = self._dumps([name, args])
         self._proc.sendline('CALL {code}'.format(code=code))
-        return self._repl()
-
-    def eval_block(self, code):
-        '''Evaluate "code" inside the interpreter, within an anonymous block'''
-        code = self._dumps(code)
-        self._proc.sendline('EVAL_BLOCK {code}'.format(code=code))
         return self._repl()
 
     def close(self):

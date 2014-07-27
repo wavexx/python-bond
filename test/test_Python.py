@@ -97,43 +97,37 @@ def test_basic():
 
 def test_eval():
     py = Python(timeout=1)
-    assert(py.eval_block('None') is None)
-    assert(py.eval_block('1') == 1)
+    assert(py.eval('None') is None)
+    assert(py.eval('1') == 1)
 
-    py.eval(r'''def test_python(arg):
+    # define a variable
+    py.eval_block('x = 1')
+    assert(py.eval('x') == 1)
+
+    # define a function
+    py.eval_block(r'''def test_python(arg):
         return arg + 1
     ''')
-    assert(py.eval_block('test_python(0)') == 1)
+    assert(py.eval('test_python(0)') == 1)
 
 
 def test_eval_error():
     py = Python(timeout=1)
 
     # try a correct statement before
-    assert(py.eval_block('1') == 1)
+    assert(py.eval('1') == 1)
 
     # broken statement
     failed = False
     try:
-        py.eval_block('"')
+        py.eval('"')
     except bond.RemoteException as e:
         print(e)
         failed = True
     assert(failed)
 
     # check that the environment is still alive
-    assert(py.eval_block('1') == 1)
-
-
-def test_eval_block():
-    py = Python(timeout=1)
-
-    # ensure eval_block work first
-    assert(py.eval_block('1') == 1)
-
-    # check eval
-    py.eval('x = 1')
-    assert(py.eval_block('x') == 1)
+    assert(py.eval('1') == 1)
 
 
 # def test_export():
@@ -181,7 +175,7 @@ def test_eval_block():
 
 def test_output_redirect():
     py = Python(timeout=1)
-    py.eval(r'print "Hello world!\n";')
+    py.eval_block(r'print "Hello world!\n"')
 
 
 # def test_proxy():
