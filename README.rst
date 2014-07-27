@@ -155,11 +155,6 @@ PHP:
 
 Perl:
 
-* The ``perlsh`` interpreter is used, which is installed by the
-  `Term::ReadLine::Gnu package
-  <https://metacpan.org/release/Term-ReadLine-Gnu>`_ (also available in
-  Debian/Ubuntu as ``libterm-readline-gnu-perl``).
-
 * There's no distinction between ``eval`` and ``eval_block`` in Perl. Both
   calls execute the evaluated code in an anonymous scope. If you need to
   *create* global variables, you need to use a qualified prefix.

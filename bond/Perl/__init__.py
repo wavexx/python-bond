@@ -4,7 +4,7 @@ import re
 
 
 # Perl constants
-PERL_PROMPT      = r'main\[\d+\]\$ '
+PERL_PROMPT      = r'  DB<\d+> '
 PERL_PRELUDE     = 'prelude.pl'
 PERL_WRAP_PREFIX = '__PY_BOND'
 
@@ -19,7 +19,7 @@ def _strip_newlines(code):
 class Perl(Bond):
     LANG = 'Perl'
 
-    def __init__(self, perl="perlsh", args="", xargs="", timeout=None):
+    def __init__(self, perl="perl", args="-d -e ''", xargs="", timeout=None):
         cmd = ' '.join([perl, args, xargs])
         proc = Spawn(cmd, timeout=timeout)
         try:
