@@ -1,6 +1,7 @@
 from bond import *
 import pkg_resources
-import re
+import base64
+import cPickle
 
 
 # Python constants
@@ -34,3 +35,11 @@ class Python(Bond):
         proc.sendline(r'{PY_WRAP_PREFIX}_start();'.format(
             PY_WRAP_PREFIX=PY_WRAP_PREFIX))
         super(Python, self).__init__(proc)
+
+
+    # Use pickle with Python
+    def _dumps(self, *args):
+        return base64.b64encode(cPickle.dumps(args, 0))
+
+    def _loads(self, string):
+        return cPickle.loads(base64.b64decode(string))[0]

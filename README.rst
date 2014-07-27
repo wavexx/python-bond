@@ -144,7 +144,7 @@ Language support
 
 Python:
 
-* None.
+* Python has no restriction on data types (everything is pickled).
 
 
 PHP:

@@ -1,7 +1,7 @@
 # python-bond Python interface setup
+import base64
+import cPickle
 import cStringIO
-#import cPickle
-import json
 import os
 import sys
 
@@ -13,7 +13,11 @@ __PY_BOND_STDOUT = sys.stdout
 
 
 # Define our own i/o methods
-__PY_BOND_PICKLE = json
+def __PY_BOND_dumps(*args):
+    return base64.b64encode(cPickle.dumps(args, 0))
+
+def __PY_BOND_loads(string):
+    return cPickle.loads(base64.b64decode(string))[0]
 
 def __PY_BOND_getline():
     return __PY_BOND_STDIN.readline().rstrip()
@@ -42,7 +46,7 @@ def __PY_BOND_repl():
 
         line = line.split(' ', 1)
         cmd = str(line[0])
-        args = __PY_BOND_PICKLE.loads(line[1]) if len(line) > 1 else []
+        args = __PY_BOND_loads(line[1]) if len(line) > 1 else []
 
         ret = None
         err = None
@@ -78,7 +82,7 @@ def __PY_BOND_repl():
         # redirected output
         if __PY_BOND_BUFFER.tell():
             output = __PY_BOND_BUFFER.getvalue()
-            code = __PY_BOND_PICKLE.dumps(['STDOUT', output])
+            code = __PY_BOND_dumps(['STDOUT', output])
             __PY_BOND_sendline("OUTPUT {code}".format(code=code))
             __PY_BOND_BUFFER.truncate(0)
 
@@ -90,7 +94,7 @@ def __PY_BOND_repl():
             state = "ERROR"
             ret = err
 
-        code = __PY_BOND_PICKLE.dumps(ret)
+        code = __PY_BOND_dumps(ret)
         __PY_BOND_sendline("{state} {code}".format(state=state, code=code))
 
     # stream ended

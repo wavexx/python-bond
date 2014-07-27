@@ -44,8 +44,8 @@ class Bond(object):
             raise StateException('unknown "{lang}" interpreter state'.format(lang=self.LANG))
 
 
-    def _loads(self, *args):
-        return json.loads(*args)
+    def _loads(self, string):
+        return json.loads(string)
 
     def _dumps(self, *args):
         return json.dumps(*args)
