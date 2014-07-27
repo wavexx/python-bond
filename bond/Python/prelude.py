@@ -49,7 +49,7 @@ def __PY_BOND_repl():
         if cmd == "EVAL" or cmd == "EVAL_BLOCK":
             try:
                 mode = 'eval' if cmd == "EVAL" else 'exec'
-                ret = eval(compile(args, '<string>', mode))
+                ret = eval(compile(args, '<string>', mode), globals())
             except Exception as e:
                 err = str(e)
 
@@ -63,9 +63,7 @@ def __PY_BOND_repl():
 
         elif cmd == "CALL":
             name = args[0]
-            func = locals().get(name)
-            if func is None:
-                func = globals().get(name)
+            func = globals().get(name)
             try:
                 ret = func(*args[1])
             except Exception as e:

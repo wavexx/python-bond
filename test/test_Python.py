@@ -7,37 +7,51 @@ def test_basic():
     py.close()
 
 
-# def test_call_marshalling():
-#     py = Python(timeout=1)
+def test_call_marshalling():
+    py = Python(timeout=1)
 
-#     py.eval(r'sub test_str { "Hello world!"; }')
-#     assert(str(py.call('test_str')) == "Hello world!")
+    py.eval_block(r'''def test_str():
+        return "Hello world!"
+    ''')
+    assert(str(py.call('test_str')) == "Hello world!")
 
-#     py.eval(r'sub test_array { [42]; }')
-#     assert(py.call('test_array') == [42])
+    py.eval_block(r'''def test_array():
+        return [42]
+    ''')
+    assert(py.call('test_array') == [42])
 
-#     py.eval(r'sub test_number { 42; }')
-#     assert(py.call('test_number') == 42)
+    py.eval_block(r'''def test_number():
+        return 42
+    ''')
+    assert(py.call('test_number') == 42)
 
-#     py.eval(r'sub test_nothing { undef; }')
-#     assert(py.call('test_nothing') is None)
+    py.eval_block(r'''def test_nothing():
+        pass
+    ''')
+    assert(py.call('test_nothing') is None)
 
-#     py.eval(r'sub test_identity { shift(); }')
-#     perl_identity = py.callable('test_identity')
-#     for value in [True, False, 0, 1, "String", [], [u"String"]]:
-#         ret = perl_identity(value)
-#         print("{} => {}".format(value, ret))
-#         assert(str(ret) == str(value))
+    py.eval_block(r'''def test_identity(arg):
+        return arg
+    ''')
+    py_identity = py.callable('test_identity')
+    for value in [True, False, 0, 1, "String", [], [u"String"]]:
+        ret = py_identity(value)
+        print("{} => {}".format(value, ret))
+        assert(str(ret) == str(value))
 
-#     py.eval(r'sub test_multi_arg { sprintf("%s %s", @_); }')
-#     assert(str(py.call('test_multi_arg', "Hello", "world!")) == "Hello world!")
+    py.eval_block(r'''def test_multi_arg(arg1, arg2):
+        return arg1 + ' ' + arg2
+    ''')
+    assert(str(py.call('test_multi_arg', "Hello", "world!")) == "Hello world!")
 
-#     py.eval(r'sub test_nested { test_identity(shift()); }')
-#     perl_nested = py.callable('test_nested')
-#     for value in [True, False, 0, 1, "String", [], [u"String"]]:
-#         ret = perl_nested(value)
-#         print("{} => {}".format(value, ret))
-#         assert(str(ret) == str(value))
+    py.eval_block(r'''def test_nested(arg):
+        return test_identity(arg)
+    ''')
+    py_nested = py.callable('test_nested')
+    for value in [True, False, 0, 1, "String", [], [u"String"]]:
+        ret = py_nested(value)
+        print("{} => {}".format(value, ret))
+        assert(str(ret) == str(value))
 
 
 def test_call_simple():
@@ -80,48 +94,6 @@ def test_call_error():
         print(e)
         failed = True
     assert(failed)
-
-
-# def test_call_proto():
-#     py = Python(timeout=1)
-
-#     # without prototypes
-#     py.eval('sub test_simple { "Hello world!"; }')
-#     perl_simple = py.callable('test_simple')
-#     ret = perl_simple()
-#     assert(str(ret) == "Hello world!")
-#     ret = perl_simple(1)
-#     assert(str(ret) == "Hello world!")
-#     ret = perl_simple(1, 2)
-#     assert(str(ret) == "Hello world!")
-
-#     # with prototypes
-#     py.eval('sub test_proto() { "Hello world!"; }')
-#     perl_proto = py.callable('test_proto')
-#     ret = perl_proto()
-#     assert(str(ret) == "Hello world!")
-
-#     # broken statement
-#     failed = False
-#     try:
-#         perl_proto(1)
-#     except bond.RemoteException as e:
-#         print(e)
-#         failed = True
-#     assert(failed)
-
-
-# def test_call_builtin():
-#     py = Python(timeout=1)
-
-#     # NOTE: sprintf is a built-in, and thus more compliated to call with
-#     #       the same semantics
-#     perl_sprintf = py.callable('sprintf')
-#     ret = perl_sprintf("Hello world!")
-#     assert(str(ret) == "Hello world!")
-
-#     # no exception should be thrown here
-#     py.call('print', 'Hellow world!')
 
 
 def test_eval():
