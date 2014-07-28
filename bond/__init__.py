@@ -110,3 +110,42 @@ class Bond(object):
     def proxy(self, name, other, remote=None):
         '''Export a function "name" to the "other" bond, named as "remote"'''
         other.export(self.callable(name), remote or name)
+
+    def interact(self, **kwargs):
+        '''Start an interactive session with this bond. See bond.interact() for
+        a full list of keyword options'''
+        interact(self, **kwargs)
+
+
+
+def interact(bond, prompt=None):
+    '''Start an interactive session with "bond"
+
+    If "prompt" is not specified, use the language name of the bond.  By
+    default, all input lines are executed with bond.eval_block(), which might
+    not output the result of the expression. If "!" is pre-pended, execute a
+    single statement with bond.eval() instead.'''
+
+    if prompt is None:
+        prompt = "{lang}> ".format(lang=bond.LANG)
+
+    # start a simple repl
+    while True:
+        try:
+            line = raw_input(prompt)
+        except EOFError:
+            print('<EOF>')
+            break
+        if not line:
+            continue
+
+        ret = None
+        try:
+            if line[0] == '!':
+                ret = bond.eval(line[1:])
+            else:
+                ret = bond.eval_block(line)
+        except RemoteException as e:
+            ret = e
+        if ret is not None:
+            print(ret)

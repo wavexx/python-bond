@@ -133,6 +133,13 @@ The ``bond`` class supports the following methods:
   Export a function "name" from the current ``bond`` to "other", named as
   "remote". If "remote" is not provided, the same value as "name" is used.
 
+``interact()``:
+
+  Start an interactive session with the underlying interpreter. By default, all
+  input lines are executed with bond.eval_block(), which might not output the
+  result of the expression. If "!" is pre-pended, execute a single statement
+  with bond.eval() instead.
+
 You can construct a ``bond`` by using the appropriate subclass:
 
 .. code:: python
@@ -146,7 +153,8 @@ Language support
 
 Python:
 
-* Python has no restriction on data types (everything is pickled).
+* Python has no restriction on data types (everything is pickled), so you can
+  also transparently send/receive functions.
 
 
 PHP:
@@ -162,10 +170,11 @@ Perl:
   calls accept any number of statements and return the result of the last.
 
 * By default, evaluation is forced in array context. Use the "scalar" keyword
-  to coerce the result.
+  to coerce the result manually.
 
-* Not all built-in functions are callable directly using ``bond.call`` due to
-  the syntax semantics of Perl: you can only call function-like builtins.
+* Most, but not all built-in functions are callable directly using
+  ``bond.call()`` due to the syntax semantics of Perl: you can only call
+  function-like builtins.
 
 
 Common limitations
