@@ -105,13 +105,16 @@ def test_call_error():
     py.eval('test_simple(1)')
 
     # make it fail
-    fail = False
+    failed = False
     try:
         py.call('test_simple', 0)
     except bond.RemoteException as e:
         print(e)
         failed = True
     assert(failed)
+
+    # check that the environment is still alive
+    assert(py.eval('1') == 1)
 
 
 def test_eval():
