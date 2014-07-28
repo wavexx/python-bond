@@ -19,7 +19,7 @@ def _strip_newlines(code):
 class Perl(Bond):
     LANG = 'Perl'
 
-    def __init__(self, perl="perl", args="-d -e ''", xargs="", timeout=None):
+    def __init__(self, perl="perl", args="-d -e1", xargs="", timeout=None):
         cmd = ' '.join([perl, args, xargs])
         proc = Spawn(cmd, timeout=timeout)
         try:
