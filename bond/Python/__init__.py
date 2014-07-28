@@ -13,7 +13,7 @@ PY_WRAP_PREFIX = '__PY_BOND'
 class Python(Bond):
     LANG = 'Python'
 
-    def __init__(self, python="python", args="", xargs="", timeout=None):
+    def __init__(self, python="python", args="", xargs="", timeout=None, protocol=-1):
         cmd = ' '.join([python, args, xargs])
         proc = Spawn(cmd, timeout=timeout)
         try:
@@ -32,14 +32,17 @@ class Python(Bond):
             raise StateException('cannot initialize Python')
 
         # start the inner repl
-        proc.sendline(r'{PY_WRAP_PREFIX}_start();'.format(
-            PY_WRAP_PREFIX=PY_WRAP_PREFIX))
+        proc.sendline(r'{PY_WRAP_PREFIX}_start({protocol});'.format(
+            PY_WRAP_PREFIX=PY_WRAP_PREFIX,
+            protocol=protocol))
+
+        self.protocol = protocol
         super(Python, self).__init__(proc)
 
 
     # Use pickle with Python
     def _dumps(self, *args):
-        return base64.b64encode(cPickle.dumps(args, 0))
+        return base64.b64encode(cPickle.dumps(args, self.protocol))
 
     def _loads(self, string):
         return cPickle.loads(base64.b64decode(string))[0]

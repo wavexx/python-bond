@@ -13,18 +13,22 @@ __PY_BOND_STDOUT = sys.stdout
 
 
 # Define our own i/o methods
-def __PY_BOND_dumps(*args):
-    return base64.b64encode(cPickle.dumps(args, 0))
-
-def __PY_BOND_loads(string):
-    return cPickle.loads(base64.b64decode(string))[0]
-
 def __PY_BOND_getline():
     return __PY_BOND_STDIN.readline().rstrip()
 
 def __PY_BOND_sendline(line=""):
     __PY_BOND_STDOUT.write(line + "\n")
     __PY_BOND_STDOUT.flush()
+
+
+# Serialization methods
+__PY_BOND_PROTOCOL = -1
+
+def __PY_BOND_dumps(*args):
+    return base64.b64encode(cPickle.dumps(args, __PY_BOND_PROTOCOL))
+
+def __PY_BOND_loads(string):
+    return cPickle.loads(base64.b64decode(string))[0]
 
 
 # Recursive repl
@@ -93,8 +97,9 @@ def __PY_BOND_repl():
     exit(0)
 
 
-def __PY_BOND_start():
+def __PY_BOND_start(protocol=-1):
     sys.stdout = __PY_BOND_BUFFER
     sys.stdin = open(os.devnull)
+    __PY_BOND_PROTOCOL = protocol
     __PY_BOND_sendline("READY")
     exit(__PY_BOND_repl())
