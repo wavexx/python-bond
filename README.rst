@@ -155,8 +155,6 @@ PHP:
   the interactive interpreter to work properly. On Debian/Ubuntu, you'll need
   ``php5-cli`` and ``php5-readline``.
 
-* A syntax error will not currently return a proper exception.
-
 
 Perl:
 

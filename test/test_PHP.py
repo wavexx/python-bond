@@ -1,4 +1,5 @@
 from __future__ import print_function
+import bond
 from bond.PHP import PHP
 from test import *
 
@@ -68,6 +69,24 @@ def test_call_stm():
     assert(str(ret) == "Hello world!")
 
 
+def test_call_error():
+    php = PHP(timeout=1)
+
+    # test a regular working function
+    php.eval_block('function test_simple($arg) { return 1 / $arg; }')
+    ret = php.call('test_simple', 1)
+    assert(ret == 1)
+
+    # make it fail
+    failed = False
+    try:
+        php.call('no_test_simple', 0)
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
+
+
 def test_eval():
     php = PHP(timeout=1)
 
@@ -82,6 +101,37 @@ def test_eval():
     # check a variable definition
     php.eval_block('$x = 1;')
     assert(php.eval('$x') == 1)
+
+
+def test_eval_error():
+    php = PHP(timeout=1)
+
+    # try a correct statement before
+    assert(php.eval('1') == 1)
+
+    # broken statement
+    failed = False
+    try:
+        php.eval('"')
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
+
+    # check that the environment is still alive
+    assert(php.eval('1') == 1)
+
+    # broken eval_block
+    failed = False
+    try:
+        php.eval_block('"')
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
+
+    # check that the environment is still alive
+    assert(php.eval('1') == 1)
 
 
 def test_export():

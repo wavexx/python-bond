@@ -29,6 +29,22 @@ function __PY_BOND_sendline($line = '')
 }
 
 
+/// some utilities to get/reset the error state
+function __PY_BOND_clear_error()
+{
+  set_error_handler(null, 0);
+  @trigger_error(null);
+  restore_error_handler();
+}
+
+function __PY_BOND_get_error()
+{
+  $err = error_get_last();
+  if($err) $err = $err["message"];
+  return $err;
+}
+
+
 /// Recursive repl
 function __PY_BOND_remote($name, $args)
 {
@@ -47,16 +63,19 @@ function __PY_BOND_repl()
     $args = (count($line) > 1? json_decode($line[1]): array());
 
     $ret = null;
+    $err = null;
     switch($cmd)
     {
     case "EVAL":
-      /// TODO: handle eval errors
-      $ret = eval("return $args;");
+      __PY_BOND_clear_error();
+      $ret = @eval("return $args;");
+      $err = __PY_BOND_get_error();
       break;
 
     case "EVAL_BLOCK":
-      /// TODO: handle eval errors
-      $ret = eval($args);
+      __PY_BOND_clear_error();
+      $ret = @eval($args);
+      $err = __PY_BOND_get_error();
       break;
 
     case "EXPORT":
@@ -65,7 +84,9 @@ function __PY_BOND_repl()
       break;
 
     case "CALL":
-      $ret = call_user_func_array($args[0], $args[1]);
+      __PY_BOND_clear_error();
+      $ret = @call_user_func_array($args[0], $args[1]);
+      $err = __PY_BOND_get_error();
       break;
 
     case "RETURN":
@@ -83,8 +104,19 @@ function __PY_BOND_repl()
       $__PY_BOND_BUFFER = '';
     }
 
+    /// error state
+    $state = null;
+    if(!$err) {
+      $state = "RETURN";
+    }
+    else
+    {
+      $state = "ERROR";
+      $ret = $err;
+    }
+
     $enc_ret = json_encode($ret);
-    __PY_BOND_sendline("RETURN $enc_ret");
+    __PY_BOND_sendline("$state $enc_ret");
   }
   exit(0);
 }
