@@ -58,8 +58,8 @@ sub __PY_BOND_repl()
 
       # NOTE: force evaluation in array context to avoid swallowing lists
       $ret = [eval($args)];
-      $ret = $ret->[0] if @$ret == 1;
       $err = $@;
+      $ret = $ret->[0] if @$ret == 1;
     }
     elsif($cmd eq "EXPORT")
     {
@@ -79,8 +79,8 @@ sub __PY_BOND_repl()
       my $args_ = dump(@args);
       $args_ = "($args_)" if(@args == 1);
       $ret = [eval($name . ' ' . $args_)];
-      $ret = $ret->[0] if @$ret == 1;
       $err = $@;
+      $ret = $ret->[0] if @$ret == 1;
     }
     elsif($cmd eq "RETURN")
     {
@@ -108,7 +108,7 @@ sub __PY_BOND_repl()
     else
     {
       $state = "ERROR";
-      $ret = $err;
+      $ret = "$err";
     }
 
     my $enc_ret = $__PY_BOND_JSON->encode($ret);

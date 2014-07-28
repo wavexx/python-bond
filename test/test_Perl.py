@@ -186,6 +186,40 @@ def test_eval_block():
     assert(perl.eval_block('$y // -1') == -1)
 
 
+def test_exception():
+    perl = Perl(timeout=1)
+
+    # local exception
+    perl.eval_block('sub exceptional() { die \$_; }')
+
+    # ... in eval
+    failed = False
+    try:
+        perl.eval('exceptional()')
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
+
+    # ... in eval_block
+    failed = False
+    try:
+        perl.eval_block('exceptional()');
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
+
+    # ... in call
+    failed = False
+    try:
+        perl.call('exceptional')
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
+
+
 def test_export():
     def call_me():
         return 42
