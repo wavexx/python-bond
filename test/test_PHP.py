@@ -1,5 +1,6 @@
 from __future__ import print_function
 from bond.PHP import PHP
+from test import *
 
 def test_basic():
     php = PHP(timeout=1)
@@ -52,6 +53,18 @@ def test_call_simple():
     php = PHP(timeout=1)
     php_print = php.callable('sprintf')
     ret = php_print("Hello world!")
+    assert(str(ret) == "Hello world!")
+
+
+@knownfail
+def test_call_stm():
+    php = PHP(timeout=1)
+
+    # NOTE: it would be nice to have the following working, though it seems
+    #       that there's no way to evaluate a reference to a function in PHP
+    #       without breaking it.
+    php.eval_block(r'$fun = function($arg){ return $arg; };')
+    ret = php.call('$fun', "Hello world!")
     assert(str(ret) == "Hello world!")
 
 
