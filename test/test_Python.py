@@ -77,6 +77,24 @@ def test_call_simple():
     assert(str(ret) == "Hello world!")
 
 
+def test_call_stm():
+    py = Python(timeout=1)
+
+    # test the call interface with a normal function
+    py.eval_block('from copy import copy')
+    ret = py.call('copy', "Hello world!")
+    assert(str(ret) == "Hello world!")
+
+    # test the call interface with a module prefix
+    py.eval_block("import copy")
+    ret = py.call('copy.copy', "Hello world!")
+    assert(str(ret) == "Hello world!")
+
+    # now with a statement
+    ret = py.call('lambda x: x', "Hello world!")
+    assert(str(ret) == "Hello world!")
+
+
 def test_call_error():
     py = Python(timeout=1)
 

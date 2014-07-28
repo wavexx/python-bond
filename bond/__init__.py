@@ -88,7 +88,7 @@ class Bond(object):
         return self._repl()
 
     def call(self, name, *args):
-        '''Call a function "name" using *args'''
+        '''Call a function "name" using *args (apply *args to a callable statement "name")'''
         code = self._dumps([name, args])
         self._proc.sendline('CALL {code}'.format(code=code))
         return self._repl()

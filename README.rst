@@ -108,9 +108,9 @@ The ``bond`` class supports the following methods:
 ``call(name, *args)``:
 
   Call a function "name" in the interpreter using the supplied list of
-  arguments \*args. The arguments are automatically converted to their other
-  language's counterpart. The return value is captured and converted back to
-  Python as well.
+  arguments \*args (apply *args to a callable statement defined by "name"). The
+  arguments are automatically converted to their other language's counterpart.
+  The return value is captured and converted back to Python as well.
 
 ``callable(name)``:
 
