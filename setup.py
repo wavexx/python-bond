@@ -25,6 +25,6 @@ setup(name='python-bond', version='0.1',
       include_package_data=True,
       exclude_package_data = {'': ['.gitignore']},
 
-      install_requires=['pexpect', 'pkg_resources'],
+      install_requires=['pexpect', 'setuptools'],
       setup_requires=['nose', 'setuptools_git'],
       test_suite='nose.collector')

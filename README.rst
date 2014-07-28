@@ -167,6 +167,9 @@ PHP:
 
 Perl:
 
+* The ``JSON`` and ``Data::Dump`` modules are required (``libjson-perl`` and
+  ``libdata-dump-perl`` in Debian/Ubuntu).
+
 * There's no distinction between ``eval`` and ``eval_block`` in Perl. Both
   calls accept any number of statements and return the result of the last.
 
