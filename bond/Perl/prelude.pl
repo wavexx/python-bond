@@ -55,7 +55,10 @@ sub __PY_BOND_repl()
     {
       no strict;
       no warnings;
-      $ret = eval($args);
+
+      # NOTE: force evaluation in array context to avoid swallowing lists
+      $ret = [eval($args)];
+      $ret = $ret->[0] if @$ret == 1;
       $err = $@;
     }
     elsif($cmd eq "EXPORT")
@@ -69,13 +72,14 @@ sub __PY_BOND_repl()
       my $name = $args->[0];
 
       # NOTE: note that we use "dump" to evaluate the command as a pure string.
-      #       This allows us to execute *some* perl special forms consistenly.
+      #       This allows us to execute *most* perl special forms consistenly.
       # TODO: special-case builtins to allow transparent invocation and higher
       #       performance with regular functions.
       my @args = @{$args->[1]};
       my $args_ = dump(@args);
       $args_ = "($args_)" if(@args == 1);
-      $ret = eval($name . $args_);
+      $ret = [eval($name . ' ' . $args_)];
+      $ret = $ret->[0] if @$ret == 1;
       $err = $@;
     }
     elsif($cmd eq "RETURN")

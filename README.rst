@@ -163,6 +163,9 @@ Perl:
 * There's no distinction between ``eval`` and ``eval_block`` in Perl. Both
   calls accept any number of statements and return the result of the last.
 
+* By default, evaluation is forced in array context. Use the "scalar" keyword
+  to coerce the result.
+
 * Not all built-in functions are callable directly using ``bond.call`` due to
   the syntax semantics of Perl: you can only call function-like builtins.
 

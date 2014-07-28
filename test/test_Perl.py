@@ -53,6 +53,30 @@ def test_call_simple():
     assert(str(ret) == "Hello world!")
 
 
+def test_call_stm():
+    perl = Perl(timeout=1)
+
+    # test the call interface with a normal function
+    perl.eval_block('sub copy { shift() }')
+    ret = perl.call('copy', "Hello world!")
+    assert(str(ret) == "Hello world!")
+
+    # test the call interface with some random syntax
+    ret = perl.call('&{ \&copy }', "Hello world!")
+    assert(str(ret) == "Hello world!")
+
+    # check return values depending on the context
+    ret = perl.call('scalar split', ' ', "Hello world!")
+    assert(ret == 2)
+
+    ret = perl.call('split', ' ', "Hello world!")
+    assert(ret == ["Hello", "world!"])
+
+    # try with some perl prototyped functions
+    ret = perl.call('map { $_ }', "Hello world!")
+    assert(str(ret) == "Hello world!")
+
+
 def test_call_error():
     perl = Perl(timeout=1)
     perl.eval('sub test_simple { 1 / shift() }')
