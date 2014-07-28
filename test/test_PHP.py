@@ -134,6 +134,49 @@ def test_eval_error():
     assert(php.eval('1') == 1)
 
 
+def test_exception():
+    php = PHP(timeout=1)
+
+    # local exception
+    php.eval_block('function exceptional() { throw new Exception("exception"); }')
+
+    # ... in eval
+    failed = False
+    try:
+        php.eval('exceptional()')
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
+
+    # check that the environment is still alive
+    assert(php.eval('1') == 1)
+
+    # ... in eval_block
+    failed = False
+    try:
+        php.eval_block('exceptional();')
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
+
+    # check that the environment is still alive
+    assert(php.eval('1') == 1)
+
+    # ... in call
+    failed = False
+    try:
+        php.call('exceptional')
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
+
+    # check that the environment is still alive
+    assert(php.eval('1') == 1)
+
+
 def test_export():
     def call_me():
         return 42

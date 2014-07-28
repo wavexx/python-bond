@@ -23,7 +23,7 @@ class PHP(Bond):
 
     def __init__(self, php="php", args="-a", xargs="", timeout=None):
         cmd = ' '.join([php, args, xargs])
-        proc = Spawn(cmd, timeout=timeout, logfile=open("log", "w"))
+        proc = Spawn(cmd, timeout=timeout)
         try:
             proc.expect(PHP_PROMPT)
         except pexpect.ExceptionPexpect as e:

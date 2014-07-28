@@ -67,15 +67,29 @@ function __PY_BOND_repl()
     switch($cmd)
     {
     case "EVAL":
-      __PY_BOND_clear_error();
-      $ret = @eval("return $args;");
-      $err = __PY_BOND_get_error();
+      try
+      {
+	__PY_BOND_clear_error();
+	$ret = @eval("return $args;");
+	$err = __PY_BOND_get_error();
+      }
+      catch(Exception $e)
+      {
+	$err = $e->getMessage();
+      }
       break;
 
     case "EVAL_BLOCK":
-      __PY_BOND_clear_error();
-      $ret = @eval($args);
-      $err = __PY_BOND_get_error();
+      try
+      {
+	__PY_BOND_clear_error();
+	$ret = @eval($args);
+	$err = __PY_BOND_get_error();
+      }
+      catch(Exception $e)
+      {
+	$err = $e->getMessage();
+      }
       break;
 
     case "EXPORT":
@@ -84,9 +98,16 @@ function __PY_BOND_repl()
       break;
 
     case "CALL":
-      __PY_BOND_clear_error();
-      $ret = @call_user_func_array($args[0], $args[1]);
-      $err = __PY_BOND_get_error();
+      try
+      {
+	__PY_BOND_clear_error();
+	$ret = @call_user_func_array($args[0], $args[1]);
+	$err = __PY_BOND_get_error();
+      }
+      catch(Exception $e)
+      {
+	$err = $e->getMessage();
+      }
       break;
 
     case "RETURN":
