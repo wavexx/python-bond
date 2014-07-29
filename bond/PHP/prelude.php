@@ -152,7 +152,13 @@ function __PY_BOND_repl()
       $ret = $err;
     }
 
+    /// encode the result
     $enc_ret = json_encode($ret);
+    if(json_last_error())
+    {
+      $state = "ERROR";
+      $enc_ret = json_encode(@"BOND ERROR: cannot encode $ret");
+    }
     __PY_BOND_sendline("$state $enc_ret");
   }
   exit(0);

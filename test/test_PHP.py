@@ -80,6 +80,43 @@ def test_call_stm():
     assert(ret == 1)
 
 
+def test_ser_err():
+    php = PHP(timeout=1, logfile=open("log", "w"))
+
+    # construct an unserializable type
+    php.eval_block(r'''
+    $fd = fopen("php://stdin", "r");
+    function func()
+    {
+        return fopen("php://stdin", "r");
+    }
+    ''')
+
+    # try to send it across
+    failed = False
+    try:
+        php.eval('$fd')
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
+
+    # ensure the env didn't just die
+    assert(php.eval('1') == 1)
+
+    # ... with call (return)
+    failed = False
+    try:
+        php.call('func')
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
+
+    # ensure the env didn't just die
+    assert(php.eval('1') == 1)
+
+
 def test_call_error():
     php = PHP(timeout=1)
 
