@@ -155,9 +155,8 @@ Language support
 Python
 ------
 
-Python, as the identity language, has no restriction on data types (everything
-is pickled), so you can also transparently send/receive functions. Everything
-works as you would expect.
+Python, as the identity language, has no restriction on data types. Everything
+is pickled, including exceptions on the remote side.
 
 
 PHP

@@ -57,7 +57,7 @@ def __PY_BOND_repl():
                 mode = 'eval' if cmd == "EVAL" else 'exec'
                 ret = eval(compile(args, '<string>', mode), globals())
             except Exception as e:
-                err = str(e)
+                err = e
 
         elif cmd == "EXPORT":
             __PY_BOND_export(args)
@@ -67,7 +67,7 @@ def __PY_BOND_repl():
                 func = eval(compile(args[0], '<string>', 'eval'), globals())
                 ret = func(*args[1])
             except Exception as e:
-                err = str(e)
+                err = e
 
         elif cmd == "RETURN":
             return args
@@ -90,7 +90,14 @@ def __PY_BOND_repl():
             state = "ERROR"
             ret = err
 
-        code = __PY_BOND_dumps(ret)
+        # encode the result
+        code = None
+        try:
+            code = __PY_BOND_dumps(ret)
+        except:
+            state = "ERROR"
+            code = __PY_BOND_dumps("BOND ERROR: cannot encode {ret}".format(ret=str(ret)))
+
         __PY_BOND_sendline("{state} {code}".format(state=state, code=code))
 
     # stream ended

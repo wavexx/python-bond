@@ -152,6 +152,56 @@ def test_eval_error():
     assert(py.eval('1') == 1)
 
 
+def test_ser_err():
+    py = Python(timeout=1)
+
+    # construct an unserializable type
+    py.eval_block(r'''if True:
+    import os
+
+    x = lambda x: x
+
+    def func():
+        return x
+    ''')
+
+    # test the call interface with a normal function
+    failed = False
+    try:
+        ret = py.eval('x')
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
+
+    # ensure the env didn't just die
+    assert(py.eval('1') == 1)
+
+    # ... with call (return)
+    failed = False
+    try:
+        py.call('func')
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
+
+    # ensure the env didn't just die
+    assert(py.eval('1') == 1)
+
+    # ... with an exception
+    failed = False
+    try:
+        py.eval_block('raise Exception(x)')
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
+
+    # ensure the env didn't just die
+    assert(py.eval('1') == 1)
+
+
 def test_export():
     def call_me():
         return 42
