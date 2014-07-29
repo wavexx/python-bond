@@ -166,6 +166,53 @@ def test_eval():
     assert(perl.eval('test_perl(0);') == 1)
 
 
+def test_ser_err():
+    perl = Perl(timeout=1)
+
+    # construct an unserializable type
+    perl.eval_block(r'''
+    use IO::File;
+    $fd = IO::File->new();
+    sub func { $fd; }
+    ''')
+
+    # try to send it across
+    failed = False
+    try:
+        perl.eval('$fd')
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
+
+    # ensure the env didn't just die
+    assert(perl.eval('1') == 1)
+
+    # ... with call (return)
+    failed = False
+    try:
+        perl.call('func')
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
+
+    # ensure the env didn't just die
+    assert(perl.eval('1') == 1)
+
+    # ... with an exception
+    failed = False
+    try:
+        perl.eval('die $fd')
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
+
+    # ensure the env didn't just die
+    assert(perl.eval('1') == 1)
+
+
 def test_eval_error():
     perl = Perl(timeout=1)
 
