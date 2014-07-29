@@ -83,7 +83,7 @@ function __PY_BOND_repl()
       try
       {
 	__PY_BOND_clear_error();
-	$ret = @eval($args);
+	@eval($args);
 	$err = __PY_BOND_get_error();
       }
       catch(Exception $e)

@@ -82,7 +82,7 @@ class Bond(object):
         return self._repl()
 
     def eval_block(self, code):
-        '''Evaluate a "code" block inside the interpreter'''
+        '''Evaluate a "code" block inside the interpreter. Nothing is returned.'''
         code = self._dumps(code)
         self._proc.sendline('EVAL_BLOCK {code}'.format(code=code))
         return self._repl()

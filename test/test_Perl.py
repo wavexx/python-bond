@@ -140,12 +140,26 @@ def test_call_builtin():
 
 def test_eval():
     perl = Perl(timeout=1)
-    assert(perl.eval_block('undef;') is None)
-    assert(perl.eval_block('1;') == 1)
 
+    # literal values
+    assert(perl.eval('1') == 1)
+    assert(perl.eval('undef') is None)
+    assert(perl.eval_block('1;') is None)
+
+    # expression
+    assert(perl.eval('1 + 1') == 2)
+
+    # check eval with unscoped variables
+    perl.eval_block('$x = 1;')
+    assert(perl.eval('$x // -1') == 1)
+
+    # eval in Perl is scoped
+    perl.eval_block('my $y = 1;')
+    assert(perl.eval('$y // -1') == -1)
+
+    # function definition
     perl.eval('sub test_perl { shift() + 1; }')
     assert(perl.eval('test_perl(0);') == 1)
-    assert(perl.eval_block('return test_perl(0);') == 1)
 
 
 def test_eval_error():
@@ -165,25 +179,6 @@ def test_eval_error():
 
     # check that the environment is still alive
     assert(perl.eval('1;') == 1)
-
-
-def test_eval_block():
-    perl = Perl(timeout=1)
-
-    # ensure eval/eval_block work first
-    assert(perl.eval('1;') == 1)
-    assert(perl.eval_block('1;') == 1)
-
-    # check eval with unscoped variables
-    perl.eval('$x = 1;')
-    assert(perl.eval('$x;') == 1)
-
-    # eval/eval_block in Perl are *both* scoped
-    perl.eval('my $y = 1;')
-    assert(perl.eval('$y // -1') == -1)
-
-    perl.eval_block('my $y = 1;')
-    assert(perl.eval_block('$y // -1') == -1)
 
 
 def test_exception():

@@ -51,7 +51,7 @@ sub __PY_BOND_repl()
 
     my $ret = undef;
     my $err = undef;
-    if($cmd eq "EVAL" or $cmd eq "EVAL_BLOCK")
+    if($cmd eq "EVAL")
     {
       no strict;
       no warnings;
@@ -60,6 +60,15 @@ sub __PY_BOND_repl()
       $ret = [eval($args)];
       $err = $@;
       $ret = $ret->[0] if @$ret == 1;
+    }
+    elsif($cmd eq "EVAL_BLOCK")
+    {
+      no strict;
+      no warnings;
+
+      # NOTE: discard return, as with Perl it would most likely be a CODE ref
+      eval($args);
+      $err = $@;
     }
     elsif($cmd eq "EXPORT")
     {
