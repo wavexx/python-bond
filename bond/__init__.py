@@ -76,7 +76,7 @@ class Bond(object):
 
 
     def eval(self, code):
-        '''Evaluate a single statement in the interpreter and return its value'''
+        '''Evaluate and return the value of a single statement of code in the interpreter.'''
         code = self._dumps(code)
         self._proc.sendline('EVAL {code}'.format(code=code))
         return self._repl()

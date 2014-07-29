@@ -95,7 +95,7 @@ The ``bond`` class supports the following methods:
 ``eval(code)``:
 
   Evaluate and return the value of a *single statement* of code in the
-  interpreter and return its value.
+  interpreter.
 
 ``eval_block(code)``:
 
@@ -232,7 +232,7 @@ Common limitations
   forgotten due to the blurring of the boundary.
 
 * Calling functions across the bridge is slow, also in Python, due to the
-  serialization, but the execution speed of the functions themselves is *not
+  serialization. But the execution speed of the functions themselves is *not
   affected*. This might be perfectly reasonable if there are only occasional
   calls between languages, and/or the calls themselves take a significant
   fraction of time.
