@@ -100,17 +100,18 @@ function __PY_BOND_repl()
     case "CALL":
       try
       {
+	$name = $args[0];
+
 	__PY_BOND_clear_error();
-	if(is_callable($args[0]))
+	if(preg_match("/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/", $name) || is_callable($name))
 	{
-	  /// special-case regular functions
+	  /// special-case regular functions to avoid fatal errors in PHP
 	  $ret = @call_user_func_array($args[0], $args[1]);
 	}
 	else
 	{
 	  /// construct a string that we can interpret "function-like", to
 	  /// handle also function references and method calls uniformly
-	  $name = $args[0];
 	  $args_ = array();
 	  foreach($args[1] as $el)
 	    $args_[] = var_export($el, true);

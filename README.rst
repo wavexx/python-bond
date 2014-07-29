@@ -173,6 +173,10 @@ Limitations:
 * You cannot use "call" on a built-in function such as "echo" (use "eval" in
   that case). You have to use a real function instead, like "print".
 
+* Unfortunately, you cannot catch "fatal errors" in PHP. If the evaluated code
+  triggers a "fatal error" it will terminate the bond without appeal. A common
+  example of "fatal error" in PHP is an "undefined variable/function".
+
 
 Perl
 ----

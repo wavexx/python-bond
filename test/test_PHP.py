@@ -98,6 +98,21 @@ def test_call_error():
     assert(failed)
 
 
+@knownfail
+def test_fatal_error():
+    php = PHP(timeout=1)
+
+    failed = True
+    try:
+        # We test for a RemoteException. If the bond dies without handling the
+        # exception correctly you'll get a pexpect.TIMEOUT instead.
+        php.eval_block('no_test_simple();')
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
+
+
 def test_eval():
     php = PHP(timeout=1)
 
