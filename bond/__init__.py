@@ -121,10 +121,10 @@ class Bond(object):
 def interact(bond, prompt=None):
     '''Start an interactive session with "bond"
 
-    If "prompt" is not specified, use the language name of the bond.  By
-    default, all input lines are executed with bond.eval_block(), which might
-    not output the result of the expression. If "!" is pre-pended, execute a
-    single statement with bond.eval() instead.'''
+    If "prompt" is not specified, use the language name of the bond. By
+    default, all input lines are executed with bond.eval_block().  If "!" is
+    pre-pended, execute a single statement with bond.eval() and print it's
+    return value'''
 
     if prompt is None:
         prompt = "{lang}> ".format(lang=bond.LANG)

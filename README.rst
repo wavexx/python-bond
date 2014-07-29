@@ -1,8 +1,9 @@
 ================
  python ``bond``
 ================
+---------------------------------------------------
 Ambivalent bonds between Python and other languages
-===================================================
+---------------------------------------------------
 
 .. contents::
 
@@ -137,9 +138,8 @@ The ``bond`` class supports the following methods:
 ``interact()``:
 
   Start an interactive session with the underlying interpreter. By default, all
-  input lines are executed with bond.eval_block(), which might not output the
-  result of the expression. If "!" is pre-pended, execute a single statement
-  with bond.eval() instead.
+  input lines are executed with bond.eval_block(). If "!" is pre-pended,
+  execute a single statement with bond.eval() and print it's return value.
 
 You can construct a ``bond`` by using the appropriate subclass:
 
