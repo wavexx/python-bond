@@ -21,9 +21,9 @@ def _strip_newlines(code):
 class PHP(Bond):
     LANG = 'PHP'
 
-    def __init__(self, php="php", args="-a", xargs="", timeout=None):
+    def __init__(self, php="php", args="-a", xargs="", timeout=None, logfile=None):
         cmd = ' '.join([php, args, xargs])
-        proc = Spawn(cmd, timeout=timeout)
+        proc = Spawn(cmd, timeout=timeout, logfile=logfile)
         try:
             proc.expect(PHP_PROMPT)
         except pexpect.ExceptionPexpect as e:

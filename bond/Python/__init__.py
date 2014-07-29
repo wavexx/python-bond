@@ -13,9 +13,10 @@ PY_WRAP_PREFIX = '__PY_BOND'
 class Python(Bond):
     LANG = 'Python'
 
-    def __init__(self, python="python", args="", xargs="", timeout=None, protocol=-1):
+    def __init__(self, python="python", args="", xargs="", timeout=None,
+                 logfile=None, protocol=-1):
         cmd = ' '.join([python, args, xargs])
-        proc = Spawn(cmd, timeout=timeout)
+        proc = Spawn(cmd, timeout=timeout, logfile=logfile)
         try:
             proc.expect(PY_PROMPT)
         except pexpect.ExceptionPexpect as e:

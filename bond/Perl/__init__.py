@@ -19,9 +19,9 @@ def _strip_newlines(code):
 class Perl(Bond):
     LANG = 'Perl'
 
-    def __init__(self, perl="perl", args="-d -e1", xargs="", timeout=None):
+    def __init__(self, perl="perl", args="-d -e1", xargs="", timeout=None, logfile=None):
         cmd = ' '.join([perl, args, xargs])
-        proc = Spawn(cmd, timeout=timeout)
+        proc = Spawn(cmd, timeout=timeout, logfile=logfile)
         try:
             proc.expect(PERL_PROMPT)
         except pexpect.ExceptionPexpect as e:
