@@ -2,7 +2,7 @@
  python ``bond``
 ================
 Ambivalent bonds between Python and other languages
----------------------------------------------------
+===================================================
 
 .. contents::
 
@@ -93,13 +93,13 @@ The ``bond`` class supports the following methods:
 
 ``eval(code)``:
 
-  Evaluate and return the value of a *single statement* of code in the interpreter.
+  Evaluate and return the value of a *single statement* of code in the
+  interpreter and return its value.
 
 ``eval_block(code)``:
 
   Execute a "code" block inside the interpreter. Any construct which is legal
-  by the current interpreter is allowed, but the return value may/may not
-  contain the result of the last statement.
+  by the current interpreter is allowed. Nothing is returned.
 
 ``close()``:
 
@@ -143,7 +143,7 @@ The ``bond`` class supports the following methods:
 
 You can construct a ``bond`` by using the appropriate subclass:
 
-.. code:: python
+.. code:: python3
 
   from bond.<language> import <language>
   interpreter = <language>().
@@ -152,46 +152,101 @@ You can construct a ``bond`` by using the appropriate subclass:
 Language support
 ================
 
-Python:
+Python
+------
 
-* Python has no restriction on data types (everything is pickled), so you can
-  also transparently send/receive functions.
+Python, as the identity language, has no restriction on data types (everything
+is pickled), so you can also transparently send/receive functions. Everything
+works as you would expect.
 
 
-PHP:
+PHP
+---
+
+Requirements:
 
 * The PHP's command line and the ``readline`` module needs to be installed for
   the interactive interpreter to work properly. On Debian/Ubuntu, you'll need
   ``php5-cli`` and ``php5-readline``.
 
+Limitations:
 
-Perl:
+* Due to PHP limitations, you can only call plain function names directly. You
+  cannot call an object method or a direct reference to a function. You'll need
+  a wrapper construct like the following:
+
+  .. code:: python3
+
+    php.eval_block(r'''
+    $obj = new object;
+
+    function call_obj($method, $params)
+    {
+	return call_user_method_array('method', $obj, $params);
+    }
+    ''')
+
+    # The following is equivalent to `$obj->method(1, 2, 3)`
+    php.call('call_obj', 'method', [1, 2, 3])
+
+
+Perl
+----
+
+Perl is a quirky language, due to its syntax. We assume here you're an
+experienced Perl developer.
+
+Requirements:
 
 * The ``JSON`` and ``Data::Dump`` modules are required (``libjson-perl`` and
   ``libdata-dump-perl`` in Debian/Ubuntu).
 
-* There's no distinction between ``eval`` and ``eval_block`` in Perl. Both
-  calls accept any number of statements and return the result of the last.
+Gotchas:
 
-* By default, evaluation is forced in array context. Use the "scalar" keyword
-  to coerce the result manually.
+* By default, evaluation is forced in array context, as otherwise most of the
+  built-ins working with arrays would return an useless scalar. Use the
+  "scalar" keyword for the rare cases when you really need it to.
 
-* Most, but not all built-in functions are callable directly using
-  ``bond.call()`` due to the syntax semantics of Perl: you can only call
-  function-like builtins.
+* You can "call" any function-like statement, as long as the last argument is
+  expected to be an argument list. For example:
+
+  .. code:: python3
+
+    perl.call('map { $_ + 1 }', [1, 2, 3])
+
+* You can of course "call" a statement that returns any ``CODE``. Meaning that
+  you can call references to functions as long as you dereference them first:
+
+  .. code:: python3
+
+    perl.call('&{ $fun_ref }', ...)
+
+  Likewise you can "call" objects methods directly:
+
+  .. code:: python3
+
+    perl.call('$object->method', ...)
 
 
 Common limitations
-==================
+------------------
 
-Only basic types (booleans, numbers, strings, lists, arrays and
-maps/dictionaries) can be transferred between the interpreters. References are
-implicitly broken as *objects are transferred by value*.
+* Except for Python, only basic types (booleans, numbers, strings, lists,
+  arrays and maps/dictionaries) can be transferred between the interpreters.
 
-Calling functions across the bridge is slow due to the serialization, but the
-execution speed of the functions themselves is *not affected*. This might be
-perfectly reasonable if there are only occasional calls between languages,
-and/or the calls themselves take a significant fraction of time.
+  If an object that cannot be serialized reaches a "call", "eval", or even a
+  non-local return such as an *error or exception*, it will generate a
+  ``RemoteException`` on the Python side.
+
+* References are implicitly broken as *objects are transferred by value*. This
+  is obvious, are you're talking with a separate process, but it can easily be
+  forgotten due to the blurring of the boundary.
+
+* Calling functions across the bridge is slow, also in Python, due to the
+  serialization, but the execution speed of the functions themselves is *not
+  affected*. This might be perfectly reasonable if there are only occasional
+  calls between languages, and/or the calls themselves take a significant
+  fraction of time.
 
 
 Authors and Copyright
