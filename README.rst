@@ -171,23 +171,8 @@ Requirements:
 
 Limitations:
 
-* Due to PHP limitations, you can only call plain function names directly. You
-  cannot call an object method or a direct reference to a function. You'll need
-  a wrapper construct like the following:
-
-  .. code:: python3
-
-    php.eval_block(r'''
-    $obj = new object;
-
-    function call_obj($method, $params)
-    {
-	return call_user_method_array('method', $obj, $params);
-    }
-    ''')
-
-    # The following is equivalent to `$obj->method(1, 2, 3)`
-    php.call('call_obj', 'method', [1, 2, 3])
+* You cannot use "call" on a built-in function such as "echo" (use "eval" in
+  that case). You have to use a real function instead, like "print".
 
 
 Perl

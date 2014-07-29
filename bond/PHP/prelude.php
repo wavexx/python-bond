@@ -101,7 +101,22 @@ function __PY_BOND_repl()
       try
       {
 	__PY_BOND_clear_error();
-	$ret = @call_user_func_array($args[0], $args[1]);
+	if(is_callable($args[0]))
+	{
+	  /// special-case regular functions
+	  $ret = @call_user_func_array($args[0], $args[1]);
+	}
+	else
+	{
+	  /// construct a string that we can interpret "function-like", to
+	  /// handle also function references and method calls uniformly
+	  $name = $args[0];
+	  $args_ = array();
+	  foreach($args[1] as $el)
+	    $args_[] = var_export($el, true);
+	  $args_ = implode(", ", $args_);
+	  $ret = @eval("return " . $name . "(" . $args_ . ");");
+	}
 	$err = __PY_BOND_get_error();
       }
       catch(Exception $e)

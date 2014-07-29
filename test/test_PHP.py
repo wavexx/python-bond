@@ -57,16 +57,27 @@ def test_call_simple():
     assert(str(ret) == "Hello world!")
 
 
-@knownfail
 def test_call_stm():
     php = PHP(timeout=1)
 
-    # NOTE: it would be nice to have the following working, though it seems
-    #       that there's no way to evaluate a reference to a function in PHP
-    #       without breaking it.
-    php.eval_block(r'$fun = function($arg){ return $arg; };')
+    # call a function reference
+    php.eval_block('$fun = function($arg){ return $arg; };')
     ret = php.call('$fun', "Hello world!")
     assert(str(ret) == "Hello world!")
+
+    # call a method
+    php.eval_block(r'''
+    class Test
+    {
+        public function call_me($arg)
+        {
+            return $arg;
+        }
+    }
+    $obj = new Test();
+    ''')
+    ret = php.call('$obj->call_me', 1)
+    assert(ret == 1)
 
 
 def test_call_error():
