@@ -81,7 +81,7 @@ def test_call_stm():
 
 
 def test_ser_err():
-    php = PHP(timeout=1, logfile=open("log", "w"))
+    php = PHP(timeout=1)
 
     # construct an unserializable type
     php.eval_block(r'''
