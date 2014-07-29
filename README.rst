@@ -193,7 +193,7 @@ Gotchas:
   "scalar" keyword for the rare cases when you really need it to.
 
 * You can "call" any function-like statement, as long as the last argument is
-  expected to be an argument list. For example:
+  expected to be an argument list. This allows you to call builtins directly:
 
   .. code:: python3
 

@@ -65,6 +65,10 @@ def test_call_stm():
     ret = perl.call('&{ \&copy }', "Hello world!")
     assert(str(ret) == "Hello world!")
 
+    # test calling a function bypassing the prototype
+    ret = perl.call('&copy', "Hello world!")
+    assert(str(ret) == "Hello world!")
+
     # check return values depending on the context
     ret = perl.call('scalar split', ' ', "Hello world!")
     assert(ret == 2)
