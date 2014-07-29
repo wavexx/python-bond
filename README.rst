@@ -219,7 +219,8 @@ Gotchas:
 
   .. code:: python3
 
-    perl.call('&{ $fun_ref }', ...)
+    perl.call('&$fun_ref', ...)
+    perl.call('&{ $any->{expression} }', ...)
 
   Likewise you can "call" objects methods directly:
 
@@ -239,7 +240,7 @@ Common limitations
   ``RemoteException`` on the Python side.
 
 * References are implicitly broken as *objects are transferred by value*. This
-  is obvious, are you're talking with a separate process, but it can easily be
+  is obvious, as you're talking with a separate process, but it can easily be
   forgotten due to the blurring of the boundary.
 
 * Calling functions across the bridge is slow, also in Python, due to the
