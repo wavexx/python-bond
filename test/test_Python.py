@@ -257,13 +257,3 @@ def test_export_recursive():
 def test_output_redirect():
     py = Python(timeout=1)
     py.eval_block(r'print "Hello world!\n"')
-
-
-# def test_proxy():
-#     py1 = Python(timeout=1)
-#     py1.eval(r'sub func_perl1 { shift() + 1; }')
-
-#     py2 = Python(timeout=1)
-#     py1.proxy('func_perl1', perl2)
-
-#     assert(perl2.call('func_perl1', 0) == 1)

@@ -312,13 +312,3 @@ def test_export_recursive():
 def test_output_redirect():
     perl = Perl(timeout=1)
     perl.eval_block(r'print "Hello world!\n";')
-
-
-def test_proxy():
-    perl1 = Perl(timeout=1)
-    perl1.eval(r'sub func_perl1 { shift() + 1; }')
-
-    perl2 = Perl(timeout=1)
-    perl1.proxy('func_perl1', perl2)
-
-    assert(perl2.call('func_perl1', 0) == 1)

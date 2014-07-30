@@ -286,13 +286,3 @@ def test_export_recursive():
 def test_output_redirect():
     php = PHP(timeout=1)
     php.eval_block(r'echo "Hello world!\n";')
-
-
-def test_proxy():
-    php1 = PHP(timeout=1)
-    php1.eval_block(r'function func_php1($arg) { return $arg + 1; }')
-
-    php2 = PHP(timeout=1)
-    php1.proxy('func_php1', php2)
-
-    assert(php2.call('func_php1', 0) == 1)
