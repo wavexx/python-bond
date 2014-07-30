@@ -2,30 +2,73 @@
 /// NOTE: use /// for comments only, as this code is transformed into a single
 ///       line to be injected into the interpreter *without parsing*.
 
-/// Define STDIN/STDOUT
-define("__PY_BOND_STDIN", fopen("php://stdin","r"));
-define("__PY_BOND_STDOUT", fopen("php://stdout","w"));
+/// Redirect normal output
+$__PY_BOND_BUFFERS = array(
+    "STDOUT" => "",
+    "STDERR" => ""
+);
 
-/// Use a custom output filter to redirect normal output
-$__PY_BOND_BUFFER = '';
-
-function __PY_BOND_output($buffer, $phase)
+class __PY_BOND_BUFFERED
 {
-  global $__PY_BOND_BUFFER;
-  $__PY_BOND_BUFFER .= $buffer;
+  public $name;
+
+  public function stream_open($path, $mode, $options, &$opened_path)
+  {
+    global $__PY_BOND_BUFFERS;
+    $path = strtoupper(substr(strstr($path, "://"), 3));
+    if(!isset($__PY_BOND_BUFFERS[$path]))
+      return false;
+    $this->name = $path;
+    return true;
+  }
+
+  public function stream_write($data)
+  {
+    global $__PY_BOND_BUFFERS;
+    $buffer = &$__PY_BOND_BUFFERS[$this->name];
+    $buffer .= $data;
+    return strlen($data);
+  }
 }
 
 
+/// Redefine standard streams
+$__PY_BOND_CHANNELS = array(
+    "STDIN" => fopen("php://stdin", "r"),
+    "STDOUT" => fopen("php://stdout", "w"),
+    "STDERR" => fopen("php://stderr", "w")
+);
+
+stream_wrapper_unregister("php");
+stream_wrapper_register("php", "__PY_BOND_BUFFERED");
+
+if(!defined("STDIN"))
+  define('STDIN', null);
+if(!defined("STDOUT"))
+  define('STDOUT', fopen("php://stdout", "w"));
+if(!defined("STDERR"))
+  define('STDERR', fopen("php://stderr", "w"));
+
+
 /// Define our own i/o methods
+function __PY_BOND_output($buffer, $phase)
+{
+  global $__PY_BOND_BUFFERS;
+  fwrite(STDOUT, $buffer);
+}
+
 function __PY_BOND_getline()
 {
-  return rtrim(fgets(__PY_BOND_STDIN));
+  global $__PY_BOND_CHANNELS;
+  return rtrim(fgets($__PY_BOND_CHANNELS['STDIN']));
 }
 
 function __PY_BOND_sendline($line = '')
 {
-  fwrite(__PY_BOND_STDOUT, $line . "\n");
-  fflush(__PY_BOND_STDOUT);
+  global $__PY_BOND_CHANNELS;
+  $stdout = $__PY_BOND_CHANNELS['STDOUT'];
+  fwrite($stdout, $line . "\n");
+  fflush($stdout);
 }
 
 
@@ -48,6 +91,7 @@ function __PY_BOND_get_error()
 /// Recursive repl
 function __PY_BOND_remote($name, $args)
 {
+  /// TODO: handle encoding errors
   $json = json_encode(array($name, $args));
   __PY_BOND_sendline("REMOTE $json");
   return __PY_BOND_repl();
@@ -55,7 +99,8 @@ function __PY_BOND_remote($name, $args)
 
 function __PY_BOND_repl()
 {
-  global $__PY_BOND_BUFFER;
+  global $__PY_BOND_BUFFERS;
+
   while($line = __PY_BOND_getline())
   {
     $line = explode(" ", $line, 2);
@@ -133,12 +178,16 @@ function __PY_BOND_repl()
       exit(1);
     }
 
+    /// redirected channels
     ob_flush();
-    if(strlen($__PY_BOND_BUFFER))
+    foreach($__PY_BOND_BUFFERS as $chan => &$buf)
     {
-      $enc_out = json_encode(array("STDOUT", $__PY_BOND_BUFFER));
-      __PY_BOND_sendline("OUTPUT $enc_out");
-      $__PY_BOND_BUFFER = '';
+      if(strlen($buf))
+      {
+	$enc_out = json_encode(array($chan, $buf));
+	__PY_BOND_sendline("OUTPUT $enc_out");
+	$buf = "";
+      }
     }
 
     /// error state

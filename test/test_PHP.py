@@ -85,10 +85,10 @@ def test_ser_err():
 
     # construct an unserializable type
     php.eval_block(r'''
-    $fd = fopen("php://stdin", "r");
+    $fd = fopen("php://stdout", "w");
     function func()
     {
-        return fopen("php://stdin", "r");
+        return fopen("php://stdout", "w");
     }
     ''')
 
@@ -284,5 +284,12 @@ def test_export_recursive():
 
 
 def test_output_redirect():
-    php = PHP(timeout=1)
+    php = PHP(timeout=1);
+
+    # standard output
     php.eval_block(r'echo "Hello world!\n";')
+    assert(php.eval('1') == 1)
+
+    # standard error
+    php.eval_block(r'fwrite(STDERR, "Hello world!\n");')
+    assert(php.eval('1') == 1)
