@@ -40,7 +40,7 @@ A simple  example
   >>> # Call Python from PHP
   >>> def call_me():
   ...     print("Hi, this is Python talking!")
-  >>> php.export(call_me, 'call_me')
+  >>> php.export(call_me)
   >>> php.eval('call_me()')
   Hi, this is Python talking!
 
@@ -127,8 +127,8 @@ The ``bond`` class supports the following methods:
 ``export(func, name)``:
 
   Export a local function "func" so that can be called on the remote language
-  as "name". Note that "func" must be a function *reference*, not a function
-  name.
+  as "name". If "name" is not specified, use the local function name directly.
+  Note that "func" must be a function *reference*, not a function name.
 
 ``proxy(name, other, remote)``:
 

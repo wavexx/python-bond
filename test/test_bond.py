@@ -16,6 +16,21 @@ def test_ser_err():
     assert(failed)
 
 
+def test_export():
+    py = Python(timeout=1)
+
+    def call_me():
+        return 42
+
+    # check that export without a name
+    py.export(call_me)
+    assert(py.call('call_me') == 42)
+
+    # check that export with explicit name
+    py.export(call_me, 'call_me_again')
+    assert(py.call('call_me_again') == 42)
+
+
 def test_proxy():
     py1 = Python(timeout=1)
     py1.eval_block(r'''def func_py1(arg):

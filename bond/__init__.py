@@ -123,8 +123,11 @@ class Bond(object):
         '''Terminate the underlying interpreter'''
         self._proc.sendeof()
 
-    def export(self, func, name):
-        '''Export a local function "func" to be callable in the interpreter as "name"'''
+    def export(self, func, name=None):
+        '''Export a local function "func" to be callable in the interpreter as "name".
+        If "name" is not specified, use the local function name directly.'''
+        if name is None:
+            name = func.__name__
         self.bindings[name] = func
         self._proc.sendline('EXPORT {name}'.format(name=self._dumps(name)))
         return self._repl()
