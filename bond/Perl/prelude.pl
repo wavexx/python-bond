@@ -8,19 +8,42 @@ use IO::String;
 use JSON;
 use Data::Dump qw{dump};
 
-# Redirect normal output
-my $__PY_BOND_BUFFER = IO::String->new();
-my $__PY_BOND_STDIN = *STDIN;
-my $__PY_BOND_STDOUT = *STDOUT;
+
+# Channels and buffers
+my %__PY_BOND_BUFFERS =
+(
+  "STDOUT" => IO::String->new(),
+  "STDERR" => IO::String->new()
+);
+
+my %__PY_BOND_CHANNELS =
+(
+  "STDIN" => *STDIN,
+  "STDOUT" => *STDOUT,
+  "STDERR" => *STDERR
+);
 
 
-# Define our own i/o methods
+# Serialization methods
 my $__PY_BOND_JSON = JSON->new();
 $__PY_BOND_JSON->allow_nonref();
 
+sub __PY_BOND_dumps
+{
+  return $__PY_BOND_JSON->encode(@_);
+}
+
+sub __PY_BOND_loads
+{
+  return $__PY_BOND_JSON->decode(@_);
+}
+
+
+# Define our own i/o methods
 sub __PY_BOND_getline()
 {
-  my $line = <$__PY_BOND_STDIN>;
+  my $stdin = $__PY_BOND_CHANNELS{STDIN};
+  my $line = <$stdin>;
   chomp($line) if(defined($line));
   return $line;
 }
@@ -28,8 +51,9 @@ sub __PY_BOND_getline()
 sub __PY_BOND_sendline
 {
   my $line = shift // "";
-  print $__PY_BOND_STDOUT "$line\n";
-  $__PY_BOND_STDOUT->flush();
+  my $stdout = $__PY_BOND_CHANNELS{STDOUT};
+  print $stdout "$line\n";
+  $stdout->flush();
 }
 
 
@@ -37,7 +61,8 @@ sub __PY_BOND_sendline
 sub __PY_BOND_remote($$)
 {
   my ($name, $args) = @_;
-  my $json = $__PY_BOND_JSON->encode([$name, $args]);
+  # TODO: handle encoding errors
+  my $json = __PY_BOND_dumps([$name, $args]);
   __PY_BOND_sendline("REMOTE $json");
   return __PY_BOND_repl();
 }
@@ -47,7 +72,7 @@ sub __PY_BOND_repl()
   while(my $line = __PY_BOND_getline())
   {
     my ($cmd, $args) = split(/ /, $line, 2);
-    $args = $__PY_BOND_JSON->decode($args) if(defined($args));
+    $args = __PY_BOND_loads($args) if(defined($args));
 
     my $ret = undef;
     my $err = undef;
@@ -100,13 +125,17 @@ sub __PY_BOND_repl()
       exit(1);
     }
 
-    # redirected output
-    if(tell($__PY_BOND_BUFFER))
+    # redirected channels
+    while(my ($channel, $buffer) = each %__PY_BOND_BUFFERS)
     {
-      my $output = ${$__PY_BOND_BUFFER->string_ref};
-      my $enc_out = $__PY_BOND_JSON->encode(["STDOUT", $output]);
-      __PY_BOND_sendline("OUTPUT $enc_out");
-      truncate($__PY_BOND_BUFFER, 0);
+      if(tell($buffer))
+      {
+	my $output = ${$buffer->string_ref};
+	my $enc_out = __PY_BOND_dumps([$channel, $output]);
+	__PY_BOND_sendline("OUTPUT $enc_out");
+	seek($buffer, 0, 0);
+	truncate($buffer, 0);
+      }
     }
 
     # error state
@@ -121,11 +150,11 @@ sub __PY_BOND_repl()
     }
 
     # encode the result
-    my $enc_ret = eval { $__PY_BOND_JSON->encode($ret); };
+    my $enc_ret = eval { __PY_BOND_dumps($ret); };
     if($@)
     {
       $state = "ERROR";
-      $enc_ret = $__PY_BOND_JSON->encode("cannot encode $ret");
+      $enc_ret = __PY_BOND_dumps("cannot encode $ret");
     }
     __PY_BOND_sendline("$state $enc_ret");
   }
@@ -135,8 +164,12 @@ sub __PY_BOND_repl()
 sub __PY_BOND_start()
 {
   *STDIN = IO::Handle->new();
-  *STDOUT = $__PY_BOND_BUFFER;
-  select($__PY_BOND_BUFFER);
+  *STDOUT = $__PY_BOND_BUFFERS{STDOUT};
+  *STDERR = $__PY_BOND_BUFFERS{STDERR};
+  $SIG{__WARN__} = sub
+  {
+    print STDERR shift();
+  };
 
   __PY_BOND_sendline("READY");
   exit(__PY_BOND_repl());

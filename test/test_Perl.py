@@ -311,4 +311,15 @@ def test_export_recursive():
 
 def test_output_redirect():
     perl = Perl(timeout=1)
+
+    # stdout
     perl.eval_block(r'print "Hello world!\n";')
+    assert(perl.eval('1') == 1)
+
+    # stderr
+    perl.eval_block(r'print STDERR "Hello world!\n"')
+    assert(perl.eval('1') == 1)
+
+    # warnings
+    perl.eval_block(r'use warnings; "$undefined";')
+    assert(perl.eval('1') == 1)

@@ -50,7 +50,7 @@ class Bond(object):
     LANG = '<unknown>'
 
     def __init__(self, proc):
-        self.channels = {'STDOUT': sys.stdout}
+        self.channels = {'STDOUT': sys.stdout, 'STDERR': sys.stderr}
         self.bindings = {}
 
         self._proc = proc
