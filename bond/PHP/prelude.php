@@ -89,11 +89,20 @@ function __PY_BOND_get_error()
 
 
 /// Recursive repl
+function __PY_BOND_sendstate($state, $data)
+{
+  $enc_ret = json_encode($data);
+  if(json_last_error())
+  {
+    $state = "ERROR";
+    $enc_ret = json_encode(@"cannot encode $data");
+  }
+  __PY_BOND_sendline("$state $enc_ret");
+}
+
 function __PY_BOND_remote($name, $args)
 {
-  /// TODO: handle encoding errors
-  $json = json_encode(array($name, $args));
-  __PY_BOND_sendline("REMOTE $json");
+  __PY_BOND_sendstate("REMOTE", array($name, $args));
   return __PY_BOND_repl();
 }
 
@@ -201,14 +210,7 @@ function __PY_BOND_repl()
       $ret = $err;
     }
 
-    /// encode the result
-    $enc_ret = json_encode($ret);
-    if(json_last_error())
-    {
-      $state = "ERROR";
-      $enc_ret = json_encode(@"cannot encode $ret");
-    }
-    __PY_BOND_sendline("$state $enc_ret");
+    __PY_BOND_sendstate($state, $ret);
   }
   exit(0);
 }

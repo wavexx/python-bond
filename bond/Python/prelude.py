@@ -40,10 +40,17 @@ def __PY_BOND_loads(string):
 
 
 # Recursive repl
+def __PY_BOND_sendstate(state, data):
+    code = None
+    try:
+        code = __PY_BOND_dumps(data)
+    except:
+        state = "ERROR"
+        code = __PY_BOND_dumps("cannot encode {data}".format(data=str(data)))
+    __PY_BOND_sendline("{state} {code}".format(state=state, code=code))
+
 def __PY_BOND_remote(name, args):
-    # TODO: handle encoding errors
-    code = __PY_BOND_dumps([name, args])
-    __PY_BOND_sendline("REMOTE {code}".format(code=code))
+    __PY_BOND_sendstate("REMOTE", [name, args])
     return __PY_BOND_repl()
 
 def __PY_BOND_export(name):
@@ -100,15 +107,7 @@ def __PY_BOND_repl():
             state = "EXCEPT"
             ret = err
 
-        # encode the result
-        code = None
-        try:
-            code = __PY_BOND_dumps(ret)
-        except:
-            state = "ERROR"
-            code = __PY_BOND_dumps("cannot encode {ret}".format(ret=str(ret)))
-
-        __PY_BOND_sendline("{state} {code}".format(state=state, code=code))
+        __PY_BOND_sendstate(state, ret)
 
     # stream ended
     exit(0)

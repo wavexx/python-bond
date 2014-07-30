@@ -309,6 +309,29 @@ def test_export_recursive():
     assert(func_perl_rec_2(0) == 5)
 
 
+def test_export_ser_err():
+    def call_me(arg):
+        pass
+
+    perl = Perl(timeout=1)
+    perl.export(call_me, 'call_me')
+    perl.eval_block(r'''
+    use IO::File;
+    $fd = IO::File->new();
+    ''')
+
+    failed = False
+    try:
+        perl.eval('call_me($fd)')
+    except bond.SerializationException as e:
+        print(e)
+        failed = (e.side == "remote")
+    assert(failed)
+
+    # ensure the env didn't just die
+    assert(perl.eval('1') == 1)
+
+
 def test_output_redirect():
     perl = Perl(timeout=1)
 

@@ -58,12 +58,22 @@ sub __PY_BOND_sendline
 
 
 # Recursive repl
+sub __PY_BOND_sendstate($$)
+{
+  my ($state, $data) = @_;
+  my $enc_ret = eval { __PY_BOND_dumps($data); };
+  if($@)
+  {
+    $state = "ERROR";
+    $enc_ret = __PY_BOND_dumps("cannot encode $data");
+  }
+  __PY_BOND_sendline("$state $enc_ret");
+}
+
 sub __PY_BOND_remote($$)
 {
   my ($name, $args) = @_;
-  # TODO: handle encoding errors
-  my $json = __PY_BOND_dumps([$name, $args]);
-  __PY_BOND_sendline("REMOTE $json");
+  __PY_BOND_sendstate("REMOTE", [$name, $args]);
   return __PY_BOND_repl();
 }
 
@@ -149,14 +159,7 @@ sub __PY_BOND_repl()
       $ret = $err;
     }
 
-    # encode the result
-    my $enc_ret = eval { __PY_BOND_dumps($ret); };
-    if($@)
-    {
-      $state = "ERROR";
-      $enc_ret = __PY_BOND_dumps("cannot encode $ret");
-    }
-    __PY_BOND_sendline("$state $enc_ret");
+    __PY_BOND_sendstate($state, $ret);
   }
   exit(0);
 }

@@ -254,6 +254,25 @@ def test_export_recursive():
     assert(func_remote_rec_2(0) == 5)
 
 
+def test_export_ser_err():
+    def call_me(arg):
+        pass
+
+    py = Python(timeout=1)
+    py.export(call_me, 'call_me')
+
+    failed = False
+    try:
+        py.eval('call_me(lambda x: x)')
+    except bond.SerializationException as e:
+        print(e)
+        failed = (e.side == "remote")
+    assert(failed)
+
+    # ensure the env didn't just die
+    assert(py.eval('1') == 1)
+
+
 def test_output_redirect():
     py = Python(timeout=1)
 

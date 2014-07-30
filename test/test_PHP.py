@@ -283,6 +283,26 @@ def test_export_recursive():
     assert(func_php_rec_2(0) == 5)
 
 
+def test_export_ser_err():
+    def call_me(arg):
+        pass
+
+    php = PHP(timeout=1)
+    php.export(call_me, 'call_me')
+    php.eval_block('$fd = fopen("php://stdout", "w");')
+
+    failed = False
+    try:
+        php.eval('call_me($fd)')
+    except bond.SerializationException as e:
+        print(e)
+        failed = (e.side == "remote")
+    assert(failed)
+
+    # ensure the env didn't just die
+    assert(php.eval('1') == 1)
+
+
 def test_output_redirect():
     php = PHP(timeout=1);
 
