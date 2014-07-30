@@ -7,18 +7,26 @@ import sys
 
 
 # Redirect normal output
-__PY_BOND_BUFFER = cStringIO.StringIO()
-__PY_BOND_STDIN = sys.stdin
-__PY_BOND_STDOUT = sys.stdout
+__PY_BOND_BUFFERS = {
+    "STDOUT": cStringIO.StringIO(),
+    "STDERR": cStringIO.StringIO()
+}
+
+__PY_BOND_CHANNELS = {
+    "STDIN": sys.stdin,
+    "STDOUT": sys.stdout,
+    "STDERR": sys.stderr
+}
 
 
 # Define our own i/o methods
 def __PY_BOND_getline():
-    return __PY_BOND_STDIN.readline().rstrip()
+    return __PY_BOND_CHANNELS['STDIN'].readline().rstrip()
 
 def __PY_BOND_sendline(line=""):
-    __PY_BOND_STDOUT.write(line + "\n")
-    __PY_BOND_STDOUT.flush()
+    stdout = __PY_BOND_CHANNELS['STDOUT']
+    stdout.write(line + "\n")
+    stdout.flush()
 
 
 # Serialization methods
@@ -33,6 +41,7 @@ def __PY_BOND_loads(string):
 
 # Recursive repl
 def __PY_BOND_remote(name, args):
+    # TODO: handle encoding errors
     code = __PY_BOND_dumps([name, args])
     __PY_BOND_sendline("REMOTE {code}".format(code=code))
     return __PY_BOND_repl()
@@ -75,12 +84,13 @@ def __PY_BOND_repl():
         else:
             exit(1)
 
-        # redirected output
-        if __PY_BOND_BUFFER.tell():
-            output = __PY_BOND_BUFFER.getvalue()
-            code = __PY_BOND_dumps(['STDOUT', output])
-            __PY_BOND_sendline("OUTPUT {code}".format(code=code))
-            __PY_BOND_BUFFER.truncate(0)
+        # redirected channels
+        for chan, buf in __PY_BOND_BUFFERS.iteritems():
+            if buf.tell():
+                output = buf.getvalue()
+                code = __PY_BOND_dumps([chan, output])
+                __PY_BOND_sendline("OUTPUT {code}".format(code=code))
+                buf.truncate(0)
 
         # error state
         state = None
@@ -105,7 +115,8 @@ def __PY_BOND_repl():
 
 
 def __PY_BOND_start(protocol=-1):
-    sys.stdout = __PY_BOND_BUFFER
+    sys.stdout = __PY_BOND_BUFFERS['STDOUT']
+    sys.stderr = __PY_BOND_BUFFERS['STDERR']
     sys.stdin = open(os.devnull)
     __PY_BOND_PROTOCOL = protocol
     __PY_BOND_sendline("READY")
