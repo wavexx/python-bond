@@ -96,9 +96,9 @@ def test_ser_err():
     failed = False
     try:
         php.eval('$fd')
-    except bond.RemoteException as e:
+    except bond.SerializationException as e:
         print(e)
-        failed = True
+        failed = (e.side == "remote")
     assert(failed)
 
     # ensure the env didn't just die
@@ -108,9 +108,9 @@ def test_ser_err():
     failed = False
     try:
         php.call('func')
-    except bond.RemoteException as e:
+    except bond.SerializationException as e:
         print(e)
-        failed = True
+        failed = (e.side == "remote")
     assert(failed)
 
     # ensure the env didn't just die

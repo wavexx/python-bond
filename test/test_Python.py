@@ -169,9 +169,9 @@ def test_ser_err():
     failed = False
     try:
         ret = py.eval('x')
-    except bond.RemoteException as e:
+    except bond.SerializationException as e:
         print(e)
-        failed = True
+        failed = (e.side == "remote")
     assert(failed)
 
     # ensure the env didn't just die
@@ -181,9 +181,9 @@ def test_ser_err():
     failed = False
     try:
         py.call('func')
-    except bond.RemoteException as e:
+    except bond.SerializationException as e:
         print(e)
-        failed = True
+        failed = (e.side == "remote")
     assert(failed)
 
     # ensure the env didn't just die
@@ -193,9 +193,9 @@ def test_ser_err():
     failed = False
     try:
         py.eval_block('raise Exception(x)')
-    except bond.RemoteException as e:
+    except bond.SerializationException as e:
         print(e)
-        failed = True
+        failed = (e.side == "remote")
     assert(failed)
 
     # ensure the env didn't just die

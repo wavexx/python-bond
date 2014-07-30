@@ -23,11 +23,15 @@ class Spawn(pexpect.spawn):
 class BondException(exceptions.IOError):
     pass
 
-class StateException(BondException):
-    pass
+class SerializationException(BondException):
+    def __init__(self, error, side):
+        self.side = side
+        super(SerializationException, self).__init__(error)
 
 class RemoteException(BondException):
-    pass
+    def __init__(self, error, data):
+        self.data = data
+        super(RemoteException, self).__init__(error)
 
 
 class Bond(object):
@@ -41,14 +45,23 @@ class Bond(object):
         try:
             self._proc.expect("READY\r\n")
         except pexpect.ExceptionPexpect as e:
-            raise StateException('unknown "{lang}" interpreter state'.format(lang=self.LANG))
+            raise BondException('unknown "{lang}" interpreter state'.format(lang=self.LANG))
 
 
-    def _loads(self, string):
+    def loads(self, string):
         return json.loads(string)
 
-    def _dumps(self, *args):
+    def dumps(self, *args):
         return json.dumps(*args)
+
+
+    def _dumps(self, *args):
+        try:
+            return self.dumps(*args)
+        except Exception as e:
+            raise SerializationException('{lang}[{side}]: {error}'.format(
+                lang=self.LANG, side="local", error=str(e)), "local")
+        return ret
 
 
     def _repl(self):
@@ -56,7 +69,7 @@ class Bond(object):
             cmd = str(self._proc.match.group(1))
             args = self._proc.match.group(2)
             if args is not None:
-                args = self._loads(args)
+                args = self.loads(args)
 
             # interpret the serial protocol
             if cmd == "OUTPUT":
@@ -67,12 +80,15 @@ class Bond(object):
                 ret = self._dumps(ret) if ret else None
                 self._proc.sendline('RETURN {ret}'.format(ret=ret))
                 continue
-            elif cmd == "ERROR":
+            elif cmd == "EXCEPT":
                 raise RemoteException('{lang}: {error}'.format(lang=self.LANG, error=str(args)), args)
+            elif cmd == "ERROR":
+                raise SerializationException('{lang}[{side}]: {error}'.format(
+                    lang=self.LANG, side="remote", error=str(args)), "remote")
             elif cmd == "RETURN":
                 return args
 
-            raise StateException('unknown "{lang}" interpreter state'.format(lang=self.LANG))
+            raise BondException('unknown "{lang}" interpreter state'.format(lang=self.LANG))
 
 
     def eval(self, code):

@@ -20,7 +20,7 @@ class Python(Bond):
         try:
             proc.expect(PY_PROMPT)
         except pexpect.ExceptionPexpect as e:
-            raise StateException('cannot start Python')
+            raise BondException('cannot start Python')
 
         # inject our prelude
         code = pkg_resources.resource_string(__name__, PY_PRELUDE)
@@ -30,7 +30,7 @@ class Python(Bond):
         try:
             proc.expect(r'\r\n{prompt}'.format(prompt=PY_PROMPT))
         except pexpect.ExceptionPexpect as e:
-            raise StateException('cannot initialize Python')
+            raise BondException('cannot initialize Python')
 
         # start the inner repl
         proc.sendline(r'{PY_WRAP_PREFIX}_start({protocol});'.format(
@@ -42,8 +42,8 @@ class Python(Bond):
 
 
     # Use pickle with Python
-    def _dumps(self, *args):
+    def dumps(self, *args):
         return base64.b64encode(cPickle.dumps(args, self.protocol))
 
-    def _loads(self, string):
+    def loads(self, string):
         return cPickle.loads(base64.b64decode(string))[0]

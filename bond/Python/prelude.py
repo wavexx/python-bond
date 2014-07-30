@@ -87,7 +87,7 @@ def __PY_BOND_repl():
         if err is None:
             state = "RETURN"
         else:
-            state = "ERROR"
+            state = "EXCEPT"
             ret = err
 
         # encode the result
@@ -96,7 +96,7 @@ def __PY_BOND_repl():
             code = __PY_BOND_dumps(ret)
         except:
             state = "ERROR"
-            code = __PY_BOND_dumps("BOND ERROR: cannot encode {ret}".format(ret=str(ret)))
+            code = __PY_BOND_dumps("cannot encode {ret}".format(ret=str(ret)))
 
         __PY_BOND_sendline("{state} {code}".format(state=state, code=code))
 

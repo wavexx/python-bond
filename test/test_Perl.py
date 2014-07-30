@@ -180,9 +180,9 @@ def test_ser_err():
     failed = False
     try:
         perl.eval('$fd')
-    except bond.RemoteException as e:
+    except bond.SerializationException as e:
         print(e)
-        failed = True
+        failed = (e.side == "remote")
     assert(failed)
 
     # ensure the env didn't just die
@@ -192,9 +192,9 @@ def test_ser_err():
     failed = False
     try:
         perl.call('func')
-    except bond.RemoteException as e:
+    except bond.SerializationException as e:
         print(e)
-        failed = True
+        failed = (e.side == "remote")
     assert(failed)
 
     # ensure the env didn't just die
@@ -204,9 +204,9 @@ def test_ser_err():
     failed = False
     try:
         perl.eval('die $fd')
-    except bond.RemoteException as e:
+    except bond.SerializationException as e:
         print(e)
-        failed = True
+        failed = (e.side == "remote")
     assert(failed)
 
     # ensure the env didn't just die
@@ -235,8 +235,8 @@ def test_eval_error():
 def test_exception():
     perl = Perl(timeout=1)
 
-    # local exception
-    perl.eval_block('sub exceptional() { die \$_; }')
+    # remote exception
+    perl.eval_block('sub exceptional() { die $@; }')
 
     # ... in eval
     failed = False

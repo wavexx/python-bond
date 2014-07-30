@@ -225,7 +225,7 @@ Common limitations
 
   If an object that cannot be serialized reaches a "call", "eval", or even a
   non-local return such as an *error or exception*, it will generate a
-  ``RemoteException`` on the Python side.
+  ``SerializationException`` on the Python side.
 
 * References are implicitly broken as *objects are transferred by value*. This
   is obvious, as you're talking with a separate process, but it can easily be

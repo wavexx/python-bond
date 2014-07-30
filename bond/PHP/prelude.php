@@ -148,7 +148,7 @@ function __PY_BOND_repl()
     }
     else
     {
-      $state = "ERROR";
+      $state = "EXCEPT";
       $ret = $err;
     }
 
@@ -157,7 +157,7 @@ function __PY_BOND_repl()
     if(json_last_error())
     {
       $state = "ERROR";
-      $enc_ret = json_encode(@"BOND ERROR: cannot encode $ret");
+      $enc_ret = json_encode(@"cannot encode $ret");
     }
     __PY_BOND_sendline("$state $enc_ret");
   }
