@@ -53,7 +53,6 @@ if(!defined("STDERR"))
 /// Define our own i/o methods
 function __PY_BOND_output($buffer, $phase)
 {
-  global $__PY_BOND_BUFFERS;
   fwrite(STDOUT, $buffer);
 }
 
