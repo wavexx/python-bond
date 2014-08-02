@@ -167,7 +167,7 @@ def test_eval():
 
 
 def test_ser_err():
-    perl = Perl(timeout=1)
+    perl = Perl(timeout=1, trans_except=True)
 
     # construct an unserializable type
     perl.eval_block(r'''
@@ -380,3 +380,71 @@ def test_output_redirect():
     # warnings
     perl.eval_block(r'use warnings; "$undefined";')
     assert(perl.eval('1') == 1)
+
+
+def test_trans_except():
+    perl_trans = Perl(timeout=1, trans_except=True)
+    perl_not_trans = Perl(timeout=1, trans_except=False)
+
+    code = r'''sub func() { die \&func; }'''
+
+    # by default exceptions are transparent, so the following should try to
+    # serialize the code block (and fail)
+    perl_trans.eval_block(code)
+    failed = False
+    try:
+        ret = perl_trans.call('func')
+    except bond.SerializationException as e:
+        print(e)
+        failed = (e.side == "remote")
+    assert(failed)
+
+    # ensure the env didn't just die
+    assert(perl_trans.eval('1') == 1)
+
+    # this one though will just always forward the remote exception
+    perl_not_trans.eval_block(code)
+    failed = False
+    try:
+        ret = perl_not_trans.call('func')
+    except bond.RemoteException as e:
+        failed = True
+    assert(failed)
+
+    # ensure the env didn't just die
+    assert(perl_not_trans.eval('1') == 1)
+
+
+def test_export_trans_except():
+    perl_trans = Perl(timeout=1, trans_except=True)
+    perl_not_trans = Perl(timeout=1, trans_except=False)
+
+    def call_me():
+       raise RuntimeError("a runtime error")
+
+    # by default exceptions are transparent, so the following should try to
+    # serialize RuntimeError in JSON (and fail)
+    perl_trans.export(call_me)
+    perl_trans.eval_block(r'''
+    sub test_exception()
+    {
+        my $ret = 0;
+        eval { call_me(); };
+        $ret = 1 if $@ =~ /SerializationException/;
+        return $ret;
+    }
+    ''')
+    assert(perl_trans.call('test_exception') == True)
+
+    # this one though will just generate a string
+    perl_not_trans.export(call_me)
+    perl_not_trans.eval_block(r'''
+    sub test_exception()
+    {
+        my $ret = 0;
+        eval { call_me(); };
+        $ret = 1 if $@ !~ /SerializationException/ && $@ =~ /a runtime error/;
+        return $ret;
+    }
+    ''')
+    assert(perl_not_trans.call('test_exception') == True)

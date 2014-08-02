@@ -19,7 +19,8 @@ def _strip_newlines(code):
 class Perl(Bond):
     LANG = 'Perl'
 
-    def __init__(self, cmd="perl", args="-d -e1", xargs="", timeout=None, logfile=None):
+    def __init__(self, cmd="perl", args="-d -e1", xargs="",
+                 trans_except=False, timeout=None, logfile=None):
         cmd = ' '.join([cmd, args, xargs])
         proc = Spawn(cmd, timeout=timeout, logfile=logfile)
         try:
@@ -38,6 +39,6 @@ class Perl(Bond):
             raise BondException('cannot initialize Perl')
 
         # start the inner repl
-        proc.sendline(r'{PERL_WRAP_PREFIX}_start();'.format(
-            PERL_WRAP_PREFIX=PERL_WRAP_PREFIX))
-        super(Perl, self).__init__(proc, True)
+        proc.sendline(r'{PERL_WRAP_PREFIX}_start({trans_except});'.format(
+            PERL_WRAP_PREFIX=PERL_WRAP_PREFIX, trans_except=int(trans_except)))
+        super(Perl, self).__init__(proc, trans_except)

@@ -58,6 +58,8 @@ sub __PY_BOND_sendline
 
 
 # Recursive repl
+my $__PY_BOND_TRANS_EXCEPT;
+
 sub __PY_BOND_sendstate($$)
 {
   my ($state, $data) = @_;
@@ -160,7 +162,7 @@ sub __PY_BOND_repl()
     else
     {
       $state = "EXCEPT";
-      $ret = $err;
+      $ret = ($__PY_BOND_TRANS_EXCEPT? $err: "$err");
     }
 
     __PY_BOND_sendstate($state, $ret);
@@ -168,8 +170,10 @@ sub __PY_BOND_repl()
   exit(0);
 }
 
-sub __PY_BOND_start()
+sub __PY_BOND_start($)
 {
+  my $trans_except = shift();
+
   *STDIN = IO::Handle->new();
   *STDOUT = $__PY_BOND_BUFFERS{STDOUT};
   *STDERR = $__PY_BOND_BUFFERS{STDERR};
@@ -178,6 +182,7 @@ sub __PY_BOND_start()
     print STDERR shift();
   };
 
+  $__PY_BOND_TRANS_EXCEPT = $trans_except;
   __PY_BOND_sendline("READY");
   exit(__PY_BOND_repl());
 }
