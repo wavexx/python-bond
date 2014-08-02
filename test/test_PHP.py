@@ -318,6 +318,25 @@ def test_export_ser_err():
     assert(php.eval('1') == 1)
 
 
+def test_export_except():
+    php = PHP(timeout=1)
+
+    def gen_exception():
+        raise Exception("test")
+
+    php.export(gen_exception)
+    php.eval_block(r'''
+    function test_exception()
+    {
+        $ret = 0;
+        try { gen_exception(); }
+        catch(Exception $e) { $ret = 1; }
+        return $ret;
+    }''')
+
+    assert(php.call('test_exception') == True)
+
+
 def test_output_redirect():
     php = PHP(timeout=1);
 

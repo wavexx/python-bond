@@ -188,6 +188,10 @@ function __PY_BOND_repl()
     case "RETURN":
       return $args;
 
+    case "EXCEPT":
+    case "ERROR":
+      throw new Exception($args);
+
     default:
       exit(1);
     }
