@@ -28,7 +28,7 @@ class PHP(Bond):
         try:
             proc.expect(PHP_PROMPT)
         except pexpect.ExceptionPexpect as e:
-            raise BondException('cannot start PHP')
+            raise BondException(self.LANG, 'cannot get an interactive prompt using: ' + cmd)
 
         # inject our prelude
         code = pkg_resources.resource_string(__name__, PHP_PRELUDE)
@@ -38,7 +38,7 @@ class PHP(Bond):
         try:
             proc.expect(r'\r\n{prompt}'.format(prompt=PHP_PROMPT))
         except pexpect.ExceptionPexpect as e:
-            raise BondException('cannot initialize PHP')
+            raise BondException(self.LANG, 'cannot initialize interpreter')
 
         # start the inner repl
         proc.sendline(r'{PHP_WRAP_PREFIX}_start({trans_except});'.format(

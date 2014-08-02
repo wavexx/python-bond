@@ -26,7 +26,7 @@ class Perl(Bond):
         try:
             proc.expect(PERL_PROMPT)
         except pexpect.ExceptionPexpect as e:
-            raise BondException('cannot start Perl')
+            raise BondException(self.LANG, 'cannot get an interactive prompt using: ' + cmd)
 
         # inject our prelude
         code = pkg_resources.resource_string(__name__, PERL_PRELUDE)
@@ -36,7 +36,7 @@ class Perl(Bond):
         try:
             proc.expect(r'\r\n{prompt}'.format(prompt=PERL_PROMPT))
         except pexpect.ExceptionPexpect as e:
-            raise BondException('cannot initialize Perl')
+            raise BondException(self.LANG, 'cannot initialize interpreter')
 
         # start the inner repl
         proc.sendline(r'{PERL_WRAP_PREFIX}_start({trans_except});'.format(
