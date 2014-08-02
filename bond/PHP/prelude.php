@@ -146,8 +146,14 @@ function __PY_BOND_repl()
       break;
 
     case "EXPORT":
-      $code = "function $args() { return __PY_BOND_remote('$args', func_get_args()); }";
-      $ret = eval($code);
+      $name = $args;
+      if(function_exists($name))
+	$err = "Function \"$name\" already exists";
+      else
+      {
+	$code = "function $name() { return __PY_BOND_remote('$args', func_get_args()); }";
+	$ret = eval($code);
+      }
       break;
 
     case "CALL":

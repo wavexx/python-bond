@@ -211,6 +211,21 @@ def test_export():
     assert(py.call('call_me') == 42)
 
 
+def test_export_redef():
+    py = Python(timeout=1)
+
+    def call_me():
+        return 42
+
+    py.export(call_me)
+    try:
+        py.export(call_me)
+    except:
+        pass
+
+    assert(py.call('call_me') == 42)
+
+
 def test_export_recursive():
     py = Python(timeout=1)
 

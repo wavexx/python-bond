@@ -249,6 +249,21 @@ def test_export():
     assert(php.call('call_me') == 42)
 
 
+def test_export_redef():
+    php = PHP(timeout=1)
+
+    def call_me():
+        return 42
+
+    php.export(call_me)
+    try:
+        php.export(call_me)
+    except:
+        pass
+
+    assert(php.call('call_me') == 42)
+
+
 def test_export_recursive():
     php = PHP(timeout=1)
 

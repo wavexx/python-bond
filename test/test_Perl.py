@@ -275,6 +275,21 @@ def test_export():
     assert(perl.call('call_me') == 42)
 
 
+def test_export_redef():
+    perl = Perl(timeout=1)
+
+    def call_me():
+        return 42
+
+    perl.export(call_me)
+    try:
+        perl.export(call_me)
+    except:
+        pass
+
+    assert(perl.call('call_me') == 42)
+
+
 def test_export_recursive():
     perl = Perl(timeout=1)
 
