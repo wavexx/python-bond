@@ -130,6 +130,10 @@ sub __PY_BOND_repl()
     {
       return $args;
     }
+    elsif($cmd eq "EXCEPT" or $cmd eq "ERROR")
+    {
+      die($args);
+    }
     else
     {
       exit(1);

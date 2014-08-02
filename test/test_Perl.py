@@ -347,6 +347,25 @@ def test_export_ser_err():
     assert(perl.eval('1') == 1)
 
 
+def test_export_except():
+    perl = Perl(timeout=1)
+
+    def gen_exception():
+        raise Exception("test")
+
+    perl.export(gen_exception)
+    perl.eval_block(r'''
+    sub test_exception
+    {
+        my $ret = 0;
+        eval { gen_exception() };
+        $ret = 1 if($@);
+        return $ret;
+    }''')
+
+    assert(perl.call('test_exception') == True)
+
+
 def test_output_redirect():
     perl = Perl(timeout=1)
 
