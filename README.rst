@@ -111,21 +111,21 @@ allowed in constructors:
 ``timeout``:
 
   Defines the timeout for the underlying communication protocol. Note that
-  ``bond`` cannot distinguish between a slow call or noise in the underlying
-  protocol while the interpreter is set up. Defaults to 60 seconds.
+  ``bond`` cannot distinguish between a slow call or noise generated while the
+  interpreter is set up. Defaults to 60 seconds.
 
 ``logfile``:
 
   Accepts a file handle which is used to log the entire communication with the
-  underlying interpreter.
+  underlying interpreter for debugging purposes.
 
 ``trans_except``:
 
   Enables/disables "transparent exceptions". If ``trans_except`` is enabled,
   exceptions will be forwarded across the bond using the original data-type. If
-  ``trans_except`` is disabled (default for all languages except Python), then
-  exceptions will be transformed to a string containing the text representation
-  of the exception instead, which avoids serialization errors.
+  ``trans_except`` is disabled (the default for all languages except Python),
+  then local exceptions will always contain a string representation of the
+  remote exception instead, which avoids serialization errors.
 
 
 Methods
