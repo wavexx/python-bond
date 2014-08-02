@@ -92,7 +92,7 @@ class Bond(object):
                 raise RemoteException(self.LANG, str(args), args)
             elif cmd == "ERROR":
                 raise SerializationException(self.LANG, str(args), 'remote')
-            elif cmd == "REMOTE":
+            elif cmd == "CALL":
                 ret = None
                 state = "RETURN"
                 try:

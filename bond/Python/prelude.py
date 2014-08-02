@@ -49,12 +49,12 @@ def __PY_BOND_sendstate(state, data):
         code = __PY_BOND_dumps("cannot encode {data}".format(data=str(data)))
     __PY_BOND_sendline("{state} {code}".format(state=state, code=code))
 
-def __PY_BOND_remote(name, args):
-    __PY_BOND_sendstate("REMOTE", [name, args])
+def __PY_BOND_call(name, args):
+    __PY_BOND_sendstate("CALL", [name, args])
     return __PY_BOND_repl()
 
 def __PY_BOND_export(name):
-    globals()[name] = lambda *args: __PY_BOND_remote(name, args)
+    globals()[name] = lambda *args: __PY_BOND_call(name, args)
 
 def __PY_BOND_repl():
     while True:

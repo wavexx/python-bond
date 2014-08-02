@@ -70,10 +70,10 @@ sub __PY_BOND_sendstate($$)
   __PY_BOND_sendline("$state $enc_ret");
 }
 
-sub __PY_BOND_remote($$)
+sub __PY_BOND_call($$)
 {
   my ($name, $args) = @_;
-  __PY_BOND_sendstate("REMOTE", [$name, $args]);
+  __PY_BOND_sendstate("CALL", [$name, $args]);
   return __PY_BOND_repl();
 }
 
@@ -107,7 +107,7 @@ sub __PY_BOND_repl()
     }
     elsif($cmd eq "EXPORT")
     {
-      my $code = "sub $args { __PY_BOND_remote('$args', \\\@_); }";
+      my $code = "sub $args { __PY_BOND_call('$args', \\\@_); }";
       $ret = eval($code);
     }
     elsif($cmd eq "CALL")

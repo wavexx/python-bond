@@ -292,7 +292,7 @@ def test_export_except():
     py = Python(timeout=1)
 
     def gen_exception():
-        raise Exception("test");
+        raise Exception("test")
 
     py.export(gen_exception)
     py.eval_block(r'''def test_exception():

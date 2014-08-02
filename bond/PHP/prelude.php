@@ -99,9 +99,9 @@ function __PY_BOND_sendstate($state, $data)
   __PY_BOND_sendline("$state $enc_ret");
 }
 
-function __PY_BOND_remote($name, $args)
+function __PY_BOND_call($name, $args)
 {
-  __PY_BOND_sendstate("REMOTE", array($name, $args));
+  __PY_BOND_sendstate("CALL", array($name, $args));
   return __PY_BOND_repl();
 }
 
@@ -151,7 +151,7 @@ function __PY_BOND_repl()
 	$err = "Function \"$name\" already exists";
       else
       {
-	$code = "function $name() { return __PY_BOND_remote('$args', func_get_args()); }";
+	$code = "function $name() { return __PY_BOND_call('$args', func_get_args()); }";
 	$ret = eval($code);
       }
       break;
