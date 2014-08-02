@@ -13,9 +13,9 @@ PY_WRAP_PREFIX = '__PY_BOND'
 class Python(Bond):
     LANG = 'Python'
 
-    def __init__(self, python="python", args="", xargs="",
+    def __init__(self, cmd="python", args="", xargs="",
                  trans_except=True, protocol=-1, timeout=None, logfile=None):
-        cmd = ' '.join([python, args, xargs])
+        cmd = ' '.join([cmd, args, xargs])
         proc = Spawn(cmd, timeout=timeout, logfile=logfile)
         try:
             proc.expect(PY_PROMPT)

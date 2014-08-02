@@ -96,17 +96,17 @@ Construction
 When constructing a ``bond``, the following keyword arguments are always
 allowed in constructors:
 
-``trans_except``:
+``cmd``:
 
-  Enables/disables "transparent exceptions". If ``trans_except`` is enabled,
-  exceptions will be forwarded across the bond using the original data-type. If
-  ``trans_except`` is disabled (default for all languages except Python), then
-  exceptions will be transformed to a string containing the text representation
-  of the exception instead, which avoids serialization errors.
+  Command used to execute the interactive interpreter.
+
+``args``:
+
+  Default arguments used to execute the interactive interpreter.
 
 ``xargs``:
 
-  Additional arguments to pass to the underlying interpreter command.
+  Additional arguments to pass to the interpreter.
 
 ``timeout``:
 
@@ -118,6 +118,14 @@ allowed in constructors:
 
   Accepts a file handle which is used to log the entire communication with the
   underlying interpreter.
+
+``trans_except``:
+
+  Enables/disables "transparent exceptions". If ``trans_except`` is enabled,
+  exceptions will be forwarded across the bond using the original data-type. If
+  ``trans_except`` is disabled (default for all languages except Python), then
+  exceptions will be transformed to a string containing the text representation
+  of the exception instead, which avoids serialization errors.
 
 
 Methods

@@ -21,8 +21,8 @@ def _strip_newlines(code):
 class PHP(Bond):
     LANG = 'PHP'
 
-    def __init__(self, php="php", args="-a", xargs="", timeout=None, logfile=None):
-        cmd = ' '.join([php, args, xargs])
+    def __init__(self, cmd="php", args="-a", xargs="", timeout=None, logfile=None):
+        cmd = ' '.join([cmd, args, xargs])
         proc = Spawn(cmd, timeout=timeout, logfile=logfile)
         try:
             proc.expect(PHP_PROMPT)
@@ -42,4 +42,4 @@ class PHP(Bond):
         # start the inner repl
         proc.sendline(r'{PHP_WRAP_PREFIX}_start();'.format(
             PHP_WRAP_PREFIX=PHP_WRAP_PREFIX))
-        super(PHP, self).__init__(proc)
+        super(PHP, self).__init__(proc, True)

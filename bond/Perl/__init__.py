@@ -19,8 +19,8 @@ def _strip_newlines(code):
 class Perl(Bond):
     LANG = 'Perl'
 
-    def __init__(self, perl="perl", args="-d -e1", xargs="", timeout=None, logfile=None):
-        cmd = ' '.join([perl, args, xargs])
+    def __init__(self, cmd="perl", args="-d -e1", xargs="", timeout=None, logfile=None):
+        cmd = ' '.join([cmd, args, xargs])
         proc = Spawn(cmd, timeout=timeout, logfile=logfile)
         try:
             proc.expect(PERL_PROMPT)
@@ -40,4 +40,4 @@ class Perl(Bond):
         # start the inner repl
         proc.sendline(r'{PERL_WRAP_PREFIX}_start();'.format(
             PERL_WRAP_PREFIX=PERL_WRAP_PREFIX))
-        super(Perl, self).__init__(proc)
+        super(Perl, self).__init__(proc, True)
