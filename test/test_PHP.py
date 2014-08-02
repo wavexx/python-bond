@@ -347,3 +347,90 @@ def test_output_redirect():
     # standard error
     php.eval_block(r'fwrite(STDERR, "Hello world!\n");')
     assert(php.eval('1') == 1)
+
+
+def test_trans_except():
+    php_trans = PHP(timeout=1, trans_except=True)
+    php_not_trans = PHP(timeout=1, trans_except=False)
+
+    code = r'''
+    class MyException extends Exception implements jsonSerializable
+    {
+        public function jsonSerialize()
+        {
+            return "MyException";
+        }
+    }
+
+    function func()
+    {
+        throw new MyException("an exception");
+    }'''
+
+    # by default exceptions are transparent, so the following should try to
+    # serialize the code block and call our jsonSerialize method
+    php_trans.eval_block(code)
+    failed = False
+    try:
+        ret = php_trans.call('func')
+    except bond.RemoteException as e:
+        print(e)
+        failed = (str(e.data) == "MyException")
+    assert(failed)
+
+    # ensure the env didn't just die
+    assert(php_trans.eval('1') == 1)
+
+    # this one though will just forward the text
+    php_not_trans.eval_block(code)
+    failed = False
+    try:
+        ret = php_not_trans.call('func')
+    except bond.RemoteException as e:
+        print(e)
+        failed = (str(e.data) == "an exception")
+    assert(failed)
+
+    # ensure the env didn't just die
+    assert(php_not_trans.eval('1') == 1)
+
+
+def test_export_trans_except():
+    php_trans = PHP(timeout=1, trans_except=True)
+    php_not_trans = PHP(timeout=1, trans_except=False)
+
+    def call_me():
+       raise RuntimeError("a runtime error")
+
+    # by default exceptions are transparent, so the following should try to
+    # serialize RuntimeError in JSON (and fail)
+    php_trans.export(call_me)
+    php_trans.eval_block(r'''
+    function test_exception()
+    {
+        $ret = false;
+        try { call_me(); }
+        catch(Exception $e)
+        {
+          $ret = (strstr($e->getMessage(), "SerializationException") !== false);
+        }
+        return $ret;
+    }
+    ''')
+    assert(php_trans.call('test_exception') == True)
+
+    # this one though will just generate a string
+    php_not_trans.export(call_me)
+    php_not_trans.eval_block(r'''
+    function test_exception()
+    {
+        $ret = false;
+        try { call_me(); }
+        catch(Exception $e)
+        {
+          $ret = ($e->getMessage() == "a runtime error");
+        }
+        return $ret;
+    }
+    ''')
+    assert(php_not_trans.call('test_exception') == True)

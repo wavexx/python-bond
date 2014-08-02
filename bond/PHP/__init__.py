@@ -21,7 +21,8 @@ def _strip_newlines(code):
 class PHP(Bond):
     LANG = 'PHP'
 
-    def __init__(self, cmd="php", args="-a", xargs="", timeout=None, logfile=None):
+    def __init__(self, cmd="php", args="-a", xargs="",
+                 trans_except=False, timeout=None, logfile=None):
         cmd = ' '.join([cmd, args, xargs])
         proc = Spawn(cmd, timeout=timeout, logfile=logfile)
         try:
@@ -40,6 +41,6 @@ class PHP(Bond):
             raise BondException('cannot initialize PHP')
 
         # start the inner repl
-        proc.sendline(r'{PHP_WRAP_PREFIX}_start();'.format(
-            PHP_WRAP_PREFIX=PHP_WRAP_PREFIX))
-        super(PHP, self).__init__(proc, True)
+        proc.sendline(r'{PHP_WRAP_PREFIX}_start({trans_except});'.format(
+            PHP_WRAP_PREFIX=PHP_WRAP_PREFIX, trans_except=int(trans_except)))
+        super(PHP, self).__init__(proc, trans_except)

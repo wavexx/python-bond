@@ -88,6 +88,8 @@ function __PY_BOND_get_error()
 
 
 /// Recursive repl
+$__PY_BOND_TRANS_EXCEPT = null;
+
 function __PY_BOND_sendstate($state, $data)
 {
   $enc_ret = json_encode($data);
@@ -107,7 +109,7 @@ function __PY_BOND_call($name, $args)
 
 function __PY_BOND_repl()
 {
-  global $__PY_BOND_BUFFERS;
+  global $__PY_BOND_BUFFERS, $__PY_BOND_TRANS_EXCEPT;
 
   while($line = __PY_BOND_getline())
   {
@@ -128,7 +130,7 @@ function __PY_BOND_repl()
       }
       catch(Exception $e)
       {
-	$err = $e->getMessage();
+	$err = $e;
       }
       break;
 
@@ -141,7 +143,7 @@ function __PY_BOND_repl()
       }
       catch(Exception $e)
       {
-	$err = $e->getMessage();
+	$err = $e;
       }
       break;
 
@@ -181,7 +183,7 @@ function __PY_BOND_repl()
       }
       catch(Exception $e)
       {
-	$err = $e->getMessage();
+	$err = $e;
       }
       break;
 
@@ -216,7 +218,10 @@ function __PY_BOND_repl()
     else
     {
       $state = "EXCEPT";
-      $ret = $err;
+      if($__PY_BOND_TRANS_EXCEPT)
+	$ret = $err;
+      else
+	$ret = ($err instanceOf Exception? $err->getMessage(): @"$err");
     }
 
     __PY_BOND_sendstate($state, $ret);
@@ -224,9 +229,11 @@ function __PY_BOND_repl()
   exit(0);
 }
 
-function __PY_BOND_start()
+function __PY_BOND_start($trans_except)
 {
+  global $__PY_BOND_TRANS_EXCEPT;
   ob_start('__PY_BOND_output');
+  $__PY_BOND_TRANS_EXCEPT = (bool)($trans_except);
   __PY_BOND_sendline("READY");
   exit(__PY_BOND_repl());
 }
