@@ -30,7 +30,7 @@ def __PY_BOND_sendline(line=""):
 
 
 # Serialization methods
-__PY_BOND_PROTOCOL = -1
+__PY_BOND_PROTOCOL = None
 
 def __PY_BOND_dumps(*args):
     return base64.b64encode(cPickle.dumps(args, __PY_BOND_PROTOCOL))
@@ -40,6 +40,8 @@ def __PY_BOND_loads(string):
 
 
 # Recursive repl
+__PY_BOND_TRANS_EXCEPT = None
+
 def __PY_BOND_sendstate(state, data):
     code = None
     try:
@@ -111,7 +113,7 @@ def __PY_BOND_repl():
             state = "RETURN"
         else:
             state = "EXCEPT"
-            ret = err
+            ret = err if __PY_BOND_TRANS_EXCEPT else str(err)
 
         __PY_BOND_sendstate(state, ret)
 
@@ -119,10 +121,12 @@ def __PY_BOND_repl():
     exit(0)
 
 
-def __PY_BOND_start(protocol=-1):
+def __PY_BOND_start(trans_except, protocol):
+    global __PY_BOND_TRANS_EXCEPT, __PY_BOND_PROTOCOL
     sys.stdout = __PY_BOND_BUFFERS['STDOUT']
     sys.stderr = __PY_BOND_BUFFERS['STDERR']
     sys.stdin = open(os.devnull)
+    __PY_BOND_TRANS_EXCEPT = trans_except
     __PY_BOND_PROTOCOL = protocol
     __PY_BOND_sendline("READY")
     exit(__PY_BOND_repl())

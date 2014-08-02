@@ -13,8 +13,8 @@ PY_WRAP_PREFIX = '__PY_BOND'
 class Python(Bond):
     LANG = 'Python'
 
-    def __init__(self, python="python", args="", xargs="", timeout=None,
-                 logfile=None, protocol=-1):
+    def __init__(self, python="python", args="", xargs="",
+                 trans_except=True, protocol=-1, timeout=None, logfile=None):
         cmd = ' '.join([python, args, xargs])
         proc = Spawn(cmd, timeout=timeout, logfile=logfile)
         try:
@@ -33,12 +33,11 @@ class Python(Bond):
             raise BondException('cannot initialize Python')
 
         # start the inner repl
-        proc.sendline(r'{PY_WRAP_PREFIX}_start({protocol});'.format(
-            PY_WRAP_PREFIX=PY_WRAP_PREFIX,
-            protocol=protocol))
+        proc.sendline(r'{PY_WRAP_PREFIX}_start({trans_except}, {protocol});'.format(
+            PY_WRAP_PREFIX=PY_WRAP_PREFIX, trans_except=trans_except, protocol=protocol))
 
         self.protocol = protocol
-        super(Python, self).__init__(proc)
+        super(Python, self).__init__(proc, trans_except)
 
 
     # Use pickle with Python

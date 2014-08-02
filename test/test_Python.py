@@ -337,3 +337,68 @@ def test_output_redirect():
     # stderr
     py.eval_block(r'import sys; sys.stderr.write("Hello world!\n");')
     assert(py.eval('1') == 1)
+
+
+def test_trans_except():
+    py_trans = Python(timeout=1, trans_except=True)
+    py_not_trans = Python(timeout=1, trans_except=False)
+
+    code = r'''def func():
+        raise RuntimeError("a runtime error")
+    '''
+
+    # by default exceptions are transparent, so the following should correctly
+    # restore the RuntimeError in RemoteException.data
+    py_trans.eval_block(code)
+    failed = False
+    try:
+        ret = py_trans.call('func')
+    except bond.RemoteException as e:
+        failed = isinstance(e.data, RuntimeError)
+    assert(failed)
+
+    # ensure the env didn't just die
+    assert(py_trans.eval('1') == 1)
+
+    # this one though will just always forward the remote exception
+    py_not_trans.eval_block(code)
+    failed = False
+    try:
+        ret = py_not_trans.call('func')
+    except bond.RemoteException as e:
+        failed = isinstance(e.data, str)
+    assert(failed)
+
+    # ensure the env didn't just die
+    assert(py_not_trans.eval('1') == 1)
+
+
+def test_export_trans_except():
+    py_trans = Python(timeout=1, trans_except=True)
+    py_not_trans = Python(timeout=1, trans_except=False)
+
+    def call_me():
+       raise RuntimeError("a runtime error")
+
+    # by default exceptions are transparent, so the following should correctly
+    # restore the RuntimeError in RemoteException.data
+    py_trans.export(call_me)
+    py_trans.eval_block(r'''if True:
+    failed = False
+    try:
+        call_me()
+    except RuntimeError:
+        failed = True
+    ''')
+    assert(py_trans.eval('failed') == True)
+
+    # this one though will just generate a general Exception
+    py_not_trans.export(call_me)
+    py_not_trans.eval_block(r'''if True:
+    failed = False
+    try:
+        call_me()
+    except Exception as e:
+        failed = not isinstance(e, RuntimeError)
+    ''')
+    assert(py_not_trans.eval('failed') == True)

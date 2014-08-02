@@ -49,10 +49,11 @@ class RemoteException(BondException):
 class Bond(object):
     LANG = '<unknown>'
 
-    def __init__(self, proc):
+    def __init__(self, proc, trans_except):
         self.channels = {'STDOUT': sys.stdout, 'STDERR': sys.stderr}
         self.bindings = {}
 
+        self.trans_except = trans_except
         self._proc = proc
         try:
             self._proc.expect("READY\r\n")
@@ -99,7 +100,7 @@ class Bond(object):
                     ret = self.bindings[args[0]](*args[1])
                 except Exception as e:
                     state = "EXCEPT"
-                    ret = e
+                    ret = e if self.trans_except else str(e)
                 try:
                     ret = self._dumps(ret) if ret else None
                 except SerializationException as e:

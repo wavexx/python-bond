@@ -90,6 +90,39 @@ supporting an interactive interpreter.
 API
 ===
 
+Construction
+------------
+
+When constructing a ``bond``, the following keyword arguments are always
+allowed in constructors:
+
+``trans_except``:
+
+  Enables/disables "transparent exceptions". If ``trans_except`` is enabled,
+  exceptions will be forwarded across the bond using the original data-type. If
+  ``trans_except`` is disabled (default for all languages except Python), then
+  exceptions will be transformed to a string containing the text representation
+  of the exception instead, which avoids serialization errors.
+
+``xargs``:
+
+  Additional arguments to pass to the underlying interpreter command.
+
+``timeout``:
+
+  Defines the timeout for the underlying communication protocol. Note that
+  ``bond`` cannot distinguish between a slow call or noise in the underlying
+  protocol while the interpreter is set up. Defaults to 60 seconds.
+
+``logfile``:
+
+  Accepts a file handle which is used to log the entire communication with the
+  underlying interpreter.
+
+
+Methods
+-------
+
 The ``bond`` class supports the following methods:
 
 ``eval(code)``:
