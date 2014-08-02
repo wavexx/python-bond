@@ -288,6 +288,45 @@ def test_export_ser_err():
     assert(py.eval('1') == 1)
 
 
+def test_export_except():
+    py = Python(timeout=1)
+
+    def gen_exception():
+        raise Exception("test");
+
+    py.export(gen_exception)
+    py.eval_block(r'''def test_exception():
+    ret = False
+    try:
+        gen_exception()
+    except Exception as e:
+        ret = (str(e) == "test")
+    return ret
+    ''')
+
+    assert(py.call('test_exception') == True)
+
+
+def test_export_except_ser_err():
+    py = Python(timeout=1)
+
+    def call_me():
+        return lambda x: x
+
+    py.export(call_me)
+    py.eval_block(r'''def test_ser_err():
+    ret = False
+    try:
+        call_me()
+    except Exception as e:
+        print(e)
+        ret = True
+    return ret
+    ''')
+
+    assert(py.call('test_ser_err') == True)
+
+
 def test_output_redirect():
     py = Python(timeout=1)
 

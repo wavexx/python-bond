@@ -83,20 +83,30 @@ class Bond(object):
                 args = self.loads(args)
 
             # interpret the serial protocol
-            if cmd == "OUTPUT":
+            if cmd == "RETURN":
+                return args
+            elif cmd == "OUTPUT":
                 self.channels[args[0]].write(args[1])
-                continue
-            elif cmd == "REMOTE":
-                ret = self.bindings[args[0]](*args[1])
-                ret = self._dumps(ret) if ret else None
-                self._proc.sendline('RETURN {ret}'.format(ret=ret))
                 continue
             elif cmd == "EXCEPT":
                 raise RemoteException(self.LANG, str(args), args)
             elif cmd == "ERROR":
                 raise SerializationException(self.LANG, str(args), 'remote')
-            elif cmd == "RETURN":
-                return args
+            elif cmd == "REMOTE":
+                ret = None
+                state = "RETURN"
+                try:
+                    ret = self.bindings[args[0]](*args[1])
+                except Exception as e:
+                    state = "EXCEPT"
+                    ret = e
+                try:
+                    ret = self._dumps(ret) if ret else None
+                except SerializationException as e:
+                    state = "ERROR"
+                    ret = self._dumps(str(e))
+                self._proc.sendline('{state} {ret}'.format(state=state, ret=ret))
+                continue
 
             raise BondException(self.LANG, 'unknown interpreter state')
 

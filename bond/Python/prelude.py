@@ -88,6 +88,12 @@ def __PY_BOND_repl():
         elif cmd == "RETURN":
             return args
 
+        elif cmd == "EXCEPT":
+            raise args
+
+        elif cmd == "ERROR":
+            raise Exception(args)
+
         else:
             exit(1)
 
