@@ -6,7 +6,7 @@ import sys
 
 class Spawn(pexpect.spawn):
     def __init__(self, *args, **kwargs):
-        kwargs['env'] = {'TERM': 'dumb'}
+        kwargs.setdefault('env', {})['TERM'] = 'dumb'
         super(Spawn, self).__init__(*args, **kwargs)
 
     def sendline(self, *args, **kwargs):
