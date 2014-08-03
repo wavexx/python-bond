@@ -270,12 +270,13 @@ Gotchas:
 Javascript
 ----------
 
-Javascript is supported through `nodejs <http://nodejs.org/>`_.
+Javascript is supported through `NodeJS <http://nodejs.org/>`_, which uses the
+V8 engine.
 
 Requirements:
 
-* Only NodeJS v0.10.29 has been tested. The executable is expected to be called
-  "nodejs". On Debian/Ubuntu, the package is simply ``nodejs``.
+* Only NodeJS v0.10.29 has been tested. On Debian/Ubuntu, the required package
+  is simply called ``nodejs``.
 
 Limitations:
 
