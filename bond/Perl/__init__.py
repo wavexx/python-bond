@@ -1,4 +1,5 @@
 from bond import *
+import os
 import pkg_resources
 import re
 
@@ -19,10 +20,10 @@ def _strip_newlines(code):
 class Perl(Bond):
     LANG = 'Perl'
 
-    def __init__(self, cmd="perl", args="-d -e1", xargs="",
+    def __init__(self, cmd="perl", args="-d -e1", xargs="", cwd=None, env=os.environ,
                  trans_except=False, timeout=None, logfile=None):
         cmd = ' '.join([cmd, args, xargs])
-        proc = Spawn(cmd, timeout=timeout, logfile=logfile)
+        proc = Spawn(cmd, cwd=cwd, env=env, timeout=timeout, logfile=logfile)
         try:
             proc.expect(PERL_PROMPT)
         except pexpect.ExceptionPexpect as e:

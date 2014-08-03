@@ -1,4 +1,5 @@
 from bond import *
+import os
 import pkg_resources
 import base64
 import cPickle
@@ -13,10 +14,10 @@ PY_WRAP_PREFIX = '__PY_BOND'
 class Python(Bond):
     LANG = 'Python'
 
-    def __init__(self, cmd="python", args="", xargs="",
+    def __init__(self, cmd="python", args="", xargs="", cwd=None, env=os.environ,
                  trans_except=True, protocol=-1, timeout=None, logfile=None):
         cmd = ' '.join([cmd, args, xargs])
-        proc = Spawn(cmd, timeout=timeout, logfile=logfile)
+        proc = Spawn(cmd, cwd=cwd, env=env, timeout=timeout, logfile=logfile)
         try:
             proc.expect(PY_PROMPT)
         except pexpect.ExceptionPexpect as e:

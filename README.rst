@@ -108,6 +108,15 @@ allowed in constructors:
 
   Additional arguments to pass to the interpreter.
 
+``cwd``:
+
+  Working directory for the interpreter (defaults to current working
+  directory).
+
+``env``:
+
+  Environment for the interpreter (defaults to ``os.environ``).
+
 ``timeout``:
 
   Defines the timeout for the underlying communication protocol. Note that
