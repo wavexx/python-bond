@@ -26,8 +26,7 @@ class Python(Bond):
         # inject our prelude
         code = pkg_resources.resource_string(__name__, PY_PRELUDE)
         code = code + "\n{PY_WRAP_PREFIX}_sendline()\n".format(PY_WRAP_PREFIX=PY_WRAP_PREFIX)
-        line = r"exec({code})".format(code=repr(code))
-        proc.sendline(line)
+        proc.sendline("exec({code})".format(code=repr(code)))
         try:
             proc.expect(r'\r\n{prompt}'.format(prompt=PY_PROMPT))
         except pexpect.ExceptionPexpect as e:
