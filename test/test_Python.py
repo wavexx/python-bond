@@ -100,14 +100,14 @@ def test_call_error():
 
     # define a function and call it
     py.eval_block(r'''def test_simple(arg):
-        return 1 / arg
+        return arg
     ''')
-    py.eval('test_simple(1)')
+    assert(py.call('test_simple', 1) == 1)
 
-    # make it fail
+    # unknown function
     failed = False
     try:
-        py.call('test_simple', 0)
+        py.call('test_undefined')
     except bond.RemoteException as e:
         print(e)
         failed = True
@@ -200,6 +200,42 @@ def test_ser_err():
 
     # ensure the env didn't just die
     assert(py.eval('1') == 1)
+
+
+def test_exception():
+    py = Python(timeout=1)
+
+    # remote exception
+    py.eval_block(r'''def exceptional():
+    raise Exception('an exception')
+    ''')
+
+    # ... in eval
+    failed = False
+    try:
+        py.eval('exceptional()')
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
+
+    # ... in eval_block
+    failed = False
+    try:
+        py.eval_block('exceptional()')
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
+
+    # ... in call
+    failed = False
+    try:
+        py.call('exceptional')
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
 
 
 def test_export():
