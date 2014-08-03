@@ -223,62 +223,62 @@ def test_exception():
     assert(failed)
 
 
-# def test_export():
-#     def call_me():
-#         return 42
+def test_export():
+    def call_me():
+        return 42
 
-#     js = Javascript(timeout=1)
-#     js.export(call_me, 'call_me')
-#     assert(js.call('call_me') == 42)
-
-
-# def test_export_redef():
-#     js = Javascript(timeout=1)
-
-#     def call_me():
-#         return 42
-
-#     js.export(call_me)
-#     try:
-#         js.export(call_me)
-#     except:
-#         pass
-
-#     assert(js.call('call_me') == 42)
+    js = Javascript(timeout=1)
+    js.export(call_me, 'call_me')
+    assert(js.call('call_me') == 42)
 
 
-# def test_export_recursive():
-#     js = Javascript(timeout=1)
+def test_export_redef():
+    js = Javascript(timeout=1)
 
-#     # define a remote function
-#     js.eval(r'sub func_js { shift() + 1; }')
-#     func_js = js.callable('func_js')
-#     assert(func_js(0) == 1)
+    def call_me():
+        return 42
 
-#     # define a local function that calls the remote
-#     def func_python(arg):
-#         return func_js(arg + 1)
+    js.export(call_me)
+    try:
+        js.export(call_me)
+    except:
+        pass
 
-#     assert(func_python(0) == 2)
+    assert(js.call('call_me') == 42)
 
-#     # export the function remotely and call it
-#     js.export(func_python, 'remote_func_python')
-#     remote_func_python = js.callable('remote_func_python')
-#     assert(remote_func_python(0) == 2)
 
-#     # define a remote function that calls us recursively
-#     js.eval(r'sub func_js_rec { remote_func_python(shift()) + 1; }')
-#     func_js_rec = js.callable('func_js_rec')
-#     assert(func_js_rec(0) == 3)
+def test_export_recursive():
+    js = Javascript(timeout=1)
 
-#     # inception
-#     def func_python_rec(arg):
-#         return func_js_rec(arg) + 1
+    # define a remote function
+    js.eval_block(r'function func_js(arg) { return arg + 1; }')
+    func_js = js.callable('func_js')
+    assert(func_js(0) == 1)
 
-#     js.export(func_python_rec, 'remote_func_python_rec')
-#     js.eval(r'sub func_js_rec_2 { remote_func_python_rec(shift()) + 1; }')
-#     func_js_rec_2 = js.callable('func_js_rec_2')
-#     assert(func_js_rec_2(0) == 5)
+    # define a local function that calls the remote
+    def func_python(arg):
+        return func_js(arg + 1)
+
+    assert(func_python(0) == 2)
+
+    # export the function remotely and call it
+    js.export(func_python, 'remote_func_python')
+    remote_func_python = js.callable('remote_func_python')
+    assert(remote_func_python(0) == 2)
+
+    # define a remote function that calls us recursively
+    js.eval(r'function func_js_rec(arg) { return remote_func_python(arg) + 1; }')
+    func_js_rec = js.callable('func_js_rec')
+    assert(func_js_rec(0) == 3)
+
+    # inception
+    def func_python_rec(arg):
+        return func_js_rec(arg) + 1
+
+    js.export(func_python_rec, 'remote_func_python_rec')
+    js.eval(r'function func_js_rec_2(arg) { return remote_func_python_rec(arg) + 1; }')
+    func_js_rec_2 = js.callable('func_js_rec_2')
+    assert(func_js_rec_2(0) == 5)
 
 
 # def test_export_ser_err():

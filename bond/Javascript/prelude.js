@@ -45,6 +45,23 @@ function __PY_BOND_sendstate(state, data)
   __PY_BOND_sendline(state + " " + enc_ret);
 }
 
+function __PY_BOND_call(name, args)
+{
+  __PY_BOND_sendstate("CALL", [name, args]);
+  return __PY_BOND_repl();
+}
+
+function __PY_BOND_export(name)
+{
+  global[name] = function()
+  {
+    var args = [];
+    for(var k in arguments)
+      args.push(arguments[k]);
+    return __PY_BOND_call(name, args);
+  };
+}
+
 function __PY_BOND_repl()
 {
   var line;
@@ -59,21 +76,25 @@ function __PY_BOND_repl()
     switch(cmd)
     {
     case "EVAL":
-      try { ret = eval(args); }
+      try { ret = eval.call(null, args); }
       catch(e) { err = e; }
       break;
 
     case "EVAL_BLOCK":
-      try { eval(args); }
+      try { eval.call(null, args); }
       catch(e) { err = e; }
       break;
 
-    // TODO: EXPORT
+    case "EXPORT":
+      __PY_BOND_export(args);
+      break;
 
     case "CALL":
       try
       {
-	var func = eval("(" + args[0] + ")");
+	// NOTE: we add an extra set of parenthesis to allow anonymous
+	//       functions to be parsed without an assignment
+	var func = eval.call(null, "(" + args[0] + ")");
 	ret = func.apply(null, args[1]);
       }
       catch(e)
