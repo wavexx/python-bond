@@ -18,7 +18,7 @@ Remote output is also transparently redirected locally, and since the
 evaluation is performed through a persistent co-process, you can actually spawn
 interpreters on different hosts through "ssh" efficiently.
 
-``bond`` currently supports PHP, Perl and Python itself.
+``bond`` currently supports PHP, Perl, Javascript (NodeJS) and Python itself.
 
 
 A simple  example
@@ -267,8 +267,26 @@ Gotchas:
     perl.call('$object->method', ...)
 
 
+Javascript
+----------
+
+Javascript is supported through `nodejs <http://nodejs.org/>`_.
+
+Requirements:
+
+* Only NodeJS v0.10.29 has been tested. The executable is expected to be called
+  "nodejs". On Debian/Ubuntu, the package is simply ``nodejs``.
+
+Limitations:
+
+* Currently, the code expects an unix-like environment with ``/dev/stdin`` to
+  perform synchronous I/O.
+
+
 Common limitations
 ------------------
+
+* Strings are *always* UTF-8 encoded.
 
 * Except for Python, only basic types (booleans, numbers, strings, lists,
   arrays and maps/dictionaries) can be transferred between the interpreters.
