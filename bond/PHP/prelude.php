@@ -226,7 +226,7 @@ function __PY_BOND_repl()
 
     __PY_BOND_sendstate($state, $ret);
   }
-  exit(0);
+  return 0;
 }
 
 function __PY_BOND_start($trans_except)

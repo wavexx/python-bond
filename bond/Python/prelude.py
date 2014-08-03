@@ -118,7 +118,7 @@ def __PY_BOND_repl():
         __PY_BOND_sendstate(state, ret)
 
     # stream ended
-    exit(0)
+    return 0
 
 
 def __PY_BOND_start(trans_except, protocol):

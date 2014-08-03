@@ -167,7 +167,7 @@ sub __PY_BOND_repl()
 
     __PY_BOND_sendstate($state, $ret);
   }
-  exit(0);
+  return 0;
 }
 
 sub __PY_BOND_start($)
