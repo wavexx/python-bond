@@ -4,14 +4,14 @@ import pkg_resources
 import json
 
 
-# Javascript constants
+# JavaScript constants
 JS_PROMPT      = r'> '
 JS_PRELUDE     = 'prelude.js'
 JS_WRAP_PREFIX = '__PY_BOND'
 
 
-class Javascript(Bond):
-    LANG = 'Javascript'
+class JavaScript(Bond):
+    LANG = 'JavaScript'
 
     def __init__(self, cmd="nodejs", args="-e \"require('repl').start({ignoreUndefined: true, terminal: false})\"",
                  xargs="", cwd=None, env=os.environ, trans_except=False, timeout=None, logfile=None):
@@ -34,4 +34,4 @@ class Javascript(Bond):
         # start the inner repl
         proc.sendline(r'{JS_WRAP_PREFIX}_start({trans_except});'.format(
             JS_WRAP_PREFIX=JS_WRAP_PREFIX, trans_except=int(trans_except)))
-        super(Javascript, self).__init__(proc, trans_except)
+        super(JavaScript, self).__init__(proc, trans_except)

@@ -1,14 +1,14 @@
 from __future__ import print_function
 import bond
-from bond.Javascript import Javascript
+from bond.JavaScript import JavaScript
 
 def test_basic():
-    js = Javascript(timeout=1)
+    js = JavaScript(timeout=1)
     js.close()
 
 
 def test_call_marshalling():
-    js = Javascript(timeout=1)
+    js = JavaScript(timeout=1)
 
     js.eval_block(r'function test_str() { return "Hello world!"; }')
     assert(str(js.call('test_str')) == "Hello world!")
@@ -51,7 +51,7 @@ def test_call_marshalling():
 
 
 def test_call_simple():
-    js = Javascript(timeout=1)
+    js = JavaScript(timeout=1)
 
     # define a function and call it
     js.eval_block('function test_simple() { return "Hello world!"; }')
@@ -68,7 +68,7 @@ def test_call_simple():
 
 
 def test_call_stm():
-    js = Javascript(timeout=1)
+    js = JavaScript(timeout=1)
 
     # test the call interface with a normal function
     js.eval_block('function copy(arg) { return arg; }')
@@ -85,7 +85,7 @@ def test_call_stm():
 
 
 def test_call_error():
-    js = Javascript(timeout=1)
+    js = JavaScript(timeout=1)
     js.eval_block('function test_simple(arg) { return eval(arg); }')
     ret = js.call('test_simple', 1)
     assert(ret == 1)
@@ -104,7 +104,7 @@ def test_call_error():
 
 
 def test_eval():
-    js = Javascript(timeout=1)
+    js = JavaScript(timeout=1)
 
     # literal values
     assert(js.eval('1') == 1)
@@ -124,7 +124,7 @@ def test_eval():
 
 
 def test_eval_error():
-    js = Javascript(timeout=1)
+    js = JavaScript(timeout=1)
 
     # try a correct statement before
     assert(js.eval('1') == 1)
@@ -143,7 +143,7 @@ def test_eval_error():
 
 
 def test_ser_err():
-    js = Javascript(timeout=1, trans_except=True)
+    js = JavaScript(timeout=1, trans_except=True)
 
     # construct an unserializable type
     js.eval_block(r'''
@@ -204,7 +204,7 @@ def test_ser_err():
 
 
 def test_exception():
-    js = Javascript(timeout=1)
+    js = JavaScript(timeout=1)
 
     # remote exception
     js.eval_block('function exceptional() { throw new Error("an error") }')
@@ -241,13 +241,13 @@ def test_export():
     def call_me():
         return 42
 
-    js = Javascript(timeout=1)
+    js = JavaScript(timeout=1)
     js.export(call_me, 'call_me')
     assert(js.call('call_me') == 42)
 
 
 def test_export_redef():
-    js = Javascript(timeout=1)
+    js = JavaScript(timeout=1)
 
     def call_me():
         return 42
@@ -262,7 +262,7 @@ def test_export_redef():
 
 
 def test_export_invalid():
-    js = Javascript(timeout=1)
+    js = JavaScript(timeout=1)
 
     def call_me():
         return 42
@@ -278,7 +278,7 @@ def test_export_invalid():
 
 
 def test_export_recursive():
-    js = Javascript(timeout=1)
+    js = JavaScript(timeout=1)
 
     # define a remote function
     js.eval_block(r'function func_js(arg) { return arg + 1; }')
@@ -315,7 +315,7 @@ def test_export_ser_err():
     def call_me(arg):
         pass
 
-    js = Javascript(timeout=1)
+    js = JavaScript(timeout=1)
     js.export(call_me, 'call_me')
     js.eval_block('var fd = function(){};')
 
@@ -332,7 +332,7 @@ def test_export_ser_err():
 
 
 def test_export_except():
-    js = Javascript(timeout=1)
+    js = JavaScript(timeout=1)
 
     def gen_exception():
         raise Exception("test")
@@ -351,7 +351,7 @@ def test_export_except():
 
 
 def test_output_redirect():
-    js = Javascript(timeout=1)
+    js = JavaScript(timeout=1)
 
     # stdout
     js.eval_block(r'console.log("console.log: Hello world!");')
@@ -365,8 +365,8 @@ def test_output_redirect():
 
 
 def test_trans_except():
-    js_trans = Javascript(timeout=1, trans_except=True)
-    js_not_trans = Javascript(timeout=1, trans_except=False)
+    js_trans = JavaScript(timeout=1, trans_except=True)
+    js_not_trans = JavaScript(timeout=1, trans_except=False)
 
     code = r'''function func() { throw func; }'''
 
@@ -398,8 +398,8 @@ def test_trans_except():
 
 
 def test_export_trans_except():
-    js_trans = Javascript(timeout=1, trans_except=True)
-    js_not_trans = Javascript(timeout=1, trans_except=False)
+    js_trans = JavaScript(timeout=1, trans_except=True)
+    js_not_trans = JavaScript(timeout=1, trans_except=False)
 
     def call_me():
        raise RuntimeError("a runtime error")

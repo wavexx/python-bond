@@ -18,7 +18,7 @@ Remote output is also transparently redirected locally, and since the
 evaluation is performed through a persistent co-process, you can actually spawn
 interpreters on different hosts through "ssh" efficiently.
 
-``bond`` currently supports PHP, Perl, Javascript (Node.js) and Python itself.
+``bond`` currently supports PHP, Perl, JavaScript (Node.js) and Python itself.
 
 
 A simple  example
@@ -280,11 +280,10 @@ Gotchas:
     perl.call('$object->method', ...)
 
 
-Javascript
+JavaScript
 ----------
 
-Javascript is supported through `Node.js <http://nodejs.org/>`_, which uses the
-V8 engine.
+JavaScript is supported through `Node.js <http://nodejs.org/>`_.
 
 Requirements:
 
