@@ -18,7 +18,7 @@ Remote output is also transparently redirected locally, and since the
 evaluation is performed through a persistent co-process, you can actually spawn
 interpreters on different hosts through "ssh" efficiently.
 
-``bond`` currently supports PHP, Perl, Javascript (NodeJS) and Python itself.
+``bond`` currently supports PHP, Perl, Javascript (Node.js) and Python itself.
 
 
 A simple  example
@@ -270,18 +270,22 @@ Gotchas:
 Javascript
 ----------
 
-Javascript is supported through `NodeJS <http://nodejs.org/>`_, which uses the
+Javascript is supported through `Node.js <http://nodejs.org/>`_, which uses the
 V8 engine.
 
 Requirements:
 
-* Only NodeJS v0.10.29 has been tested. On Debian/Ubuntu, the required package
+* Only Node.js v0.10.29 has been tested. On Debian/Ubuntu, the required package
   is simply called ``nodejs``.
 
 Limitations:
 
 * Currently, the code expects an unix-like environment with ``/dev/stdin`` to
   perform synchronous I/O.
+
+* Since there's no distinction between "plain" objects (dictionaries) and any
+  other object, almost everything will be silently serialized. Define a custom
+  ``toJSON`` property on your objects to control this behavior.
 
 
 Common limitations

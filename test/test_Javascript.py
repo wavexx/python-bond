@@ -115,7 +115,7 @@ def test_eval():
     assert(js.eval('1 + 1') == 2)
 
     # define a variable
-    js.eval_block('x = 1')
+    js.eval_block('var x = 1;')
     assert(js.eval('x') == 1)
 
     # define a function
@@ -142,51 +142,65 @@ def test_eval_error():
     assert(js.eval('1') == 1)
 
 
-# def test_ser_err():
-#     js = Javascript(timeout=1, trans_except=True)
+def test_ser_err():
+    js = Javascript(timeout=1, trans_except=True)
 
-#     # construct an unserializable type
-#     js.eval_block(r'''
-#     use IO::File;
-#     $fd = IO::File->new();
-#     sub func { $fd; }
-#     ''')
+    # construct an unserializable type
+    js.eval_block(r'''
+    var circular = [];
+    circular.push(circular);
+    var fun_ref = function() {};
+    function func() { return circular; }
+    function exceptional() { throw circular; }
+    ''')
 
-#     # try to send it across
-#     failed = False
-#     try:
-#         js.eval('$fd')
-#     except bond.SerializationException as e:
-#         print(e)
-#         failed = (e.side == "remote")
-#     assert(failed)
+    # try to send it across
+    failed = False
+    try:
+        js.eval('circular')
+    except bond.SerializationException as e:
+        print(e)
+        failed = (e.side == "remote")
+    assert(failed)
 
-#     # ensure the env didn't just die
-#     assert(js.eval('1') == 1)
+    # ensure the env didn't just die
+    assert(js.eval('1') == 1)
 
-#     # ... with call (return)
-#     failed = False
-#     try:
-#         js.call('func')
-#     except bond.SerializationException as e:
-#         print(e)
-#         failed = (e.side == "remote")
-#     assert(failed)
+    # try to send a function
+    failed = False
+    try:
+        js.eval('fun_ref')
+    except bond.SerializationException as e:
+        print(e)
+        failed = (e.side == "remote")
+    assert(failed)
 
-#     # ensure the env didn't just die
-#     assert(js.eval('1') == 1)
+    # ensure the env didn't just die
+    assert(js.eval('1') == 1)
 
-#     # ... with an exception
-#     failed = False
-#     try:
-#         js.eval('die $fd')
-#     except bond.SerializationException as e:
-#         print(e)
-#         failed = (e.side == "remote")
-#     assert(failed)
+    # ... with call (return)
+    failed = False
+    try:
+        js.call('func')
+    except bond.SerializationException as e:
+        print(e)
+        failed = (e.side == "remote")
+    assert(failed)
 
-#     # ensure the env didn't just die
-#     assert(js.eval('1') == 1)
+    # ensure the env didn't just die
+    assert(js.eval('1') == 1)
+
+    # ... with an exception
+    failed = False
+    try:
+        js.call('exceptional')
+    except bond.SerializationException as e:
+        print(e)
+        failed = (e.side == "remote")
+    assert(failed)
+
+    # ensure the env didn't just die
+    assert(js.eval('1') == 1)
 
 
 def test_exception():
@@ -297,27 +311,24 @@ def test_export_recursive():
     assert(func_js_rec_2(0) == 5)
 
 
-# def test_export_ser_err():
-#     def call_me(arg):
-#         pass
+def test_export_ser_err():
+    def call_me(arg):
+        pass
 
-#     js = Javascript(timeout=1)
-#     js.export(call_me, 'call_me')
-#     js.eval_block(r'''
-#     use IO::File;
-#     $fd = IO::File->new();
-#     ''')
+    js = Javascript(timeout=1)
+    js.export(call_me, 'call_me')
+    js.eval_block('var fd = function(){};')
 
-#     failed = False
-#     try:
-#         js.eval('call_me($fd)')
-#     except bond.SerializationException as e:
-#         print(e)
-#         failed = (e.side == "remote")
-#     assert(failed)
+    failed = False
+    try:
+        js.eval('call_me(fd)')
+    except bond.SerializationException as e:
+        print(e)
+        failed = (e.side == "remote")
+    assert(failed)
 
-#     # ensure the env didn't just die
-#     assert(js.eval('1') == 1)
+    # ensure the env didn't just die
+    assert(js.eval('1') == 1)
 
 
 # def test_export_except():

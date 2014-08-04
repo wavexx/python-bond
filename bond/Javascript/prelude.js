@@ -40,8 +40,23 @@ var __PY_BOND_TRANS_EXCEPT;
 
 function __PY_BOND_sendstate(state, data)
 {
-  var enc_ret = JSON.stringify(data);
-  // TODO: handle encoding error
+  var enc_ret = null;
+  try
+  {
+    enc_ret = JSON.stringify(data, function(key, value)
+    {
+      // ensure functions are not silently dropped
+      var type = typeof value;
+      if(typeof value === 'function')
+	throw new TypeError("cannot serialize " + Object.getPrototypeOf(value));
+      return value;
+    });
+  }
+  catch(e)
+  {
+    state = "ERROR";
+    enc_ret = JSON.stringify(e.toString());
+  }
   __PY_BOND_sendline(state + " " + enc_ret);
 }
 
