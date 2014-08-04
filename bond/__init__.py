@@ -65,7 +65,7 @@ class Bond(object):
         return json.loads(string)
 
     def dumps(self, *args):
-        return json.dumps(*args)
+        return json.dumps(*args, skipkeys=False)
 
 
     def _dumps(self, *args):

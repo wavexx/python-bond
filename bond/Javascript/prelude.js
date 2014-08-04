@@ -46,7 +46,7 @@ function __PY_BOND_sendstate(state, data)
     {
       // ensure functions are not silently dropped
       var type = typeof value;
-      if(typeof value === 'function')
+      if(typeof value === 'function' && value.toJSON === undefined)
 	throw new TypeError("cannot serialize " + Object.getPrototypeOf(value));
       return value;
     });
