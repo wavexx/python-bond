@@ -45,8 +45,7 @@ function __PY_BOND_sendstate(state, data)
     enc_ret = JSON.stringify(data, function(key, value)
     {
       // ensure functions are not silently dropped
-      var type = typeof value;
-      if(typeof value === 'function' && value.toJSON === undefined)
+      if(typeof(value) === 'function' && value.toJSON === undefined)
 	throw new TypeError("cannot serialize " + Object.getPrototypeOf(value));
       return value;
     });
