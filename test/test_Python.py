@@ -262,6 +262,22 @@ def test_export_redef():
     assert(py.call('call_me') == 42)
 
 
+def test_export_invalid():
+    py = Python(timeout=1)
+
+    def call_me():
+        return 42
+
+    try:
+        # Interestingly enough, this works in Python, though it won't be
+        # possible to call the function normally
+        py.export(call_me, 'invalid name')
+    except Exception as e:
+        print(e)
+
+    assert(py.eval('1') == 1)
+
+
 def test_export_recursive():
     py = Python(timeout=1)
 

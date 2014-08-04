@@ -264,6 +264,20 @@ def test_export_redef():
     assert(php.call('call_me') == 42)
 
 
+def test_export_invalid():
+    php = PHP(timeout=1)
+
+    def call_me():
+        return 42
+
+    try:
+        php.export(call_me, 'invalid name')
+    except Exception as e:
+        print(e)
+
+    assert(php.eval('1') == 1)
+
+
 def test_export_recursive():
     php = PHP(timeout=1)
 

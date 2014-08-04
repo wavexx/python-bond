@@ -247,6 +247,22 @@ def test_export_redef():
     assert(js.call('call_me') == 42)
 
 
+def test_export_invalid():
+    js = Javascript(timeout=1)
+
+    def call_me():
+        return 42
+
+    try:
+        # Interestingly enough, this works in Js, though it won't be
+        # possible to call the function normally
+        js.export(call_me, 'invalid name')
+    except Exception as e:
+        print(e)
+
+    assert(js.eval('1') == 1)
+
+
 def test_export_recursive():
     js = Javascript(timeout=1)
 

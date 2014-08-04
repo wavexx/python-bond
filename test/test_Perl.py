@@ -290,6 +290,20 @@ def test_export_redef():
     assert(perl.call('call_me') == 42)
 
 
+def test_export_invalid():
+    perl = Perl(timeout=1)
+
+    def call_me():
+        return 42
+
+    try:
+        perl.export(call_me, 'invalid name')
+    except Exception as e:
+        print(e)
+
+    assert(perl.eval('1') == 1)
+
+
 def test_export_recursive():
     perl = Perl(timeout=1)
 

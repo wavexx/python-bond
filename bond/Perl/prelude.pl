@@ -111,6 +111,7 @@ sub __PY_BOND_repl()
     {
       my $code = "sub $args { __PY_BOND_call('$args', \\\@_); }";
       $ret = eval($code);
+      $err = $@;
     }
     elsif($cmd eq "CALL")
     {

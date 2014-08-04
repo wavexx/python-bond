@@ -154,7 +154,9 @@ function __PY_BOND_repl()
       else
       {
 	$code = "function $name() { return __PY_BOND_call('$args', func_get_args()); }";
-	$ret = eval($code);
+	__PY_BOND_clear_error();
+	@eval($code);
+	$err = __PY_BOND_get_error();
       }
       break;
 
