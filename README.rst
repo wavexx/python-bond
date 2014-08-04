@@ -93,8 +93,14 @@ API
 Construction
 ------------
 
-When constructing a ``bond``, the following keyword arguments are always
-allowed in constructors:
+You can construct a ``bond`` by using the appropriate subclass:
+
+.. code:: python3
+
+  from bond.<language> import <language>
+  interpreter = <language>().
+
+The following keyword arguments are always allowed in constructors:
 
 ``cmd``:
 
@@ -102,11 +108,13 @@ allowed in constructors:
 
 ``args``:
 
-  Default arguments used to execute the interactive interpreter.
+  Default arguments used to execute the interactive interpreter. These
+  arguments are normally required to setup the interpreter correctly, and
+  should not be changed.
 
 ``xargs``:
 
-  Additional arguments to pass to the interpreter.
+  Any additional arguments to pass to the interpreter.
 
 ``cwd``:
 
@@ -190,13 +198,6 @@ The ``bond`` class supports the following methods:
   Start an interactive session with the underlying interpreter. By default, all
   input lines are executed with bond.eval_block(). If "!" is pre-pended,
   execute a single statement with bond.eval() and print it's return value.
-
-You can construct a ``bond`` by using the appropriate subclass:
-
-.. code:: python3
-
-  from bond.<language> import <language>
-  interpreter = <language>().
 
 
 Language support
