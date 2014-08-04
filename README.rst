@@ -206,7 +206,7 @@ Python
 ------
 
 Python, as the identity language, has no restriction on data types. Everything
-is pickled, including exceptions on the remote side.
+is pickled on both sides, including exceptions.
 
 
 PHP
@@ -218,6 +218,12 @@ Requirements:
   the interactive interpreter to work properly. On Debian/Ubuntu, you'll need
   ``php5-cli`` and ``php5-readline``.
 
+Serialization:
+
+* Performed remotely using ``JSON``. Implement the `JsonSerializable
+  <http://php.net/manual/en/jsonserializable.jsonserialize.php>`_ interface to
+  tweak which/how objects are encoded.
+
 Limitations:
 
 * You cannot use "call" on a built-in function such as "echo" (use "eval" in
@@ -225,7 +231,8 @@ Limitations:
 
 * Unfortunately, you cannot catch "fatal errors" in PHP. If the evaluated code
   triggers a "fatal error" it will terminate the bond without appeal. A common
-  example of "fatal error" in PHP is an "undefined variable/function".
+  example of "fatal error" in PHP is attempting to use an undefined variable or
+  function (which could happen while prototyping).
 
 
 Perl
@@ -238,6 +245,12 @@ Requirements:
 
 * The ``JSON`` and ``Data::Dump`` modules are required (``libjson-perl`` and
   ``libdata-dump-perl`` in Debian/Ubuntu).
+
+Serialization:
+
+* Performed remotely using ``JSON``. Implement the `TO_JSON
+  <http://search.cpan.org/dist/JSON/lib/JSON.pm#allow_blessed>`_ method on
+  blessed references to tweak which/how objects are encoded.
 
 Gotchas:
 
@@ -278,6 +291,11 @@ Requirements:
 * Only Node.js v0.10.29 has been tested. On Debian/Ubuntu, the required package
   is simply called ``nodejs``.
 
+Serialization:
+
+* Performed remotely using ``JSON``. Implement the "toJSON" property to tweak
+  which/how objects are encoded.
+
 Limitations:
 
 * Currently, the code expects an unix-like environment with ``/dev/stdin`` to
@@ -285,13 +303,11 @@ Limitations:
 
 * Since there's no distinction between "plain" objects (dictionaries) and any
   other object, almost everything will be silently serialized. Define a custom
-  ``toJSON`` property on your objects to control this behavior.
+  "toJSON" property on your objects to control this behavior.
 
 
-Common limitations
-------------------
-
-* Strings are *always* UTF-8 encoded.
+Common traits/limitations
+-------------------------
 
 * Except for Python, only basic types (booleans, numbers, strings, lists,
   arrays and maps/dictionaries) can be transferred between the interpreters.
@@ -299,6 +315,12 @@ Common limitations
   If an object that cannot be serialized reaches a "call", "eval", or even a
   non-local return such as an *error or exception*, it will generate a
   ``SerializationException`` on the Python side.
+
+* Serialization is performed locally using ``JSON``. Implement a custom
+  `JSONEncoder <https://docs.python.org/2/library/json.html#json.JSONEncoder>`_
+  to tweak which/how objects are encoded.
+
+* Strings are *always* UTF-8 encoded.
 
 * References are implicitly broken as *objects are transferred by value*. This
   is obvious, as you're talking with a separate process, but it can easily be
