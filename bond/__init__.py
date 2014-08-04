@@ -73,7 +73,6 @@ class Bond(object):
             return self.dumps(*args)
         except Exception as e:
             raise SerializationException(self.LANG, str(e), 'local')
-        return ret
 
 
     def _repl(self):
@@ -164,28 +163,48 @@ def interact(bond, prompt=None):
     If "prompt" is not specified, use the language name of the bond. By
     default, all input lines are executed with bond.eval_block().  If "!" is
     pre-pended, execute a single statement with bond.eval() and print it's
-    return value'''
+    return value.
 
-    if prompt is None:
-        prompt = "{lang}> ".format(lang=bond.LANG)
+    You can continue the statement on multiple lines by leaving a trailing "\".
+    Type Ctrl+C to abort a multi-line block without executing it.'''
+
+    ps1 = "{lang}> ".format(lang=bond.LANG) if prompt is None else prompt
+    ps1_len = len(ps1.rstrip())
+    ps2 = '.' * ps1_len + ' ' * (len(ps1) - ps1_len)
 
     # start a simple repl
+    buf = ""
     while True:
         try:
-            line = raw_input(prompt)
+            ps = ps1 if not buf else ps2
+            line = raw_input(ps)
         except EOFError:
-            print('<EOF>')
+            print("")
             break
-        if not line:
+        except KeyboardInterrupt:
+            print("")
+            buf = ""
             continue
 
+        # handle multi-line blocks
+        buf = (buf + "\n" + line).strip()
+        if not buf:
+            continue
+        if buf[-1] == '\\':
+            buf = buf[0:-1]
+            continue
+
+        # execute the statement/block
         ret = None
         try:
-            if line[0] == '!':
-                ret = bond.eval(line[1:])
+            if buf[0] == '!':
+                ret = bond.eval(buf[1:])
             else:
-                ret = bond.eval_block(line)
+                bond.eval_block(buf)
         except (RemoteException, SerializationException) as e:
             ret = e
+        buf = ""
+
+        # answer
         if ret is not None:
             print(ret)

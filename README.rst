@@ -197,7 +197,9 @@ The ``bond`` class supports the following methods:
 
   Start an interactive session with the underlying interpreter. By default, all
   input lines are executed with bond.eval_block(). If "!" is pre-pended,
-  execute a single statement with bond.eval() and print it's return value.
+  execute a single statement with bond.eval() and print it's return value. You
+  can continue the statement on multiple lines by leaving a trailing "\". Type
+  Ctrl+C to abort a multi-line block without executing it.
 
 
 Language support
