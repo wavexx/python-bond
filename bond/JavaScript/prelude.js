@@ -18,12 +18,13 @@ function __PY_BOND_getline()
 {
   var line = "";
   var buf = new Buffer(1);
-  while(fs.readSync(__PY_BOND_CHANNELS["STDIN"], buf, 0, 1) > 0)
+  var stdin = __PY_BOND_CHANNELS["STDIN"];
+  while(fs.readSync(stdin, buf, 0, 1) > 0)
   {
     if(buf[0] == 10) break;
     line += buf;
   }
-  return line;
+  return line.trimRight();
 }
 
 function __PY_BOND_sendline(line)
@@ -167,4 +168,4 @@ function __PY_BOND_start(trans_except)
   __PY_BOND_TRANS_EXCEPT = trans_except;
   __PY_BOND_sendline("READY");
   process.exit(__PY_BOND_repl());
-};
+}
