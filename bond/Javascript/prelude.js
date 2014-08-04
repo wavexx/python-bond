@@ -1,5 +1,4 @@
 // python-bond Javascript interface setup
-fs = require("fs");
 
 // Channels and buffers
 var __PY_BOND_BUFFERS = {
@@ -29,7 +28,7 @@ function __PY_BOND_getline()
 
 function __PY_BOND_sendline(line)
 {
-  if(line === undefined) line = "";
+  if(line == null) line = "";
   var buf = new Buffer(line + "\n");
   fs.writeSync(__PY_BOND_CHANNELS["STDOUT"], buf, 0, buf.length);
 };
@@ -121,8 +120,9 @@ function __PY_BOND_repl()
     case "RETURN":
       return args;
 
-    // TODO: EXCEPT
-    // TODO: ERROR
+    case "EXCEPT":
+    case "ERROR":
+      throw new Error(args);
 
     default:
       process.exit(1);

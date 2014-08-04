@@ -331,23 +331,23 @@ def test_export_ser_err():
     assert(js.eval('1') == 1)
 
 
-# def test_export_except():
-#     js = Javascript(timeout=1)
+def test_export_except():
+    js = Javascript(timeout=1)
 
-#     def gen_exception():
-#         raise Exception("test")
+    def gen_exception():
+        raise Exception("test")
 
-#     js.export(gen_exception)
-#     js.eval_block(r'''
-#     sub test_exception
-#     {
-#         my $ret = 0;
-#         eval { gen_exception() };
-#         $ret = 1 if($@);
-#         return $ret;
-#     }''')
+    js.export(gen_exception)
+    js.eval_block(r'''
+    function test_exception()
+    {
+        var ret = false;
+        try { gen_exception(); }
+        catch(e) { ret = true; }
+        return ret;
+    }''')
 
-#     assert(js.call('test_exception') == True)
+    assert(js.call('test_exception') == True)
 
 
 def test_output_redirect():
@@ -364,69 +364,77 @@ def test_output_redirect():
     assert(js.eval('1') == 1)
 
 
-# def test_trans_except():
-#     js_trans = Javascript(timeout=1, trans_except=True)
-#     js_not_trans = Javascript(timeout=1, trans_except=False)
+def test_trans_except():
+    js_trans = Javascript(timeout=1, trans_except=True)
+    js_not_trans = Javascript(timeout=1, trans_except=False)
 
-#     code = r'''sub func() { die \&func; }'''
+    code = r'''function func() { throw func; }'''
 
-#     # by default exceptions are transparent, so the following should try to
-#     # serialize the code block (and fail)
-#     js_trans.eval_block(code)
-#     failed = False
-#     try:
-#         ret = js_trans.call('func')
-#     except bond.SerializationException as e:
-#         print(e)
-#         failed = (e.side == "remote")
-#     assert(failed)
+    # by default exceptions are transparent, so the following should try to
+    # serialize the code block (and fail)
+    js_trans.eval_block(code)
+    failed = False
+    try:
+        ret = js_trans.call('func')
+    except bond.SerializationException as e:
+        print(e)
+        failed = (e.side == "remote")
+    assert(failed)
 
-#     # ensure the env didn't just die
-#     assert(js_trans.eval('1') == 1)
+    # ensure the env didn't just die
+    assert(js_trans.eval('1') == 1)
 
-#     # this one though will just always forward the remote exception
-#     js_not_trans.eval_block(code)
-#     failed = False
-#     try:
-#         ret = js_not_trans.call('func')
-#     except bond.RemoteException as e:
-#         failed = True
-#     assert(failed)
+    # this one though will just always forward the remote exception
+    js_not_trans.eval_block(code)
+    failed = False
+    try:
+        ret = js_not_trans.call('func')
+    except bond.RemoteException as e:
+        failed = True
+    assert(failed)
 
-#     # ensure the env didn't just die
-#     assert(js_not_trans.eval('1') == 1)
+    # ensure the env didn't just die
+    assert(js_not_trans.eval('1') == 1)
 
 
-# def test_export_trans_except():
-#     js_trans = Javascript(timeout=1, trans_except=True)
-#     js_not_trans = Javascript(timeout=1, trans_except=False)
+def test_export_trans_except():
+    js_trans = Javascript(timeout=1, trans_except=True)
+    js_not_trans = Javascript(timeout=1, trans_except=False)
 
-#     def call_me():
-#        raise RuntimeError("a runtime error")
+    def call_me():
+       raise RuntimeError("a runtime error")
 
-#     # by default exceptions are transparent, so the following should try to
-#     # serialize RuntimeError in JSON (and fail)
-#     js_trans.export(call_me)
-#     js_trans.eval_block(r'''
-#     sub test_exception()
-#     {
-#         my $ret = 0;
-#         eval { call_me(); };
-#         $ret = 1 if $@ =~ /SerializationException/;
-#         return $ret;
-#     }
-#     ''')
-#     assert(js_trans.call('test_exception') == True)
+    # by default exceptions are transparent, so the following should try to
+    # serialize RuntimeError in JSON (and fail)
+    js_trans.export(call_me)
+    js_trans.eval_block(r'''
+    function test_exception()
+    {
+        var ret = false;
+        try { call_me(); }
+        catch(e)
+        {
+            ret = e.toString().indexOf("SerializationException") >= 0;
+        }
+        return ret;
+    }
+    ''')
+    assert(js_trans.call('test_exception') == True)
 
-#     # this one though will just generate a string
-#     js_not_trans.export(call_me)
-#     js_not_trans.eval_block(r'''
-#     sub test_exception()
-#     {
-#         my $ret = 0;
-#         eval { call_me(); };
-#         $ret = 1 if $@ !~ /SerializationException/ && $@ =~ /a runtime error/;
-#         return $ret;
-#     }
-#     ''')
-#     assert(js_not_trans.call('test_exception') == True)
+    # this one though will just generate a string
+    js_not_trans.export(call_me)
+    js_not_trans.eval_block(r'''
+    function test_exception()
+    {
+        var ret = false;
+        try { call_me(); }
+        catch(e)
+        {
+            err = e.toString()
+            ret = (err.indexOf("SerializationException") < 0
+                    && err.indexOf("a runtime error") >= 0);
+        }
+        return ret;
+    }
+    ''')
+    assert(js_not_trans.call('test_exception') == True)
