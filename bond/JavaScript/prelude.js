@@ -147,7 +147,7 @@ function __PY_BOND_repl()
       var buf = __PY_BOND_BUFFERS[chan];
       if(buf.length)
       {
-	var code = JSON.stringify([chan, buf]);
+	var code = __PY_BOND_dumps([chan, buf]);
 	__PY_BOND_sendline("OUTPUT " + code);
 	__PY_BOND_BUFFERS[chan] = "";
       }
