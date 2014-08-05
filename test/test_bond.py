@@ -31,6 +31,15 @@ def test_export():
     assert(py.call('call_me_again') == 42)
 
 
+def test_export_noret():
+    def call_me():
+        pass
+
+    py = Python(timeout=1)
+    py.export(call_me)
+    assert(py.call('call_me') is None)
+
+
 def test_proxy():
     py1 = Python(timeout=1)
     py1.eval_block(r'''def func_py1(arg):

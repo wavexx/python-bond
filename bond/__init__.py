@@ -101,7 +101,7 @@ class Bond(object):
                     state = "EXCEPT"
                     ret = e if self.trans_except else str(e)
                 try:
-                    ret = self._dumps(ret) if ret else None
+                    ret = self._dumps(ret)
                 except SerializationException as e:
                     state = "ERROR"
                     ret = self._dumps(str(e))
