@@ -1,6 +1,7 @@
 from __future__ import print_function
 import bond
 from bond.Python import Python
+from test import *
 
 def test_basic():
     py = Python(timeout=1)
@@ -454,3 +455,49 @@ def test_export_trans_except():
         failed = not isinstance(e, RuntimeError)
     ''')
     assert(py_not_trans.eval('failed') == True)
+
+
+def test_stack_depth():
+    def no_exception():
+        pass
+
+    def gen_exception():
+        raise Exception("test")
+
+    def gen_ser_err():
+        return lambda x: x
+
+    # check normal stack depth
+    py = Python(timeout=1)
+    assert(bond_repl_depth(py) == 1)
+
+    # check stack depth after calling a normal function
+    py = Python(timeout=1)
+    py.export(no_exception)
+    py.call('no_exception')
+    assert(bond_repl_depth(py) == 1)
+
+    # check stack depth after returning a serializable exception
+    py = Python(timeout=1)
+    py.export(gen_exception)
+    got_except = False
+    try:
+        py.call('gen_exception')
+    except bond.RemoteException as e:
+        print(e)
+        got_except = True
+    assert(got_except)
+    assert(bond_repl_depth(py) == 1)
+
+    # check stack depth after a remote serialization error
+    py = Python(timeout=1)
+    py.export(gen_ser_err)
+    got_except = False
+    try:
+        py.call('gen_ser_err')
+    except bond.SerializationException as e:
+        print(e)
+        assert(e.side == "remote")
+        got_except = True
+    assert(got_except)
+    assert(bond_repl_depth(py) == 1)

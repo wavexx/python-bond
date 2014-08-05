@@ -32,8 +32,15 @@ def __PY_BOND_sendline(line=""):
 # Serialization methods
 __PY_BOND_PROTOCOL = None
 
+class __PY_BOND_SerializationException(cPickle.PicklingError):
+    pass
+
 def __PY_BOND_dumps(*args):
-    return base64.b64encode(cPickle.dumps(args, __PY_BOND_PROTOCOL))
+    try:
+        ret = base64.b64encode(cPickle.dumps(args, __PY_BOND_PROTOCOL))
+    except cPickle.PicklingError:
+        raise __PY_BOND_SerializationException("cannot encode {data}".format(data=str(args)))
+    return ret
 
 def __PY_BOND_loads(string):
     return cPickle.loads(base64.b64decode(string))[0]
@@ -42,17 +49,9 @@ def __PY_BOND_loads(string):
 # Recursive repl
 __PY_BOND_TRANS_EXCEPT = None
 
-def __PY_BOND_sendstate(state, data):
-    code = None
-    try:
-        code = __PY_BOND_dumps(data)
-    except:
-        state = "ERROR"
-        code = __PY_BOND_dumps("cannot encode {data}".format(data=str(data)))
-    __PY_BOND_sendline("{state} {code}".format(state=state, code=code))
-
 def __PY_BOND_call(name, args):
-    __PY_BOND_sendstate("CALL", [name, args])
+    code = __PY_BOND_dumps([name, args])
+    __PY_BOND_sendline("CALL {code}".format(code=code))
     return __PY_BOND_repl()
 
 def __PY_BOND_export(name):
@@ -94,7 +93,7 @@ def __PY_BOND_repl():
             raise args
 
         elif cmd == "ERROR":
-            raise Exception(args)
+            raise __PY_BOND_SerializationException(args)
 
         else:
             exit(1)
@@ -108,14 +107,20 @@ def __PY_BOND_repl():
                 buf.truncate(0)
 
         # error state
-        state = None
-        if err is None:
-            state = "RETURN"
-        else:
-            state = "EXCEPT"
-            ret = err if __PY_BOND_TRANS_EXCEPT else str(err)
-
-        __PY_BOND_sendstate(state, ret)
+        state = "RETURN"
+        if err is not None:
+            if isinstance(err, __PY_BOND_SerializationException):
+                state = "ERROR"
+                ret = str(err)
+            else:
+                state = "EXCEPT"
+                ret = err if __PY_BOND_TRANS_EXCEPT else str(err)
+        try:
+            code = __PY_BOND_dumps(ret)
+        except Exception as e:
+            state = "ERROR"
+            code = __PY_BOND_dumps(str(e))
+        __PY_BOND_sendline("{state} {code}".format(state=state, code=code))
 
     # stream ended
     return 0
