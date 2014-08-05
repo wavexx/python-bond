@@ -178,6 +178,18 @@ def test_ser_err():
     # ensure the env didn't just die
     assert(js.eval('1') == 1)
 
+    # try to send a function definition
+    failed = False
+    try:
+        js.eval('function test() {}')
+    except bond.SerializationException as e:
+        print(e)
+        failed = (e.side == "remote")
+    assert(failed)
+
+    # ensure the env didn't just die
+    assert(js.eval('1') == 1)
+
     # ... with call (return)
     failed = False
     try:
@@ -297,7 +309,7 @@ def test_export_recursive():
     assert(remote_func_python(0) == 2)
 
     # define a remote function that calls us recursively
-    js.eval(r'function func_js_rec(arg) { return remote_func_python(arg) + 1; }')
+    js.eval_block(r'function func_js_rec(arg) { return remote_func_python(arg) + 1; }')
     func_js_rec = js.callable('func_js_rec')
     assert(func_js_rec(0) == 3)
 
@@ -306,7 +318,7 @@ def test_export_recursive():
         return func_js_rec(arg) + 1
 
     js.export(func_python_rec, 'remote_func_python_rec')
-    js.eval(r'function func_js_rec_2(arg) { return remote_func_python_rec(arg) + 1; }')
+    js.eval_block(r'function func_js_rec_2(arg) { return remote_func_python_rec(arg) + 1; }')
     func_js_rec_2 = js.callable('func_js_rec_2')
     assert(func_js_rec_2(0) == 5)
 

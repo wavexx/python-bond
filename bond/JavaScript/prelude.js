@@ -90,7 +90,7 @@ function __PY_BOND_repl()
     switch(cmd)
     {
     case "EVAL":
-      try { ret = eval.call(null, args); }
+      try { ret = eval.call(null, "(" + args + ")"); }
       catch(e) { err = e; }
       break;
 
