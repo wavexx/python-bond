@@ -1,13 +1,22 @@
 from bond import *
 import os
 import pkg_resources
-import json
+import re
 
 
 # JavaScript constants
 JS_PROMPT      = r'> '
 JS_PRELUDE     = 'prelude.js'
 JS_WRAP_PREFIX = '__PY_BOND'
+
+
+def _strip_newlines(code):
+    """Turn a JavaScript code block into one line, so that the nodejs console
+    doesn't output cruft while interpreting it"""
+    # TODO: We used to encode the source using json.dumps() and "eval" it
+    #       remotely, but it seems that the nodejs console is interpreting
+    #       our input incorrectly.
+    return re.sub(r'(?:///.*)?\n\s*', '', code)
 
 
 class JavaScript(Bond):
@@ -24,8 +33,9 @@ class JavaScript(Bond):
 
         # inject our prelude
         code = pkg_resources.resource_string(__name__, JS_PRELUDE)
-        code = code + "\n{JS_WRAP_PREFIX}_sendline();\n".format(JS_WRAP_PREFIX=JS_WRAP_PREFIX)
-        proc.sendline('eval({code});'.format(code=json.dumps(code)))
+        code = _strip_newlines(code)
+        proc.sendline(r'{code}; {JS_WRAP_PREFIX}_sendline();'.format(
+            JS_WRAP_PREFIX=JS_WRAP_PREFIX, code=code))
         try:
             proc.expect(r'\r\n{prompt}'.format(prompt=JS_PROMPT))
         except pexpect.ExceptionPexpect as e:

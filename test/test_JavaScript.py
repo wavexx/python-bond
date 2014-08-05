@@ -1,6 +1,7 @@
 from __future__ import print_function
 import bond
 from bond.JavaScript import JavaScript
+from test import *
 
 def test_basic():
     js = JavaScript(timeout=1)
@@ -450,3 +451,49 @@ def test_export_trans_except():
     }
     ''')
     assert(js_not_trans.call('test_exception') == True)
+
+
+def test_stack_depth():
+    def no_exception():
+        pass
+
+    def gen_exception():
+        raise Exception("test")
+
+    def gen_ser_err():
+        return lambda x: x
+
+    # check normal stack depth
+    js = JavaScript(timeout=1)
+    assert(bond_repl_depth(js) == 1)
+
+    # check stack depth after calling a normal function
+    js = JavaScript(timeout=1)
+    js.export(no_exception)
+    js.call('no_exception')
+    assert(bond_repl_depth(js) == 1)
+
+    # check stack depth after returning a serializable exception
+    js = JavaScript(timeout=1)
+    js.export(gen_exception)
+    got_except = False
+    try:
+        js.call('gen_exception')
+    except bond.RemoteException as e:
+        print(e)
+        got_except = True
+    assert(got_except)
+    assert(bond_repl_depth(js) == 1)
+
+    # check stack depth after a remote serialization error
+    js = JavaScript(timeout=1)
+    js.export(gen_ser_err)
+    got_except = False
+    try:
+        js.call('gen_ser_err')
+    except bond.SerializationException as e:
+        print(e)
+        assert(e.side == "remote")
+        got_except = True
+    assert(got_except)
+    assert(bond_repl_depth(js) == 1)
