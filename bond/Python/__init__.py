@@ -14,7 +14,7 @@ PY_WRAP_PREFIX = '__PY_BOND'
 class Python(Bond):
     LANG = 'Python'
 
-    def __init__(self, cmd="python", args="", xargs="", cwd=None, env=os.environ,
+    def __init__(self, cmd="python", args="-i", xargs="", cwd=None, env=os.environ,
                  trans_except=True, protocol=-1, timeout=None, logfile=None):
         cmd = ' '.join([cmd, args, xargs])
         proc = Spawn(cmd, cwd=cwd, env=env, timeout=timeout, logfile=logfile)
