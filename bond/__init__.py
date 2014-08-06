@@ -83,11 +83,10 @@ class Bond(object):
 
 
     def _repl(self):
-        while self._proc.expect("(\S*)(?: ([^\r\n]+))?\r\n") == 0:
-            cmd = str(self._proc.match.group(1))
-            args = self._proc.match.group(2)
-            if args is not None:
-                args = self.loads(args)
+        while self._proc.expect_exact('\n') == 0:
+            line = self._proc.before.split(' ', 1)
+            cmd = str(line[0])
+            args = self.loads(line[1]) if len(line) > 1 else []
 
             # interpret the serial protocol
             if cmd == "RETURN":
