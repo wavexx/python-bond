@@ -258,6 +258,11 @@ Serialization:
   <http://php.net/manual/en/jsonserializable.jsonserialize.php>`_ interface to
   tweak which/how objects are encoded.
 
+* PHP doesn't normally throw exceptions for JSON encoding errors. ``bond``
+  generates an ``Exception`` which you can catch remotely. The detailed results
+  of the error can also be retrieved using the `json_last_error
+  <http://php.net/manual/en/function.json-last-error.php>`_ function.
+
 Limitations:
 
 * You cannot use "call" on a built-in function such as "echo" (use "eval" in

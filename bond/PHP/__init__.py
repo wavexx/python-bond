@@ -5,18 +5,12 @@ import re
 
 
 # PHP constants
-PHP_PROMPT      = 'php > '
+PHP_PS1         = 'php > '
+PHP_PS2         = 'php [({] '
+PHP_CHUNK_SIZE  = 4096 - 2
+PHP_EOL_RE      = r'(?:///.*)?\n\s*'
 PHP_PRELUDE     = 'prelude.php'
 PHP_WRAP_PREFIX = '__PY_BOND'
-
-
-def _strip_newlines(code):
-    """Turn a PHP code block into one line, so that an interactive PHP prompt
-    does not output cruft while interpreting it"""
-    # TODO: this is buggy on several levels. We could pre-process code using
-    #       `php -w`, but it sounds prohibitive. It's good enough for our
-    #       prelude though, where we control the source.
-    return re.sub(r'(?:///.*)?\n\s*', '', code)
 
 
 class PHP(Bond):
@@ -27,17 +21,25 @@ class PHP(Bond):
         cmd = ' '.join([cmd, args, xargs])
         proc = Spawn(cmd, cwd=cwd, env=env, timeout=timeout, logfile=logfile)
         try:
-            proc.expect(PHP_PROMPT)
+            proc.expect(PHP_PS1)
         except pexpect.ExceptionPexpect:
             raise BondException(self.LANG, 'cannot get an interactive prompt using: ' + cmd)
 
-        # inject our prelude
+        # inject our prelude in blocks (due line discipline input buffer limit)
+        # TODO: this requires a better approach
         code = pkg_resources.resource_string(__name__, PHP_PRELUDE)
-        code = _strip_newlines(code)
-        proc.sendline(r'{code}; {PHP_WRAP_PREFIX}_sendline();'.format(
-            PHP_WRAP_PREFIX=PHP_WRAP_PREFIX, code=code))
+        chunks = re.split(PHP_EOL_RE, code)
         try:
-            proc.expect(r'\r\n{prompt}'.format(prompt=PHP_PROMPT))
+            line = ""
+            for chunk in chunks:
+                if len(chunk) + len(line) > PHP_CHUNK_SIZE:
+                    proc.sendline(line);
+                    proc.expect([PHP_PS1, PHP_PS2])
+                    line = ""
+                line = line + chunk
+            if line:
+                proc.sendline(line);
+                proc.expect(PHP_PS1)
         except pexpect.ExceptionPexpect:
             raise BondException(self.LANG, 'cannot initialize interpreter')
 

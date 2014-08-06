@@ -8,12 +8,6 @@ def test_basic():
     php.close()
 
 
-def test_call():
-    php = PHP(timeout=1)
-    ret = php.call('sprintf', "Hello world!")
-    assert(str(ret) == "Hello world!")
-
-
 def test_call_marshalling():
     php = PHP(timeout=1)
 
@@ -381,8 +375,8 @@ def test_trans_except():
         throw new MyException("an exception");
     }'''
 
-    # by default exceptions are transparent, so the following should try to
-    # serialize the code block and call our jsonSerialize method
+    # with transparent exceptions the following should try to serialize the
+    # code block and call our jsonSerialize method
     php_trans.eval_block(code)
     failed = False
     try:
@@ -448,3 +442,49 @@ def test_export_trans_except():
     }
     ''')
     assert(php_not_trans.call('test_exception') == True)
+
+
+def test_stack_depth():
+    def no_exception():
+        pass
+
+    def gen_exception():
+        raise Exception("test")
+
+    def gen_ser_err():
+        return lambda x: x
+
+    # check normal stack depth
+    php = PHP(timeout=1)
+    assert(bond_repl_depth(php) == 1)
+
+    # check stack depth after calling a normal function
+    php = PHP(timeout=1)
+    php.export(no_exception)
+    php.call('no_exception')
+    assert(bond_repl_depth(php) == 1)
+
+    # check stack depth after returning a serializable exception
+    php = PHP(timeout=1)
+    php.export(gen_exception)
+    got_except = False
+    try:
+        php.call('gen_exception')
+    except bond.RemoteException as e:
+        print(e)
+        got_except = True
+    assert(got_except)
+    assert(bond_repl_depth(php) == 1)
+
+    # check stack depth after a remote serialization error
+    php = PHP(timeout=1)
+    php.export(gen_ser_err)
+    got_except = False
+    try:
+        php.call('gen_ser_err')
+    except bond.SerializationException as e:
+        print(e)
+        assert(e.side == "remote")
+        got_except = True
+    assert(got_except)
+    assert(bond_repl_depth(php) == 1)

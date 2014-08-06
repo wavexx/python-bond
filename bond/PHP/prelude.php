@@ -71,6 +71,23 @@ function __PY_BOND_sendline($line = '')
 }
 
 
+/// Serialization methods
+class __PY_BOND_SerializationException extends Exception {}
+
+function __PY_BOND_dumps($data)
+{
+  $code = json_encode($data);
+  if(json_last_error())
+    throw new __PY_BOND_SerializationException(@"cannot encode $data");
+  return $code;
+}
+
+function __PY_BOND_loads($string)
+{
+  return json_decode($string);
+}
+
+
 /// some utilities to get/reset the error state
 function __PY_BOND_clear_error()
 {
@@ -90,20 +107,10 @@ function __PY_BOND_get_error()
 /// Recursive repl
 $__PY_BOND_TRANS_EXCEPT = null;
 
-function __PY_BOND_sendstate($state, $data)
-{
-  $enc_ret = json_encode($data);
-  if(json_last_error())
-  {
-    $state = "ERROR";
-    $enc_ret = json_encode(@"cannot encode $data");
-  }
-  __PY_BOND_sendline("$state $enc_ret");
-}
-
 function __PY_BOND_call($name, $args)
 {
-  __PY_BOND_sendstate("CALL", array($name, $args));
+  $code = __PY_BOND_dumps(array($name, $args));
+  __PY_BOND_sendline("CALL $code");
   return __PY_BOND_repl();
 }
 
@@ -115,7 +122,7 @@ function __PY_BOND_repl()
   {
     $line = explode(" ", $line, 2);
     $cmd = $line[0];
-    $args = (count($line) > 1? json_decode($line[1]): array());
+    $args = (count($line) > 1? __PY_BOND_loads($line[1]): array());
 
     $ret = null;
     $err = null;
@@ -193,8 +200,10 @@ function __PY_BOND_repl()
       return $args;
 
     case "EXCEPT":
-    case "ERROR":
       throw new Exception($args);
+
+    case "ERROR":
+      throw new __PY_BOND_SerializationException($args);
 
     default:
       exit(1);
@@ -206,27 +215,41 @@ function __PY_BOND_repl()
     {
       if(strlen($buf))
       {
-	$enc_out = json_encode(array($chan, $buf));
-	__PY_BOND_sendline("OUTPUT $enc_out");
+	$code = __PY_BOND_dumps(array($chan, $buf));
+	__PY_BOND_sendline("OUTPUT $code");
 	$buf = "";
       }
     }
 
     /// error state
-    $state = null;
-    if(!$err) {
-      $state = "RETURN";
-    }
-    else
+    $state = "RETURN";
+    if($err)
     {
-      $state = "EXCEPT";
-      if($__PY_BOND_TRANS_EXCEPT)
-	$ret = $err;
+      if($err instanceOf __PY_BOND_SerializationException)
+      {
+	$state = "ERROR";
+	$ret = $err->getMessage();
+      }
       else
-	$ret = ($err instanceOf Exception? $err->getMessage(): @"$err");
+      {
+	$state = "EXCEPT";
+	if($err instanceOf Exception)
+	  $ret = ($__PY_BOND_TRANS_EXCEPT? $err: $err->getMessage());
+	else
+	  $ret = @"$err";
+      }
     }
-
-    __PY_BOND_sendstate($state, $ret);
+    $code = null;
+    try
+    {
+      $code = __PY_BOND_dumps($ret);
+    }
+    catch(Exception $e)
+    {
+      $state = "ERROR";
+      $code = __PY_BOND_dumps($e->getMessage());
+    }
+    __PY_BOND_sendline("$state $code");
   }
   return 0;
 }
@@ -237,5 +260,7 @@ function __PY_BOND_start($trans_except)
   ob_start('__PY_BOND_output');
   $__PY_BOND_TRANS_EXCEPT = (bool)($trans_except);
   __PY_BOND_sendline("READY");
-  exit(__PY_BOND_repl());
+  $ret = __PY_BOND_repl();
+  __PY_BOND_sendline("BYE");
+  exit($ret);
 }
