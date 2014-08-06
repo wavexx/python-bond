@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from setuptools import setup, find_packages
-setup(name='python-bond', version='0.3',
+setup(name='python-bond', version='0.4',
       description='transparent remote/recursive evaluation between Python and other languages',
 
       author="Yuri D'Elia",

@@ -1,3 +1,16 @@
+python-bond 0.4
+---------------
+
+* Serialization exceptions generating from exported functions now correctly
+  unwind the remote stack.
+* An exception with exported functions returning no values was fixed.
+* The size of the serialization buffers was previously limited to 4k; it's now
+  bound to the available memory.
+* ``bond.interact()`` now can accept multi-line blocks by using a trailing
+  backslash at the end of the line.
+* Performance was optimized.
+
+
 python-bond 0.3
 ---------------
 
@@ -16,6 +29,6 @@ python-bond 0.2
 * Serialization errors are now intercepted by default and generate a local
   exception of type ``bond.SerializationException``.
 * PHP can now "call" any callable statement.
-* eval_block() no longer returns the value of the last statement. This avoids
-  confusion with Perl code blocks returning unserializable references.
+* ``eval_block()`` no longer returns the value of the last statement. This
+  avoids confusion with Perl code blocks returning unserializable references.
 * Standard error is now also redirected.
