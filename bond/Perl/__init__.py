@@ -32,7 +32,7 @@ class Perl(Bond):
         # inject our prelude
         code = pkg_resources.resource_string(__name__, PERL_PRELUDE)
         code = _strip_newlines(code)
-        proc.sendline(r'{code}; "";'.format(
+        proc.sendline_noecho(r'{code}; "";'.format(
             PERL_WRAP_PREFIX=PERL_WRAP_PREFIX, code=code))
         try:
             proc.expect(r'\r\n{prompt}'.format(prompt=PERL_PROMPT))
@@ -40,6 +40,6 @@ class Perl(Bond):
             raise BondException(self.LANG, 'cannot initialize interpreter')
 
         # start the inner repl
-        proc.sendline(r'{PERL_WRAP_PREFIX}_start({trans_except});'.format(
+        proc.sendline_noecho(r'{PERL_WRAP_PREFIX}_start({trans_except});'.format(
             PERL_WRAP_PREFIX=PERL_WRAP_PREFIX, trans_except=int(trans_except)))
         super(Perl, self).__init__(proc, trans_except)

@@ -33,17 +33,17 @@ class PHP(Bond):
             line = ""
             for chunk in chunks:
                 if len(chunk) + len(line) > PHP_CHUNK_SIZE:
-                    proc.sendline(line);
+                    proc.sendline_noecho(line);
                     proc.expect([PHP_PS1, PHP_PS2])
                     line = ""
                 line = line + chunk
             if line:
-                proc.sendline(line);
+                proc.sendline_noecho(line);
                 proc.expect(PHP_PS1)
         except pexpect.ExceptionPexpect:
             raise BondException(self.LANG, 'cannot initialize interpreter')
 
         # start the inner repl
-        proc.sendline(r'{PHP_WRAP_PREFIX}_start({trans_except});'.format(
+        proc.sendline_noecho(r'{PHP_WRAP_PREFIX}_start({trans_except});'.format(
             PHP_WRAP_PREFIX=PHP_WRAP_PREFIX, trans_except=int(trans_except)))
         super(PHP, self).__init__(proc, trans_except)

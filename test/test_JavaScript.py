@@ -497,3 +497,12 @@ def test_stack_depth():
         got_except = True
     assert(got_except)
     assert(bond_repl_depth(js) == 1)
+
+
+def test_buf_size():
+    js = JavaScript(timeout=1)
+    for size in [2 ** n for n in range(9, 16)]:
+        print("testing buffer >= {} bytes".format(size))
+        buf = "x" * size
+        ret = js.call('String', buf)
+        assert(ret == str(ret))

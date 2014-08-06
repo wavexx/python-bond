@@ -26,14 +26,14 @@ class Python(Bond):
         # inject our prelude
         code = pkg_resources.resource_string(__name__, PY_PRELUDE)
         code = code + "\n{PY_WRAP_PREFIX}_sendline()\n".format(PY_WRAP_PREFIX=PY_WRAP_PREFIX)
-        proc.sendline("exec({code})".format(code=repr(code)))
+        proc.sendline_noecho("exec({code})".format(code=repr(code)))
         try:
             proc.expect(r'\r\n{prompt}'.format(prompt=PY_PROMPT))
         except pexpect.ExceptionPexpect:
             raise BondException(self.LANG, 'cannot initialize interpreter')
 
         # start the inner repl
-        proc.sendline(r'{PY_WRAP_PREFIX}_start({trans_except}, {protocol});'.format(
+        proc.sendline_noecho(r'{PY_WRAP_PREFIX}_start({trans_except}, {protocol});'.format(
             PY_WRAP_PREFIX=PY_WRAP_PREFIX, trans_except=trans_except, protocol=protocol))
 
         self.protocol = protocol

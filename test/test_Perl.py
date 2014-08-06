@@ -462,3 +462,14 @@ def test_export_trans_except():
     }
     ''')
     assert(perl_not_trans.call('test_exception') == True)
+
+
+def test_buf_size():
+    perl = Perl(timeout=1)
+    perl.eval_block('sub id { shift() }')
+
+    for size in [2 ** n for n in range(9, 16)]:
+        print("testing buffer >= {} bytes".format(size))
+        buf = "x" * size
+        ret = perl.call('id', buf)
+        assert(ret == str(ret))

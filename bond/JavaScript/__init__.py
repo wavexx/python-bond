@@ -34,7 +34,7 @@ class JavaScript(Bond):
         # inject our prelude
         code = pkg_resources.resource_string(__name__, JS_PRELUDE)
         code = _strip_newlines(code)
-        proc.sendline(r'{code}; {JS_WRAP_PREFIX}_sendline();'.format(
+        proc.sendline_noecho(r'{code}; {JS_WRAP_PREFIX}_sendline();'.format(
             JS_WRAP_PREFIX=JS_WRAP_PREFIX, code=code))
         try:
             proc.expect(r'\r\n{prompt}'.format(prompt=JS_PROMPT))
@@ -42,6 +42,6 @@ class JavaScript(Bond):
             raise BondException(self.LANG, 'cannot initialize interpreter')
 
         # start the inner repl
-        proc.sendline(r'{JS_WRAP_PREFIX}_start({trans_except});'.format(
+        proc.sendline_noecho(r'{JS_WRAP_PREFIX}_start({trans_except});'.format(
             JS_WRAP_PREFIX=JS_WRAP_PREFIX, trans_except=int(trans_except)))
         super(JavaScript, self).__init__(proc, trans_except)

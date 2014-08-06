@@ -2,6 +2,7 @@ import exceptions
 import json
 import pexpect
 import sys
+import tty
 
 
 class Spawn(pexpect.spawn):
@@ -9,15 +10,10 @@ class Spawn(pexpect.spawn):
         kwargs.setdefault('env', {})['TERM'] = 'dumb'
         super(Spawn, self).__init__(*args, **kwargs)
 
-    def sendline(self, *args, **kwargs):
+    def sendline_noecho(self, *args, **kwargs):
         self.setecho(False)
         self.waitnoecho()
         return super(Spawn, self).sendline(*args, **kwargs)
-
-    def expect(self, *args, **kwargs):
-        self.setecho(False)
-        self.waitnoecho()
-        return super(Spawn, self).expect(*args, **kwargs)
 
 
 class BondException(exceptions.IOError):
@@ -63,9 +59,10 @@ class Bond(object):
         self.trans_except = trans_except
         self._proc = proc
         try:
-            self._proc.expect("READY\r\n")
+            self._proc.expect_exact("READY\r\n")
         except pexpect.ExceptionPexpect:
             raise BondException(self.LANG, 'unknown interpreter state')
+        tty.setraw(self._proc.child_fd)
 
 
     def loads(self, string):

@@ -488,3 +488,14 @@ def test_stack_depth():
         got_except = True
     assert(got_except)
     assert(bond_repl_depth(php) == 1)
+
+
+def test_buf_size():
+    php = PHP(timeout=1)
+    php.eval_block('function id($arg) { return $arg; }')
+
+    for size in [2 ** n for n in range(9, 16)]:
+        print("testing buffer >= {} bytes".format(size))
+        buf = "x" * size
+        ret = php.call('id', buf)
+        assert(ret == str(ret))

@@ -128,9 +128,11 @@ def __PY_BOND_repl():
 
 def __PY_BOND_start(trans_except, protocol):
     global __PY_BOND_TRANS_EXCEPT, __PY_BOND_PROTOCOL
+
     sys.stdout = __PY_BOND_BUFFERS['STDOUT']
     sys.stderr = __PY_BOND_BUFFERS['STDERR']
     sys.stdin = open(os.devnull)
+
     __PY_BOND_TRANS_EXCEPT = trans_except
     __PY_BOND_PROTOCOL = protocol
     __PY_BOND_sendline("READY")
