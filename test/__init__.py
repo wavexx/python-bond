@@ -17,7 +17,7 @@ def bond_repl_depth(bond):
     while True:
         try:
             bond.eval('1')
-        except (pexpect.EOF, pexpect.TIMEOUT):
+        except pexpect.ExceptionPexpect:
             break
         bond._proc.sendline('RETURN')
         depth += 1

@@ -20,7 +20,7 @@ class Python(Bond):
         proc = Spawn(cmd, cwd=cwd, env=env, timeout=timeout, logfile=logfile)
         try:
             proc.expect(PY_PROMPT)
-        except pexpect.ExceptionPexpect as e:
+        except pexpect.ExceptionPexpect:
             raise BondException(self.LANG, 'cannot get an interactive prompt using: ' + cmd)
 
         # inject our prelude
@@ -29,7 +29,7 @@ class Python(Bond):
         proc.sendline("exec({code})".format(code=repr(code)))
         try:
             proc.expect(r'\r\n{prompt}'.format(prompt=PY_PROMPT))
-        except pexpect.ExceptionPexpect as e:
+        except pexpect.ExceptionPexpect:
             raise BondException(self.LANG, 'cannot initialize interpreter')
 
         # start the inner repl

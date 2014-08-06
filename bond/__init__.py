@@ -57,7 +57,7 @@ class Bond(object):
         self._proc = proc
         try:
             self._proc.expect("READY\r\n")
-        except pexpect.ExceptionPexpect as e:
+        except pexpect.ExceptionPexpect:
             raise BondException(self.LANG, 'unknown interpreter state')
 
 

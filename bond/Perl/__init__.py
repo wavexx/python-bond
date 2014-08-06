@@ -26,7 +26,7 @@ class Perl(Bond):
         proc = Spawn(cmd, cwd=cwd, env=env, timeout=timeout, logfile=logfile)
         try:
             proc.expect(PERL_PROMPT)
-        except pexpect.ExceptionPexpect as e:
+        except pexpect.ExceptionPexpect:
             raise BondException(self.LANG, 'cannot get an interactive prompt using: ' + cmd)
 
         # inject our prelude
@@ -36,7 +36,7 @@ class Perl(Bond):
             PERL_WRAP_PREFIX=PERL_WRAP_PREFIX, code=code))
         try:
             proc.expect(r'\r\n{prompt}'.format(prompt=PERL_PROMPT))
-        except pexpect.ExceptionPexpect as e:
+        except pexpect.ExceptionPexpect:
             raise BondException(self.LANG, 'cannot initialize interpreter')
 
         # start the inner repl

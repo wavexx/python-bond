@@ -28,7 +28,7 @@ class JavaScript(Bond):
         proc = Spawn(cmd, cwd=cwd, env=env, timeout=timeout, logfile=logfile)
         try:
             proc.expect(JS_PROMPT)
-        except pexpect.ExceptionPexpect as e:
+        except pexpect.ExceptionPexpect:
             raise BondException(self.LANG, 'cannot get an interactive prompt using: ' + cmd)
 
         # inject our prelude
@@ -38,7 +38,7 @@ class JavaScript(Bond):
             JS_WRAP_PREFIX=JS_WRAP_PREFIX, code=code))
         try:
             proc.expect(r'\r\n{prompt}'.format(prompt=JS_PROMPT))
-        except pexpect.ExceptionPexpect as e:
+        except pexpect.ExceptionPexpect:
             raise BondException(self.LANG, 'cannot initialize interpreter')
 
         # start the inner repl
