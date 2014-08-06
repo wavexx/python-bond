@@ -62,7 +62,7 @@ A simple  example
 Why?
 ====
 
-I needed ``bond`` for refactoring a large ``PHP`` project, mostly. With
+I needed ``bond`` for refactoring a large ``PHP`` project, *mostly*. With
 ``bond`` you can rewrite your program incrementally, while still executing all
 your existing code unchanged. You can start by rewriting just a single
 function:
@@ -76,15 +76,38 @@ function:
   php.eval_block('include("my_original_program.php");')
 
   def new_function(arg)
-     # do something here
-     pass
+      # do something here
+      pass
 
   php.export(new_function, 'function_to_be_replaced')
   php.call('main', sys.argv)
 
-It turns out that the same approach can be useful to perform remote computation
-as well. The wire protocol is simple enough to be extended to any language
-supporting an interactive interpreter.
+It turns out that the same approach can be useful to perform remote/parallel
+computation as well. Nobody stops you from having multiple interpreters at the
+same time: you can use ``bond`` to setup a poor man's distributed system
+with minimal effort:
+
+.. code:: python3
+
+  # setup the workers
+  from bond.Python import Python
+  hosts = ['host1', 'host2', 'host3']
+  nodes = [Python('ssh {} python'.format(host)) for host in hosts]
+
+  # load our libraries
+  for node in nodes:
+      node.eval_block('from library import *')
+
+  # execute do_something remotely on each worker
+  from threading import Thread
+  threads = [Thread(target=lambda: node.call('do_something')) for node in nodes]
+
+  # collect the results
+  results = [thread.join() for thread in threads]
+
+``bond`` aims to be completely invisible on the remote side (you don't need
+``bond`` installed remotely at all). The wire protocol is simple enough to be
+extended to any language supporting an interactive interpreter.
 
 
 API
@@ -109,8 +132,8 @@ The following keyword arguments are always allowed in constructors:
 ``args``:
 
   Default arguments used to execute the interactive interpreter. These
-  arguments are normally required to setup the interpreter correctly, and
-  should not be changed.
+  arguments are required to setup the interpreter correctly, and shouldn't
+  normally be changed.
 
 ``xargs``:
 
@@ -212,6 +235,14 @@ Python, as the identity language, has no restriction on data types. Everything
 is pickled on both sides, including exceptions.
 
 
+Serialization:
+
+* Performed locally and remotely using `cPickle
+  <https://docs.python.org/2/library/pickle.html#module-cPickle>`_.
+
+* Remote serialization exceptions are of type ``cPickle.PickingError``.
+
+
 PHP
 ---
 
@@ -298,9 +329,11 @@ Serialization:
 * Performed remotely using ``JSON``. Implement the "toJSON" property to tweak
   which/how objects are encoded.
 
+* Remote JSON serialization exceptions are of type ``TypeError``.
+
 Limitations:
 
-* Currently, the code expects an unix-like environment with ``/dev/stdin`` to
+* Currently the code expects an unix-like environment with ``/dev/stdin`` to
   perform synchronous I/O.
 
 * Since there's no distinction between "plain" objects (dictionaries) and any
