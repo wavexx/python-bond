@@ -28,6 +28,13 @@ class BondException(exceptions.IOError):
     def __str__(self):
         return "BondException[{lang}]: {msg}".format(lang=self.lang, msg=self.message)
 
+class TerminatedException(BondException):
+    def __init__(self, lang, error):
+        super(TerminatedException, self).__init__(lang, error)
+
+    def __str__(self):
+        return "TerminatedException[{lang}]: {msg}".format(lang=self.lang, msg=self.message)
+
 class SerializationException(BondException):
     def __init__(self, lang, error, side):
         self.side = side
@@ -92,6 +99,8 @@ class Bond(object):
                 raise RemoteException(self.LANG, str(args), args)
             elif cmd == "ERROR":
                 raise SerializationException(self.LANG, str(args), 'remote')
+            elif cmd == "BYE":
+                raise TerminatedException(self.LANG, str(args))
             elif cmd == "CALL":
                 ret = None
                 state = "RETURN"

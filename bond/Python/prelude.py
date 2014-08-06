@@ -134,4 +134,6 @@ def __PY_BOND_start(trans_except, protocol):
     __PY_BOND_TRANS_EXCEPT = trans_except
     __PY_BOND_PROTOCOL = protocol
     __PY_BOND_sendline("READY")
-    exit(__PY_BOND_repl())
+    ret = __PY_BOND_repl()
+    __PY_BOND_sendline("BYE")
+    exit(ret)

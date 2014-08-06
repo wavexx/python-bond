@@ -193,5 +193,7 @@ function __PY_BOND_start(trans_except)
 
   __PY_BOND_TRANS_EXCEPT = trans_except;
   __PY_BOND_sendline("READY");
-  process.exit(__PY_BOND_repl());
+  var ret = __PY_BOND_repl();
+  __PY_BOND_sendline("BYE");
+  process.exit(ret);
 }

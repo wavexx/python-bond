@@ -1,4 +1,5 @@
 import nose.plugins.skip
+import bond
 import pexpect
 
 def knownfail(func):
@@ -12,13 +13,13 @@ def knownfail(func):
     return wrapper
 
 
-def bond_repl_depth(bond):
+def bond_repl_depth(repl):
     depth = 0
     while True:
         try:
-            bond.eval('1')
-        except pexpect.ExceptionPexpect:
+            repl.eval('1')
+        except bond.TerminatedException:
             break
-        bond._proc.sendline('RETURN')
+        repl._proc.sendline('RETURN')
         depth += 1
     return depth
