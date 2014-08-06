@@ -39,7 +39,7 @@ function __PY_BOND_sendline(line)
 }
 
 
-/// Serialization methods
+/// Our minimal exception signature
 function __PY_BOND_SerializationException(message)
 {
   this.message = message;
@@ -48,6 +48,8 @@ function __PY_BOND_SerializationException(message)
 util.inherits(__PY_BOND_SerializationException, TypeError);
 __PY_BOND_SerializationException.prototype.name = "__PY_BOND_SerializationException";
 
+
+/// Serialization methods
 function __PY_BOND_typecheck(key, value)
 {
   if(typeof value === 'function' && value.toJSON == null)

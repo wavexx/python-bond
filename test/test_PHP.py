@@ -349,11 +349,14 @@ def test_output_redirect():
     php = PHP(timeout=1);
 
     # standard output
-    php.eval_block(r'echo "Hello world!\n";')
+    php.eval_block(r'echo "echo: Hello world!\n";')
+    php.eval_block(r'fwrite(STDOUT, "STDOUT: Hello world!\n");')
+    php.eval_block(r'file_put_contents("php://stdout", "php://stdout: Hello world!\n");')
     assert(php.eval('1') == 1)
 
     # standard error
-    php.eval_block(r'fwrite(STDERR, "Hello world!\n");')
+    php.eval_block(r'fwrite(STDERR, "STDERR: Hello world!\n");')
+    php.eval_block(r'file_put_contents("php://stderr", "php://stderr: Hello world!\n");')
     assert(php.eval('1') == 1)
 
 

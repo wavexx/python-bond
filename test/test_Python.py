@@ -384,11 +384,11 @@ def test_output_redirect():
     py = Python(timeout=1)
 
     # stdout
-    py.eval_block(r'print "Hello world!\n"')
+    py.eval_block(r'print "stdout: Hello world!"')
     assert(py.eval('1') == 1)
 
     # stderr
-    py.eval_block(r'import sys; sys.stderr.write("Hello world!\n");')
+    py.eval_block(r'import sys; sys.stderr.write("stderr: Hello world!\n");')
     assert(py.eval('1') == 1)
 
 

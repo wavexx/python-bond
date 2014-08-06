@@ -385,15 +385,15 @@ def test_output_redirect():
     perl = Perl(timeout=1)
 
     # stdout
-    perl.eval_block(r'print "Hello world!\n";')
+    perl.eval_block(r'print "stdout: Hello world!\n";')
     assert(perl.eval('1') == 1)
 
     # stderr
-    perl.eval_block(r'print STDERR "Hello world!\n"')
+    perl.eval_block(r'print STDERR "stderr: Hello world!\n"')
     assert(perl.eval('1') == 1)
 
     # warnings
-    perl.eval_block(r'use warnings; "$undefined";')
+    perl.eval_block(r'use warnings; "$warning_expected_on_stderr";')
     assert(perl.eval('1') == 1)
 
 

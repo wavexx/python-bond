@@ -25,7 +25,7 @@ class PHP(Bond):
         except pexpect.ExceptionPexpect:
             raise BondException(self.LANG, 'cannot get an interactive prompt using: ' + cmd)
 
-        # inject our prelude in blocks (due line discipline input buffer limit)
+        # inject our prelude in small chunks (due to the line discipline input buffer limit)
         # TODO: this requires a better approach
         code = pkg_resources.resource_string(__name__, PHP_PRELUDE)
         chunks = re.split(PHP_EOL_RE, code)

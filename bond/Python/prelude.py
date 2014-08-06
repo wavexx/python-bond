@@ -30,10 +30,10 @@ def __PY_BOND_sendline(line=""):
 
 
 # Serialization methods
-__PY_BOND_PROTOCOL = None
-
 class __PY_BOND_SerializationException(cPickle.PicklingError):
     pass
+
+__PY_BOND_PROTOCOL = None
 
 def __PY_BOND_dumps(*args):
     try:
