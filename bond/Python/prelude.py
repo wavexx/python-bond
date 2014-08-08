@@ -1,15 +1,19 @@
 # python-bond Python interface setup
 import base64
-import cPickle
-import cStringIO
+import io
 import os
 import sys
+
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 
 
 # Redirect normal output
 __PY_BOND_BUFFERS = {
-    "STDOUT": cStringIO.StringIO(),
-    "STDERR": cStringIO.StringIO()
+    "STDOUT": io.BytesIO(),
+    "STDERR": io.BytesIO()
 }
 
 __PY_BOND_CHANNELS = {
@@ -23,35 +27,40 @@ __PY_BOND_CHANNELS = {
 def __PY_BOND_getline():
     return __PY_BOND_CHANNELS['STDIN'].readline().rstrip()
 
-def __PY_BOND_sendline(line=""):
+def __PY_BOND_sendline(line=b''):
     stdout = __PY_BOND_CHANNELS['STDOUT']
-    stdout.write(line + "\n")
+    stdout.write(line + b'\n')
     stdout.flush()
+
+def __PY_BOND_sendstate(state, code=None):
+    line = bytes(state.encode('ascii'))
+    if code is not None:
+        line = line + b' ' + code
+    __PY_BOND_sendline(line)
 
 
 # Serialization methods
-class __PY_BOND_SerializationException(cPickle.PicklingError):
+class __PY_BOND_SerializationException(TypeError):
     pass
 
 __PY_BOND_PROTOCOL = None
 
 def __PY_BOND_dumps(*args):
     try:
-        ret = base64.b64encode(cPickle.dumps(args, __PY_BOND_PROTOCOL))
-    except cPickle.PicklingError:
+        ret = base64.b64encode(pickle.dumps(args, __PY_BOND_PROTOCOL))
+    except (TypeError, pickle.PicklingError):
         raise __PY_BOND_SerializationException("cannot encode {data}".format(data=str(args)))
     return ret
 
-def __PY_BOND_loads(string):
-    return cPickle.loads(base64.b64decode(string))[0]
+def __PY_BOND_loads(buf):
+    return pickle.loads(base64.b64decode(buf))[0]
 
 
 # Recursive repl
 __PY_BOND_TRANS_EXCEPT = None
 
 def __PY_BOND_call(name, args):
-    code = __PY_BOND_dumps([name, args])
-    __PY_BOND_sendline("CALL {code}".format(code=code))
+    __PY_BOND_sendstate("CALL", __PY_BOND_dumps([name, args]))
     return __PY_BOND_repl()
 
 def __PY_BOND_export(name):
@@ -63,8 +72,8 @@ def __PY_BOND_repl():
         if len(line) == 0:
             break
 
-        line = line.split(' ', 1)
-        cmd = str(line[0])
+        line = line.split(b' ', 1)
+        cmd = line[0].decode('ascii')
         args = __PY_BOND_loads(line[1]) if len(line) > 1 else []
 
         ret = None
@@ -99,11 +108,12 @@ def __PY_BOND_repl():
             exit(1)
 
         # redirected channels
-        for chan, buf in __PY_BOND_BUFFERS.iteritems():
+        for chan, buf in __PY_BOND_BUFFERS.items():
             if buf.tell():
-                output = buf.getvalue()
+                output = buf.getvalue() if not isinstance(buf, io.TextIOWrapper) \
+                  else buf.buffer.getvalue().decode(buf.encoding)
                 code = __PY_BOND_dumps([chan, output])
-                __PY_BOND_sendline("OUTPUT {code}".format(code=code))
+                __PY_BOND_sendstate("OUTPUT", code)
                 buf.truncate(0)
 
         # error state
@@ -120,7 +130,7 @@ def __PY_BOND_repl():
         except Exception as e:
             state = "ERROR"
             code = __PY_BOND_dumps(str(e))
-        __PY_BOND_sendline("{state} {code}".format(state=state, code=code))
+        __PY_BOND_sendstate(state, code)
 
     # stream ended
     return 0
@@ -128,6 +138,13 @@ def __PY_BOND_repl():
 
 def __PY_BOND_start(trans_except, protocol):
     global __PY_BOND_TRANS_EXCEPT, __PY_BOND_PROTOCOL
+    global __PY_BOND_BUFFERS, __PY_BOND_CHANNELS
+
+    if isinstance(sys.stdout, io.TextIOWrapper):
+        for buf in __PY_BOND_BUFFERS:
+            __PY_BOND_BUFFERS[buf] = io.TextIOWrapper(__PY_BOND_BUFFERS[buf])
+        for chan in __PY_BOND_CHANNELS:
+            __PY_BOND_CHANNELS[chan] = __PY_BOND_CHANNELS[chan].detach()
 
     sys.stdout = __PY_BOND_BUFFERS['STDOUT']
     sys.stderr = __PY_BOND_BUFFERS['STDERR']
@@ -135,7 +152,7 @@ def __PY_BOND_start(trans_except, protocol):
 
     __PY_BOND_TRANS_EXCEPT = trans_except
     __PY_BOND_PROTOCOL = protocol
-    __PY_BOND_sendline("READY")
+    __PY_BOND_sendstate("READY")
     ret = __PY_BOND_repl()
-    __PY_BOND_sendline("BYE")
+    __PY_BOND_sendstate("BYE")
     exit(ret)

@@ -2,7 +2,11 @@ from bond import *
 import os
 import pkg_resources
 import base64
-import cPickle
+
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 
 
 # Python constants
@@ -15,20 +19,24 @@ class Python(Bond):
     LANG = 'Python'
 
     def __init__(self, cmd="python", args="-i", xargs="", cwd=None, env=os.environ,
-                 trans_except=True, protocol=-1, timeout=None, logfile=None):
+                 trans_except=True, protocol=-1, compat=False, timeout=None, logfile=None):
+        if compat:
+            trans_except = False
+            protocol = 0
+
         cmd = ' '.join([cmd, args, xargs])
         proc = Spawn(cmd, cwd=cwd, env=env, timeout=timeout, logfile=logfile)
+        tty.setraw(proc)
         try:
-            proc.expect(PY_PROMPT)
+            proc.expect_exact(PY_PROMPT)
         except pexpect.ExceptionPexpect:
             raise BondException(self.LANG, 'cannot get an interactive prompt using: ' + cmd)
 
         # inject our prelude
-        code = pkg_resources.resource_string(__name__, PY_PRELUDE)
-        code = code + "\n{PY_WRAP_PREFIX}_sendline()\n".format(PY_WRAP_PREFIX=PY_WRAP_PREFIX)
+        code = pkg_resources.resource_string(__name__, PY_PRELUDE).decode('utf-8')
         proc.sendline_noecho("exec({code})".format(code=repr(code)))
         try:
-            proc.expect(r'\r\n{prompt}'.format(prompt=PY_PROMPT))
+            proc.expect_exact(PY_PROMPT)
         except pexpect.ExceptionPexpect:
             raise BondException(self.LANG, 'cannot initialize interpreter')
 
@@ -42,7 +50,7 @@ class Python(Bond):
 
     # Use pickle with Python
     def dumps(self, *args):
-        return base64.b64encode(cPickle.dumps(args, self.protocol))
+        return base64.b64encode(pickle.dumps(args, self.protocol))
 
-    def loads(self, string):
-        return cPickle.loads(base64.b64decode(string))[0]
+    def loads(self, buf):
+        return pickle.loads(base64.b64decode(buf))[0]

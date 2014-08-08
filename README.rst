@@ -238,11 +238,28 @@ is pickled on both sides, including exceptions.
 
 Serialization:
 
-* Performed locally and remotely using `cPickle
-  <https://docs.python.org/2/library/pickle.html#module-cPickle>`_.
+* Performed locally and remotely using ``cPickle`` in Python 2 or `pickle
+  <https://docs.python.org/2/library/pickle.html>`_ in Python 3.
 
 * Serialization exceptions on the remote side are of base type
-  ``cPickle.PicklingError`` <= ``__PY_BOND_SerializationException``.
+  ``TypeError`` <= ``__PY_BOND_SerializationException``.
+
+
+Python 2 / Python 3:
+
+You can freely mix Python versions between hosts/interpreters (that is: you can
+run Python 3 code from a Python 2 host and vice-versa). You'll need to provide
+the correct name for the Python command and use ``compat=True`` in the
+constructor, as follows:
+
+.. code:: python3
+
+  from bond.Python import Python
+  py = Python("python3", compat=True)
+
+``compat=True`` is just a shortcut for ``trans_except=False, protocol=0``. It
+disables transparent exceptions (as the exception hierarchy is different
+between Python 2/3) and forces the lowest pickling protocol to be used.
 
 
 PHP

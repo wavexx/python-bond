@@ -382,13 +382,14 @@ def test_export_except_ser_err():
 
 def test_output_redirect():
     py = Python(timeout=1)
+    py.eval_block(r'import sys')
 
     # stdout
-    py.eval_block(r'print "stdout: Hello world!"')
+    py.eval_block(r'sys.stdout.write("stdout: Hello world!\n")')
     assert(py.eval('1') == 1)
 
     # stderr
-    py.eval_block(r'import sys; sys.stderr.write("stderr: Hello world!\n");')
+    py.eval_block(r'sys.stderr.write("stderr: Hello world!\n")')
     assert(py.eval('1') == 1)
 
 

@@ -1,10 +1,10 @@
-import exceptions
 import json
 import pexpect
 import sys
 import tty
 
 
+# pexpect helper
 class Spawn(pexpect.spawn):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('env', {})['TERM'] = 'dumb'
@@ -13,32 +13,34 @@ class Spawn(pexpect.spawn):
     def sendline_noecho(self, *args, **kwargs):
         self.setecho(False)
         self.waitnoecho()
-        return super(Spawn, self).sendline(*args, **kwargs)
+        return self.sendline(*args, **kwargs)
 
 
-class BondException(exceptions.IOError):
+# Our exceptions
+class BondException(RuntimeError):
     def __init__(self, lang, error):
         self.lang = lang
+        self.error = error
         super(BondException, self).__init__(error)
 
     def __str__(self):
-        return "BondException[{lang}]: {msg}".format(lang=self.lang, msg=self.message)
+        return "BondException[{lang}]: {msg}".format(lang=self.lang, msg=self.error)
 
 class TerminatedException(BondException):
     def __init__(self, lang, error):
         super(TerminatedException, self).__init__(lang, error)
 
     def __str__(self):
-        return "TerminatedException[{lang}]: {msg}".format(lang=self.lang, msg=self.message)
+        return "TerminatedException[{lang}]: {msg}".format(lang=self.lang, msg=self.error)
 
-class SerializationException(BondException):
+class SerializationException(BondException, TypeError):
     def __init__(self, lang, error, side):
         self.side = side
         super(SerializationException, self).__init__(lang, error)
 
     def __str__(self):
         return "SerializationException[{lang}, {side}]: {msg}".format(
-            lang=self.lang, side=self.side, msg=self.message)
+            lang=self.lang, side=self.side, msg=self.error)
 
 class RemoteException(BondException):
     def __init__(self, lang, error, data):
@@ -46,9 +48,10 @@ class RemoteException(BondException):
         super(RemoteException, self).__init__(lang, error)
 
     def __str__(self):
-        return "RemoteException[{lang}]: {msg}".format(lang=self.lang, msg=self.message)
+        return "RemoteException[{lang}]: {msg}".format(lang=self.lang, msg=self.error)
 
 
+# The main base class
 class Bond(object):
     LANG = '<unknown>'
 
@@ -59,17 +62,17 @@ class Bond(object):
         self.trans_except = trans_except
         self._proc = proc
         try:
-            self._proc.expect_exact("READY\r\n")
+            if self._proc.expect_exact(["READY\n", "READY\r\n"]) == 1:
+                tty.setraw(self._proc.child_fd)
         except pexpect.ExceptionPexpect:
             raise BondException(self.LANG, 'unknown interpreter state')
-        tty.setraw(self._proc.child_fd)
 
 
-    def loads(self, string):
-        return json.loads(string)
+    def loads(self, buf):
+        return json.loads(buf.decode('utf-8'))
 
     def dumps(self, *args):
-        return json.dumps(*args, skipkeys=False)
+        return json.dumps(*args, skipkeys=False).encode('utf-8')
 
 
     def _dumps(self, *args):
@@ -78,11 +81,15 @@ class Bond(object):
         except Exception as e:
             raise SerializationException(self.LANG, str(e), 'local')
 
+    def _sendstate(self, cmd, code):
+        ret = bytes(cmd.encode('ascii')) + b' ' + code
+        self._proc.sendline(ret)
+
 
     def _repl(self):
-        while self._proc.expect_exact('\n') == 0:
-            line = self._proc.before.split(' ', 1)
-            cmd = str(line[0])
+        while self._proc.expect_exact(b'\n') == 0:
+            line = self._proc.before.split(b' ', 1)
+            cmd = line[0].decode('ascii')
             args = self.loads(line[1]) if len(line) > 1 else []
 
             # interpret the serial protocol
@@ -110,7 +117,7 @@ class Bond(object):
                 except SerializationException as e:
                     state = "ERROR"
                     code = self._dumps(str(e))
-                self._proc.sendline('{state} {code}'.format(state=state, code=code))
+                self._sendstate(state, code)
                 continue
 
             raise BondException(self.LANG, 'unknown interpreter state')
@@ -118,20 +125,17 @@ class Bond(object):
 
     def eval(self, code):
         '''Evaluate and return the value of a single statement of code in the interpreter.'''
-        code = self._dumps(code)
-        self._proc.sendline('EVAL {code}'.format(code=code))
+        self._sendstate('EVAL', self._dumps(code))
         return self._repl()
 
     def eval_block(self, code):
         '''Evaluate a "code" block inside the interpreter. Nothing is returned.'''
-        code = self._dumps(code)
-        self._proc.sendline('EVAL_BLOCK {code}'.format(code=code))
+        self._sendstate('EVAL_BLOCK', self._dumps(code))
         return self._repl()
 
     def call(self, name, *args):
         '''Call a function "name" using *args (apply *args to a callable statement "name")'''
-        code = self._dumps([name, args])
-        self._proc.sendline('CALL {code}'.format(code=code))
+        self._sendstate('CALL', self._dumps([name, args]))
         return self._repl()
 
     def close(self):
@@ -143,8 +147,8 @@ class Bond(object):
         If "name" is not specified, use the local function name directly.'''
         if name is None:
             name = func.__name__
+        self._sendstate('EXPORT', self._dumps(name))
         self.bindings[name] = func
-        self._proc.sendline('EXPORT {name}'.format(name=self._dumps(name)))
         return self._repl()
 
     def callable(self, name):
@@ -162,6 +166,7 @@ class Bond(object):
 
 
 
+# Utilities
 def interact(bond, prompt=None):
     '''Start an interactive session with "bond"
 
