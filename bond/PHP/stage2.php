@@ -1,8 +1,6 @@
-/// python-bond PHP interface setup
-/// NOTE: use /// for comments only, as this code is transformed into a single
-///       line to be injected into the interpreter *without parsing*.
+// python-bond PHP interface setup
 
-/// Redirect normal output
+// Redirect normal output
 $__PY_BOND_BUFFERS = array(
     "STDOUT" => "",
     "STDERR" => ""
@@ -32,9 +30,9 @@ class __PY_BOND_BUFFERED
 }
 
 
-/// Redefine standard streams
+// Redefine standard streams
 $__PY_BOND_CHANNELS = array(
-    "STDIN" => fopen("php://stdin", "r"),
+    "STDIN" => $__PY_BOND_STDIN,
     "STDOUT" => fopen("php://stdout", "w"),
     "STDERR" => fopen("php://stderr", "w")
 );
@@ -50,7 +48,7 @@ if(!defined("STDERR"))
   define('STDERR', fopen("php://stderr", "w"));
 
 
-/// Define our own i/o methods
+// Define our own i/o methods
 function __PY_BOND_output($buffer, $phase)
 {
   fwrite(STDOUT, $buffer);
@@ -71,7 +69,7 @@ function __PY_BOND_sendline($line = '')
 }
 
 
-/// Serialization methods
+// Serialization methods
 class __PY_BOND_SerializationException extends Exception {}
 
 function __PY_BOND_dumps($data)
@@ -88,7 +86,7 @@ function __PY_BOND_loads($string)
 }
 
 
-/// some utilities to get/reset the error state
+// some utilities to get/reset the error state
 function __PY_BOND_clear_error()
 {
   set_error_handler(null, 0);
@@ -104,7 +102,7 @@ function __PY_BOND_get_error()
 }
 
 
-/// Recursive repl
+// Recursive repl
 $__PY_BOND_TRANS_EXCEPT = null;
 
 function __PY_BOND_call($name, $args)
@@ -175,13 +173,13 @@ function __PY_BOND_repl()
 	__PY_BOND_clear_error();
 	if(preg_match("/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/", $name) || is_callable($name))
 	{
-	  /// special-case regular functions to avoid fatal errors in PHP
+	  // special-case regular functions to avoid fatal errors in PHP
 	  $ret = @call_user_func_array($args[0], $args[1]);
 	}
 	else
 	{
-	  /// construct a string that we can interpret "function-like", to
-	  /// handle also function references and method calls uniformly
+	  // construct a string that we can interpret "function-like", to
+	  // handle also function references and method calls uniformly
 	  $args_ = array();
 	  foreach($args[1] as $el)
 	    $args_[] = var_export($el, true);
@@ -209,7 +207,7 @@ function __PY_BOND_repl()
       exit(1);
     }
 
-    /// redirected channels
+    // redirected channels
     ob_flush();
     foreach($__PY_BOND_BUFFERS as $chan => &$buf)
     {
@@ -221,7 +219,7 @@ function __PY_BOND_repl()
       }
     }
 
-    /// error state
+    // error state
     $state = "RETURN";
     if($err)
     {

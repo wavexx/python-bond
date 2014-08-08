@@ -10,10 +10,17 @@ class Spawn(pexpect.spawn):
         kwargs.setdefault('env', {})['TERM'] = 'dumb'
         super(Spawn, self).__init__(*args, **kwargs)
 
-    def sendline_noecho(self, *args, **kwargs):
+    def noecho(self):
         self.setecho(False)
         self.waitnoecho()
+
+    def sendline_noecho(self, *args, **kwargs):
+        self.noecho()
         return self.sendline(*args, **kwargs)
+
+    def expect_exact_noecho(self, *args, **kwargs):
+        self.noecho()
+        return self.expect_exact(*args, **kwargs)
 
 
 # Our exceptions
@@ -65,7 +72,25 @@ class Bond(object):
             if self._proc.expect_exact(["READY\n", "READY\r\n"]) == 1:
                 tty.setraw(self._proc.child_fd)
         except pexpect.ExceptionPexpect:
-            raise BondException(self.LANG, 'unknown interpreter state')
+            errors = proc.before.decode('utf-8')
+            raise BondException(self.LANG, 'unknown interpreter state: ' + errors)
+
+
+    def _init_2stage(self, proc, stage1, stage2, trans_except):
+        tty.setraw(proc.child_fd)
+        try:
+            # inject base loader
+            proc.sendline(stage1)
+            proc.expect_exact('STAGE2\n')
+
+            # load the second stage
+            proc.sendline(stage2)
+        except pexpect.ExceptionPexpect:
+            errors = proc.before.decode('utf-8')
+            raise BondException(self.LANG, 'cannot initialize interpreter: ' + errors)
+
+        # remote environment should come up shortly
+        Bond.__init__(self, proc, trans_except)
 
 
     def loads(self, buf):

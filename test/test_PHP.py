@@ -8,6 +8,11 @@ def test_basic():
     php.close()
 
 
+def test_basic_rmt():
+    php = PHP("ssh localhost php", timeout=1)
+    php.close()
+
+
 def test_call_marshalling():
     php = PHP(timeout=1)
 
@@ -493,8 +498,7 @@ def test_stack_depth():
     assert(bond_repl_depth(php) == 1)
 
 
-def test_buf_size():
-    php = PHP(timeout=1)
+def _test_buf_size(php):
     php.eval_block('function id($arg) { return $arg; }')
 
     for size in [2 ** n for n in range(9, 16)]:
@@ -502,3 +506,11 @@ def test_buf_size():
         buf = "x" * size
         ret = php.call('id', buf)
         assert(ret == str(ret))
+
+def test_buf_size():
+    php = PHP(timeout=1)
+    _test_buf_size(php)
+
+def test_buf_size_rmt():
+    php = PHP("ssh localhost php", timeout=1)
+    _test_buf_size(php)

@@ -267,9 +267,8 @@ PHP
 
 Requirements:
 
-* The PHP's command line and the ``readline`` module needs to be installed for
-  the interactive interpreter to work properly. On Debian/Ubuntu, you'll need
-  ``php5-cli`` and ``php5-readline``.
+* The PHP's command line interpreter needs to be installed. On Debian/Ubuntu,
+  the required package is ``php5-cli``.
 
 Serialization:
 
