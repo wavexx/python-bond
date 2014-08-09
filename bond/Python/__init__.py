@@ -1,7 +1,8 @@
 from bond import *
+import base64
 import os
 import pkg_resources
-import base64
+import re
 
 try:
     import cPickle as pickle
@@ -10,9 +11,9 @@ except ImportError:
 
 
 # Python constants
-PY_PROMPT      = r'>>> '
-PY_PRELUDE     = 'prelude.py'
-PY_WRAP_PREFIX = '__PY_BOND'
+PY_EOL_RE = r'(?:\s*(?:###.*)?\n)+'
+PY_STAGE1 = pkg_resources.resource_string(__name__, 'stage1.py').decode('utf-8')
+PY_STAGE2 = pkg_resources.resource_string(__name__, 'stage2.py').decode('utf-8')
 
 
 class Python(Bond):
@@ -23,29 +24,25 @@ class Python(Bond):
         if compat:
             trans_except = False
             protocol = 0
+        self.protocol = protocol
 
         cmd = ' '.join([cmd, args, xargs])
         proc = Spawn(cmd, cwd=cwd, env=env, timeout=timeout, logfile=logfile)
-        tty.setraw(proc)
+
+        # probe the interpreter
         try:
-            proc.expect_exact(PY_PROMPT)
+            proc.sendline_noecho(r'print("stage1\n".upper())')
+            proc.expect_exact_noecho('STAGE1\r\n')
         except pexpect.ExceptionPexpect:
             raise BondException(self.LANG, 'cannot get an interactive prompt using: ' + cmd)
 
-        # inject our prelude
-        code = pkg_resources.resource_string(__name__, PY_PRELUDE).decode('utf-8')
-        proc.sendline_noecho("exec({code})".format(code=repr(code)))
-        try:
-            proc.expect_exact(PY_PROMPT)
-        except pexpect.ExceptionPexpect:
-            raise BondException(self.LANG, 'cannot initialize interpreter')
-
-        # start the inner repl
-        proc.sendline_noecho(r'{PY_WRAP_PREFIX}_start({trans_except}, {protocol});'.format(
-            PY_WRAP_PREFIX=PY_WRAP_PREFIX, trans_except=trans_except, protocol=protocol))
-
-        self.protocol = protocol
-        super(Python, self).__init__(proc, trans_except)
+        # environment is responding
+        stage1 = re.sub(PY_EOL_RE, '\n', PY_STAGE1)
+        stage1 = "exec({code})".format(code=repr(stage1))
+        stage2 = repr({'code': PY_STAGE2,
+                       'func': '__PY_BOND_start',
+                       'args': [trans_except, protocol]})
+        self._init_2stage(proc, stage1, stage2, trans_except)
 
 
     # Use pickle with Python

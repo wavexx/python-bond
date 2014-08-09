@@ -90,7 +90,7 @@ def __PY_BOND_repl():
 
         elif cmd == "CALL":
             try:
-                func = eval(compile(args[0], '<string>', 'eval'), globals())
+                func = eval(args[0], globals())
                 ret = func(*args[1])
             except Exception as e:
                 err = e

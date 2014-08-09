@@ -8,6 +8,11 @@ def test_basic():
     py.close()
 
 
+def test_basic_rmt():
+    py = Python("ssh localhost python", timeout=1)
+    py.close()
+
+
 def test_call_marshalling():
     py = Python(timeout=1)
 
@@ -504,10 +509,17 @@ def test_stack_depth():
     assert(bond_repl_depth(py) == 1)
 
 
-def test_buf_size():
-    py = Python(timeout=1)
+def _test_buf_size(py):
     for size in [2 ** n for n in range(9, 16)]:
         print("testing buffer >= {} bytes".format(size))
         buf = "x" * size
         ret = py.call('str', buf)
         assert(ret == str(ret))
+
+def test_buf_size():
+    py = Python(timeout=1)
+    _test_buf_size(py)
+
+def test_buf_size_rmt():
+    py = Python("ssh localhost python", timeout=1)
+    _test_buf_size(py)
