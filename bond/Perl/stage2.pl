@@ -1,6 +1,4 @@
 # python-bond Perl interface setup
-# NOTE: use # for comments only, as this code is transformed into a single
-#       line to be injected into the interpreter *without parsing*.
 use strict;
 use warnings;
 use IO::Handle;
@@ -40,8 +38,7 @@ my %__PY_BOND_CHANNELS =
 
 
 # Serialization methods
-my $__PY_BOND_JSON = JSON->new();
-$__PY_BOND_JSON->allow_nonref();
+my $__PY_BOND_JSON = JSON->new()->allow_nonref();
 
 sub __PY_BOND_dumps
 {
@@ -71,7 +68,6 @@ sub __PY_BOND_sendline
   my $line = shift // "";
   my $stdout = $__PY_BOND_CHANNELS{STDOUT};
   print $stdout "$line\n";
-  $stdout->flush();
 }
 
 

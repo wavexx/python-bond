@@ -8,6 +8,11 @@ def test_basic():
     perl.close()
 
 
+def test_basic_rmt():
+    perl = Perl("ssh localhost perl", timeout=1)
+    perl.close()
+
+
 def test_call_marshalling():
     perl = Perl(timeout=1)
 
@@ -511,12 +516,18 @@ def test_stack_depth():
     assert(bond_repl_depth(perl) == 1)
 
 
-def test_buf_size():
-    perl = Perl(timeout=1)
+def _test_buf_size(perl):
     perl.eval_block('sub id { shift() }')
-
     for size in [2 ** n for n in range(9, 16)]:
         print("testing buffer >= {} bytes".format(size))
         buf = "x" * size
         ret = perl.call('id', buf)
         assert(ret == str(ret))
+
+def test_buf_size():
+    perl = Perl(timeout=1)
+    _test_buf_size(perl)
+
+def test_buf_size_rmt():
+    perl = Perl("ssh localhost perl", timeout=1)
+    _test_buf_size(perl)
