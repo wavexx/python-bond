@@ -167,9 +167,40 @@ def test_eval():
     perl.eval_block('my $y = 1;')
     assert(perl.eval('$y // -1') == -1)
 
+    # 'our' scope
+    perl.eval_block('our $z = 1;')
+    assert(perl.eval('$z // -1') == 1)
+
     # function definition
     perl.eval('sub test_perl { shift() + 1; }')
     assert(perl.eval('test_perl(0);') == 1)
+
+
+def test_eval_sentinel():
+    perl = Perl(timeout=1)
+
+    # ensure the sentinel is not accessible
+    failed = False
+    try:
+        perl.eval('$SENTINEL')
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(True)
+
+
+def test_eval_rec():
+    perl = Perl(timeout=1)
+
+    # in a recursive call, we should still be able to see our global scope
+    def call_me():
+        assert(perl.eval('$should_exist') == 1)
+        assert(perl.eval('$should_not_exist // -1') == -1)
+
+    perl.export(call_me)
+    perl.eval_block('$should_exist = 1')
+    assert(perl.eval('$should_exist') == 1)
+    perl.call('call_me')
 
 
 def test_ser_err():

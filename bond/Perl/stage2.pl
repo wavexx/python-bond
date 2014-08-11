@@ -84,6 +84,7 @@ sub __PY_BOND_call($$)
 
 sub __PY_BOND_repl()
 {
+  my $SENTINEL = 1;
   while(my $line = __PY_BOND_getline())
   {
     my ($cmd, $args) = split(/ /, $line, 2);

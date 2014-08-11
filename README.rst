@@ -339,6 +339,15 @@ Gotchas:
 
     perl.call('$object->method', ...)
 
+* ``eval_block`` introduces a new block. Variables declared as "my" will not be
+  visible into a subsequent ``eval_block``. Use a fully qualified name or "our"
+  to define variables that should persist across blocks:
+
+  .. code:: python3
+
+    perl.eval_block('our $variable = 1;')
+    perl.eval_block('do_something_with($variable);')
+
 
 JavaScript
 ----------
