@@ -129,6 +129,40 @@ def test_eval():
     assert(js.eval('test_js(0)') == 1)
 
 
+def test_eval_sentinel():
+    js = JavaScript(timeout=1)
+
+    # ensure the sentinel is not accessible
+    failed = False
+    try:
+        js.eval('SENTINEL')
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(True)
+
+
+def test_eval_rec():
+    js = JavaScript(timeout=1)
+
+    # in a recursive call, we should still be able to see our global scope
+    def call_me():
+        assert(js.eval('should_exist') == 1)
+
+        failed = False
+        try:
+            js.eval('should_not_exist')
+        except bond.RemoteException as e:
+            print(e)
+            failed = True
+        assert(failed)
+
+    js.export(call_me)
+    js.eval_block('var should_exist = 1;')
+    assert(js.eval('should_exist') == 1)
+    js.call('call_me')
+
+
 def test_eval_error():
     js = JavaScript(timeout=1)
 

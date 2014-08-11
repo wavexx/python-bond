@@ -77,6 +77,7 @@ function __PY_BOND_export(name)
 
 function __PY_BOND_repl()
 {
+  var SENTINEL = 1;
   var line;
   while((line = __PY_BOND_getline()))
   {
