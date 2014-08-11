@@ -112,10 +112,49 @@ function __PY_BOND_call($name, $args)
   return __PY_BOND_repl();
 }
 
+function __PY_BOND_eval($code)
+{
+  // encase "code" in an anonymous block, hiding our local variables and
+  // simulating the global scope
+  $SENTINEL = 1;
+  __PY_BOND_clear_error();
+  $ret = @eval("return call_user_func(function()
+  {
+    extract(\$GLOBALS);
+    return ($code);
+  }, null);");
+  $err = __PY_BOND_get_error();
+  if($err) throw new Exception($err);
+  return $ret;
+}
+
+function __PY_BOND_exec($code)
+{
+  $SENTINEL = 1;
+  $prefix = "__PY_BOND";
+  $prefix_len = strlen($prefix);
+  $prefix = var_export($prefix, true);
+
+  // like "eval", but exports any local definition to the global scope
+  __PY_BOND_clear_error();
+  @eval("call_user_func(function()
+  {
+    extract(\$GLOBALS);
+    { $code }
+    \$__PY_BOND_vars = get_defined_vars();
+    foreach(\$__PY_BOND_vars as \$k => &\$v)
+      \$GLOBALS[\$k] = &\$v;
+    foreach(array_keys(\$GLOBALS) as \$k)
+      if(!isset(\$__PY_BOND_vars[\$k]))
+        unset(\$GLOBALS[\$k]);
+  }, null);");
+  $err = __PY_BOND_get_error();
+  if($err) throw new Exception($err);
+}
+
 function __PY_BOND_repl()
 {
   global $__PY_BOND_BUFFERS, $__PY_BOND_TRANS_EXCEPT;
-
   while($line = __PY_BOND_getline())
   {
     $line = explode(" ", $line, 2);
@@ -127,29 +166,13 @@ function __PY_BOND_repl()
     switch($cmd)
     {
     case "EVAL":
-      try
-      {
-	__PY_BOND_clear_error();
-	$ret = @eval("return $args;");
-	$err = __PY_BOND_get_error();
-      }
-      catch(Exception $e)
-      {
-	$err = $e;
-      }
+      try { $ret = __PY_BOND_eval($args); }
+      catch(Exception $e) { $err = $e; }
       break;
 
     case "EVAL_BLOCK":
-      try
-      {
-	__PY_BOND_clear_error();
-	@eval($args);
-	$err = __PY_BOND_get_error();
-      }
-      catch(Exception $e)
-      {
-	$err = $e;
-      }
+      try { __PY_BOND_exec($args); }
+      catch(Exception $e) { $err = $e; }
       break;
 
     case "EXPORT":
@@ -169,12 +192,12 @@ function __PY_BOND_repl()
       try
       {
 	$name = $args[0];
-
-	__PY_BOND_clear_error();
 	if(preg_match("/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/", $name) || is_callable($name))
 	{
 	  // special-case regular functions to avoid fatal errors in PHP
+	  __PY_BOND_clear_error();
 	  $ret = @call_user_func_array($args[0], $args[1]);
+	  $err = __PY_BOND_get_error();
 	}
 	else
 	{
@@ -184,9 +207,8 @@ function __PY_BOND_repl()
 	  foreach($args[1] as $el)
 	    $args_[] = var_export($el, true);
 	  $args_ = implode(", ", $args_);
-	  $ret = @eval("return " . $name . "(" . $args_ . ");");
+	  $ret = __PY_BOND_eval("$name($args_)");
 	}
-	$err = __PY_BOND_get_error();
       }
       catch(Exception $e)
       {

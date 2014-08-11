@@ -164,6 +164,37 @@ def test_eval():
     php.eval_block('$x = 1;')
     assert(php.eval('$x') == 1)
 
+    # unset a variable to stress our simulated global scope
+    php.eval_block('unset($x);')
+    assert(php.eval('!isset($x)') == 1)
+
+
+def test_eval_sentinel():
+    php = PHP(timeout=1)
+
+    # ensure the sentinel is not accessible
+    failed = False
+    try:
+        php.eval('$SENTINEL')
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(failed)
+
+
+def test_eval_rec():
+    php = PHP(timeout=1)
+
+    # in a recursive call, we should still be able to see our global scope
+    def call_me():
+        assert(php.eval('$should_exist') == 1)
+        assert(php.eval('!isset($should_not_exist)'))
+
+    php.export(call_me)
+    php.eval_block('$should_exist = 1;')
+    assert(php.eval('$should_exist') == 1)
+    php.call('call_me')
+
 
 def test_eval_error():
     php = PHP(timeout=1)
