@@ -8,6 +8,11 @@ def test_basic():
     js.close()
 
 
+def test_basic_rmt():
+    js = JavaScript("ssh localhost nodejs", timeout=1)
+    js.close()
+
+
 def test_call_marshalling():
     js = JavaScript(timeout=1)
 
@@ -499,10 +504,17 @@ def test_stack_depth():
     assert(bond_repl_depth(js) == 1)
 
 
-def test_buf_size():
-    js = JavaScript(timeout=1)
+def _test_buf_size(js):
     for size in [2 ** n for n in range(9, 16)]:
         print("testing buffer >= {} bytes".format(size))
         buf = "x" * size
         ret = js.call('String', buf)
         assert(ret == str(ret))
+
+def test_buf_size():
+    js = JavaScript(timeout=1)
+    _test_buf_size(js)
+
+def test_buf_size_rmt():
+    js = JavaScript("ssh localhost nodejs", timeout=1)
+    _test_buf_size(js)

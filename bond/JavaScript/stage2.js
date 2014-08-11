@@ -1,7 +1,6 @@
 /// python-bond Javascript interface setup
 /// NOTE: use /// for comments only, as this code is transformed into a single
 ///       line to be injected into the interpreter *without parsing*.
-var fs = require("fs");
 var util = require("util");
 
 /// Channels and buffers
@@ -11,26 +10,13 @@ var __PY_BOND_BUFFERS = {
 };
 
 var __PY_BOND_CHANNELS = {
-  "STDIN": fs.openSync("/dev/stdin", "r"),
+  "STDIN": __PY_BOND_STDIN,
   "STDOUT": fs.openSync("/dev/stdout", "w"),
   "STDERR": fs.openSync("/dev/stderr", "w")
 };
 
 
 /// Define our own i/o methods
-function __PY_BOND_getline()
-{
-  var line = "";
-  var buf = new Buffer(1);
-  var stdin = __PY_BOND_CHANNELS["STDIN"];
-  while(fs.readSync(stdin, buf, 0, 1) > 0)
-  {
-    if(buf[0] == 10) break;
-    line += buf;
-  }
-  return line.trimRight();
-}
-
 function __PY_BOND_sendline(line)
 {
   if(line == null) line = "";
