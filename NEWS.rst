@@ -1,3 +1,15 @@
+python-bond 0.5
+---------------
+
+* Python 3 support has been added, with the ability to mix major Python
+  versions between the host and the bond.
+* All languages/interpreters can now be executed with a remote shell without
+  using additional arguments.
+* On the remote side, ``__PY_BOND_SerializationException`` has been renamed to
+  ``_PY_BOND_SerializationException`` as it can be trapped by the user code.
+* The scope of a PHP code block in an exported, recursive call has been fixed.
+
+
 python-bond 0.4
 ---------------
 
