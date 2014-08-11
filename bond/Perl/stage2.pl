@@ -1,11 +1,11 @@
 # python-bond Perl interface setup
 use strict;
 use warnings;
-use IO::Handle;
-use IO::String;
-use JSON;
-use Data::Dump qw{dump};
-use Scalar::Util qw{blessed};
+require IO::Handle;
+require IO::String;
+require JSON;
+require Data::Dump;
+require Scalar::Util;
 
 
 # Channels and buffers
@@ -127,7 +127,7 @@ sub __PY_BOND_repl()
       # TODO: special-case builtins to allow transparent invocation and higher
       #       performance with regular functions.
       my @args = @{$args->[1]};
-      my $args_ = dump(@args);
+      my $args_ = Data::Dump::dump(@args);
       $args_ = "($args_)" if @args == 1;
       $ret = [eval ($name . ' ' . $args_)];
       $err = $@;
@@ -167,7 +167,7 @@ sub __PY_BOND_repl()
     my $state = "RETURN";
     if($err)
     {
-      if(blessed($err) && $err->isa('_PY_BOND_SerializationException'))
+      if(Scalar::Util::blessed($err) && $err->isa('_PY_BOND_SerializationException'))
       {
 	$state = "ERROR";
 	$ret = $$err;

@@ -3,8 +3,8 @@
 ###       line to be injected into the interpreter *without parsing*.
 use strict;
 use warnings;
-use IO::Handle qw{};
-use JSON qw{};
+require IO::Handle;
+require JSON;
 
 sub
 {
