@@ -1,9 +1,7 @@
-/// python-bond Javascript interface setup
-/// NOTE: use /// for comments only, as this code is transformed into a single
-///       line to be injected into the interpreter *without parsing*.
+// python-bond Javascript interface setup
 var util = require("util");
 
-/// Channels and buffers
+// Channels and buffers
 var __PY_BOND_BUFFERS = {
   "STDOUT": "",
   "STDERR": ""
@@ -16,7 +14,7 @@ var __PY_BOND_CHANNELS = {
 };
 
 
-/// Define our own i/o methods
+// Define our own i/o methods
 function __PY_BOND_sendline(line)
 {
   if(line == null) line = "";
@@ -25,7 +23,7 @@ function __PY_BOND_sendline(line)
 }
 
 
-/// Our minimal exception signature
+// Our minimal exception signature
 function _PY_BOND_SerializationException(message)
 {
   this.message = message;
@@ -35,7 +33,7 @@ util.inherits(_PY_BOND_SerializationException, TypeError);
 _PY_BOND_SerializationException.prototype.name = "_PY_BOND_SerializationException";
 
 
-/// Serialization methods
+// Serialization methods
 function __PY_BOND_typecheck(key, value)
 {
   if(typeof value === 'function' && value.toJSON == null)
@@ -57,7 +55,7 @@ function __PY_BOND_loads(string)
 }
 
 
-/// Recursive repl
+// Recursive repl
 var __PY_BOND_TRANS_EXCEPT;
 
 function __PY_BOND_call(name, args)
@@ -106,8 +104,8 @@ function __PY_BOND_repl()
     case "CALL":
       try
       {
-	/// NOTE: we add an extra set of parenthesis to allow anonymous
-	///       functions to be parsed without an assignment
+	// NOTE: we add an extra set of parenthesis to allow anonymous
+	//       functions to be parsed without an assignment
 	var func = eval.call(null, "(" + args[0] + ")");
 	ret = func.apply(null, args[1]);
       }
@@ -130,7 +128,7 @@ function __PY_BOND_repl()
       process.exit(1);
     }
 
-    /// redirected channels
+    // redirected channels
     for(var chan in __PY_BOND_BUFFERS)
     {
       var buf = __PY_BOND_BUFFERS[chan];
@@ -142,7 +140,7 @@ function __PY_BOND_repl()
       }
     }
 
-    /// error state
+    // error state
     var state = "RETURN";
     if(err != null)
     {
@@ -175,7 +173,7 @@ function __PY_BOND_repl()
 
 function __PY_BOND_start(trans_except)
 {
-  /// TODO: this is a hack
+  // TODO: this is a hack
   process.stdout.write = function(buf) { __PY_BOND_BUFFERS["STDOUT"] += buf; };
   process.stderr.write = function(buf) { __PY_BOND_BUFFERS["STDERR"] += buf; };
   process.stdin.read = function() { return undefined; };
