@@ -9,6 +9,7 @@ class Spawn(pexpect.spawn):
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('env', {})['TERM'] = 'dumb'
         super(Spawn, self).__init__(*args, **kwargs)
+        tty.setraw(self.child_fd)
 
     def noecho(self):
         self.setecho(False)
@@ -65,31 +66,39 @@ class Bond(object):
     def __init__(self, proc, trans_except):
         self.channels = {'STDOUT': sys.stdout, 'STDERR': sys.stderr}
         self.bindings = {}
-
         self.trans_except = trans_except
         self._proc = proc
+
+
+    def _init_2stage(self, proc, probe, stage1, stage2, trans_except):
+        # probe the interpreter
         try:
-            if self._proc.expect_exact(["READY\n", "READY\r\n"]) == 1:
-                tty.setraw(self._proc.child_fd)
+            proc.sendline_noecho(probe)
+            if proc.expect_exact_noecho(['STAGE1\n', 'STAGE1\r\n']) == 1:
+                tty.setraw(proc.child_fd)
         except pexpect.ExceptionPexpect:
-            errors = proc.before.decode('utf-8')
-            raise BondException(self.LANG, 'unknown interpreter state: ' + errors)
+            raise BondException(self.LANG,
+                                'cannot get an interactive prompt using: '
+                                + str(proc.args))
 
-
-    def _init_2stage(self, proc, stage1, stage2, trans_except):
-        tty.setraw(proc.child_fd)
+        # inject base loader
         try:
-            # inject base loader
             proc.sendline(stage1)
-            proc.expect_exact('STAGE2\n')
-
-            # load the second stage
-            proc.sendline(stage2)
+            if proc.expect_exact_noecho(['STAGE2\n', 'STAGE2\r\n']) == 1:
+                raise BondException(self.LANG, 'cannot switch terminal to raw mode')
         except pexpect.ExceptionPexpect:
             errors = proc.before.decode('utf-8')
-            raise BondException(self.LANG, 'cannot initialize interpreter: ' + errors)
+            raise BondException(self.LANG, 'cannot initialize stage1: ' + errors)
 
-        # remote environment should come up shortly
+        # load the second stage
+        try:
+            proc.sendline(stage2)
+            proc.expect_exact("READY\n")
+        except pexpect.ExceptionPexpect:
+            errors = proc.before.decode('utf-8')
+            raise BondException(self.LANG, 'cannot initialize stage2: ' + errors)
+
+        # remote environment is ready
         Bond.__init__(self, proc, trans_except)
 
 

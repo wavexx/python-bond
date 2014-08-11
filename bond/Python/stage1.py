@@ -3,12 +3,8 @@
 ###       possible to be injected into the interpreter *without parsing*.
 
 def __PY_BOND_stage1():
-    import sys, tty
-
-    if sys.stdin.isatty():
-        tty.setraw(sys.stdin)
+    import sys
     sys.stdout.write("STAGE2\n")
-
     line = sys.stdin.readline().rstrip()
     stage2 = eval(line)
     exec(stage2['code'], globals())
