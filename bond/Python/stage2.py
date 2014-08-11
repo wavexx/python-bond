@@ -100,7 +100,7 @@ def __PY_BOND_repl():
             return args
 
         elif cmd == "EXCEPT":
-            raise args
+            raise args if isinstance(args, Exception) else Exception(args)
 
         elif cmd == "ERROR":
             raise _PY_BOND_SerializationException(args)

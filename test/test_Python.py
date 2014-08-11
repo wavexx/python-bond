@@ -392,6 +392,7 @@ def test_export_except():
     try:
         gen_exception()
     except Exception as e:
+        print(e)
         ret = (str(e) == "test")
     return ret
     ''')
