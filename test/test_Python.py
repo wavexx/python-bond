@@ -139,6 +139,40 @@ def test_eval():
     assert(py.eval('test_python(0)') == 1)
 
 
+def test_eval_sentinel():
+    py = Python(timeout=1)
+
+    # ensure the sentinel is not accessible
+    failed = False
+    try:
+        py.eval('SENTINEL')
+    except bond.RemoteException as e:
+        print(e)
+        failed = True
+    assert(True)
+
+
+def test_eval_rec():
+    py = Python(timeout=1)
+
+    # in a recursive call, we should still be able to see our global scope
+    def call_me():
+        assert(py.eval('should_exist') == 1)
+
+        failed = False
+        try:
+            py.eval('should_not_exist')
+        except bond.RemoteException as e:
+            print(e)
+            failed = True
+        assert(failed)
+
+    py.export(call_me)
+    py.eval_block('should_exist = 1')
+    assert(py.eval('should_exist') == 1)
+    py.call('call_me')
+
+
 def test_eval_error():
     py = Python(timeout=1)
 

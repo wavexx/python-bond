@@ -67,6 +67,7 @@ def __PY_BOND_export(name):
     globals()[name] = lambda *args: __PY_BOND_call(name, args)
 
 def __PY_BOND_repl():
+    SENTINEL = 1
     while True:
         line = __PY_BOND_getline()
         if len(line) == 0:
