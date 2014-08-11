@@ -26,13 +26,13 @@ function __PY_BOND_sendline(line)
 
 
 /// Our minimal exception signature
-function __PY_BOND_SerializationException(message)
+function _PY_BOND_SerializationException(message)
 {
   this.message = message;
 }
 
-util.inherits(__PY_BOND_SerializationException, TypeError);
-__PY_BOND_SerializationException.prototype.name = "__PY_BOND_SerializationException";
+util.inherits(_PY_BOND_SerializationException, TypeError);
+_PY_BOND_SerializationException.prototype.name = "_PY_BOND_SerializationException";
 
 
 /// Serialization methods
@@ -47,7 +47,7 @@ function __PY_BOND_dumps(data)
 {
   var ret;
   try { ret = JSON.stringify(data, __PY_BOND_typecheck); }
-  catch(e) { throw new __PY_BOND_SerializationException(e.toString()); }
+  catch(e) { throw new _PY_BOND_SerializationException(e.toString()); }
   return ret;
 }
 
@@ -123,7 +123,7 @@ function __PY_BOND_repl()
       throw new Error(args);
 
     case "ERROR":
-      throw new __PY_BOND_SerializationException(args);
+      throw new _PY_BOND_SerializationException(args);
 
     default:
       process.exit(1);
@@ -145,7 +145,7 @@ function __PY_BOND_repl()
     var state = "RETURN";
     if(err != null)
     {
-      if(err instanceof __PY_BOND_SerializationException)
+      if(err instanceof _PY_BOND_SerializationException)
       {
 	state = "ERROR";
 	ret = err.message;

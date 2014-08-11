@@ -70,13 +70,13 @@ function __PY_BOND_sendline($line = '')
 
 
 // Serialization methods
-class __PY_BOND_SerializationException extends Exception {}
+class _PY_BOND_SerializationException extends Exception {}
 
 function __PY_BOND_dumps($data)
 {
   $code = json_encode($data);
   if(json_last_error())
-    throw new __PY_BOND_SerializationException(@"cannot encode $data");
+    throw new _PY_BOND_SerializationException(@"cannot encode $data");
   return $code;
 }
 
@@ -201,7 +201,7 @@ function __PY_BOND_repl()
       throw new Exception($args);
 
     case "ERROR":
-      throw new __PY_BOND_SerializationException($args);
+      throw new _PY_BOND_SerializationException($args);
 
     default:
       exit(1);
@@ -223,7 +223,7 @@ function __PY_BOND_repl()
     $state = "RETURN";
     if($err)
     {
-      if($err instanceOf __PY_BOND_SerializationException)
+      if($err instanceOf _PY_BOND_SerializationException)
       {
 	$state = "ERROR";
 	$ret = $err->getMessage();

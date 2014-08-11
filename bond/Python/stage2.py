@@ -40,7 +40,7 @@ def __PY_BOND_sendstate(state, code=None):
 
 
 # Serialization methods
-class __PY_BOND_SerializationException(TypeError):
+class _PY_BOND_SerializationException(TypeError):
     pass
 
 __PY_BOND_PROTOCOL = None
@@ -49,7 +49,7 @@ def __PY_BOND_dumps(*args):
     try:
         ret = base64.b64encode(pickle.dumps(args, __PY_BOND_PROTOCOL))
     except (TypeError, pickle.PicklingError):
-        raise __PY_BOND_SerializationException("cannot encode {data}".format(data=str(args)))
+        raise _PY_BOND_SerializationException("cannot encode {data}".format(data=str(args)))
     return ret
 
 def __PY_BOND_loads(buf):
@@ -102,7 +102,7 @@ def __PY_BOND_repl():
             raise args
 
         elif cmd == "ERROR":
-            raise __PY_BOND_SerializationException(args)
+            raise _PY_BOND_SerializationException(args)
 
         else:
             exit(1)
@@ -119,7 +119,7 @@ def __PY_BOND_repl():
         # error state
         state = "RETURN"
         if err is not None:
-            if isinstance(err, __PY_BOND_SerializationException):
+            if isinstance(err, _PY_BOND_SerializationException):
                 state = "ERROR"
                 ret = str(err)
             else:

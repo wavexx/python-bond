@@ -25,7 +25,7 @@ my %__PY_BOND_CHANNELS =
 
 # Our minimal exception signature
 {
-  package __PY_BOND_SerializationException;
+  package _PY_BOND_SerializationException;
 
   use overload '""' => sub { __PACKAGE__ . ': ' . ${shift()} . '\n' };
 
@@ -44,7 +44,7 @@ sub __PY_BOND_dumps
 {
   my $data = shift;
   my $code = eval { $__PY_BOND_JSON->encode($data) };
-  die __PY_BOND_SerializationException->new("cannot encode $data") if $@;
+  die _PY_BOND_SerializationException->new("cannot encode $data") if $@;
   return $code;
 }
 
@@ -142,7 +142,7 @@ sub __PY_BOND_repl()
     }
     elsif($cmd eq "ERROR")
     {
-      die __PY_BOND_SerializationException->new($args);
+      die _PY_BOND_SerializationException->new($args);
     }
     else
     {
@@ -166,7 +166,7 @@ sub __PY_BOND_repl()
     my $state = "RETURN";
     if($err)
     {
-      if(blessed($err) && $err->isa('__PY_BOND_SerializationException'))
+      if(blessed($err) && $err->isa('_PY_BOND_SerializationException'))
       {
 	$state = "ERROR";
 	$ret = $$err;
