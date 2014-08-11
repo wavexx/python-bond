@@ -5,6 +5,7 @@
 def __PY_BOND_stage1():
     import sys
     sys.stdout.write("STAGE2\n")
+    sys.stdout.flush();
     line = sys.stdin.readline().rstrip()
     stage2 = eval(line)
     exec(stage2['code'], globals())
