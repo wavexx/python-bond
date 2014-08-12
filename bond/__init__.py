@@ -69,9 +69,6 @@ class RemoteException(BondException):
 
 # The main host controller
 class Bond(object):
-    lang = '<unknown>'      # TODO: to be removed
-    _proto = protocols.JSON # TODO: to be removed
-
     def __init__(self, proc, trans_except, lang='<unknown>', proto=protocols.JSON):
         self.channels = {'STDOUT': sys.stdout, 'STDERR': sys.stderr}
         self.bindings = {}
@@ -79,39 +76,6 @@ class Bond(object):
         self._proc = proc
         self.lang = lang
         self._proto = proto
-
-
-    # TODO: to be removed
-    def _init_2stage(self, proc, probe, stage1, stage2, trans_except):
-        # probe the interpreter
-        try:
-            proc.sendline_noecho(probe)
-            if proc.expect_exact_noecho(['STAGE1\n', 'STAGE1\r\n']) == 1:
-                tty.setraw(proc.child_fd)
-        except pexpect.ExceptionPexpect:
-            raise BondException(self.LANG,
-                                'cannot get an interactive prompt using: '
-                                + str(proc.args))
-
-        # inject base loader
-        try:
-            proc.sendline(stage1)
-            if proc.expect_exact_noecho(['STAGE2\n', 'STAGE2\r\n']) == 1:
-                raise BondException(self.LANG, 'cannot switch terminal to raw mode')
-        except pexpect.ExceptionPexpect:
-            errors = proc.before.decode('utf-8')
-            raise BondException(self.LANG, 'cannot initialize stage1: ' + errors)
-
-        # load the second stage
-        try:
-            proc.sendline(stage2)
-            proc.expect_exact("READY\n")
-        except pexpect.ExceptionPexpect:
-            errors = proc.before.decode('utf-8')
-            raise BondException(self.LANG, 'cannot initialize stage2: ' + errors)
-
-        # remote environment is ready
-        Bond.__init__(self, proc, trans_except)
 
 
     def loads(self, *args):
