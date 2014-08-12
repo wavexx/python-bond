@@ -1,5 +1,4 @@
 # python-bond Python interface setup
-import base64
 import io
 import os
 import sys
@@ -43,17 +42,17 @@ def __PY_BOND_sendstate(state, code=None):
 class _PY_BOND_SerializationException(TypeError):
     pass
 
-__PY_BOND_PROTOCOL = None
-
 def __PY_BOND_dumps(*args):
     try:
-        ret = base64.b64encode(pickle.dumps(args, __PY_BOND_PROTOCOL))
+        ret = repr(pickle.dumps(args, 0)).encode('utf-8')
     except (TypeError, pickle.PicklingError):
         raise _PY_BOND_SerializationException("cannot encode {data}".format(data=str(args)))
     return ret
 
 def __PY_BOND_loads(buf):
-    return pickle.loads(base64.b64decode(buf))[0]
+    dec = eval(buf.decode('utf-8'))
+    if not isinstance(dec, bytes): dec = dec.encode('utf-8')
+    return pickle.loads(dec)[0]
 
 
 # Recursive repl
@@ -137,9 +136,8 @@ def __PY_BOND_repl():
     return 0
 
 
-def __PY_BOND_start(trans_except, protocol):
-    global __PY_BOND_TRANS_EXCEPT, __PY_BOND_PROTOCOL
-    global __PY_BOND_BUFFERS, __PY_BOND_CHANNELS
+def __PY_BOND_start(trans_except):
+    global __PY_BOND_TRANS_EXCEPT, __PY_BOND_BUFFERS, __PY_BOND_CHANNELS
 
     if isinstance(sys.stdout, io.TextIOWrapper):
         for buf in __PY_BOND_BUFFERS:
@@ -152,7 +150,6 @@ def __PY_BOND_start(trans_except, protocol):
     sys.stdin = open(os.devnull)
 
     __PY_BOND_TRANS_EXCEPT = trans_except
-    __PY_BOND_PROTOCOL = protocol
     __PY_BOND_sendstate("READY")
     ret = __PY_BOND_repl()
     __PY_BOND_sendstate("BYE")
