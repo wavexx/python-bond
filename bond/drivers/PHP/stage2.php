@@ -274,7 +274,7 @@ function __PY_BOND_repl()
   return 0;
 }
 
-function __PY_BOND_start($trans_except)
+function __PY_BOND_start($proto, $trans_except)
 {
   global $__PY_BOND_TRANS_EXCEPT;
   ob_start('__PY_BOND_output');
