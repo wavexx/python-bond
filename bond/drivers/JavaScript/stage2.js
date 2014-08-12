@@ -171,7 +171,7 @@ function __PY_BOND_repl()
   return 0;
 }
 
-function __PY_BOND_start(trans_except)
+function __PY_BOND_start(proto, trans_except)
 {
   // TODO: this is a hack
   process.stdout.write = function(buf) { __PY_BOND_BUFFERS["STDOUT"] += buf; };

@@ -26,5 +26,5 @@ function __PY_BOND_getline()
   var line = __PY_BOND_getline();
   var stage2 = JSON.parse(line);
   eval.call(null, stage2.code);
-  eval.call(null, stage2.func).apply(null, stage2.args);
+  __PY_BOND_start.apply(null, stage2.start);
 }).call(null);
