@@ -3,12 +3,12 @@
 ###       possible to be injected into the interpreter *without parsing*.
 
 def __PY_BOND_stage1():
-    import sys
+    import sys, json
     sys.stdout.write("STAGE2\n")
     sys.stdout.flush();
     line = sys.stdin.readline().rstrip()
-    stage2 = eval(line)
+    stage2 = json.loads(line)
     exec(stage2['code'], globals())
-    eval(stage2['func'], globals())(*stage2['args'])
+    __PY_BOND_start(*stage2['start'])
 
 __PY_BOND_stage1()

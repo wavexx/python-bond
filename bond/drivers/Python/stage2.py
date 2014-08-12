@@ -1,5 +1,6 @@
 # python-bond Python interface setup
 import io
+import json
 import os
 import sys
 
@@ -136,7 +137,7 @@ def __PY_BOND_repl():
     return 0
 
 
-def __PY_BOND_start(trans_except):
+def __PY_BOND_start(proto, trans_except):
     global __PY_BOND_TRANS_EXCEPT, __PY_BOND_BUFFERS, __PY_BOND_CHANNELS
 
     if isinstance(sys.stdout, io.TextIOWrapper):

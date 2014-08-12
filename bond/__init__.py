@@ -1,7 +1,15 @@
 import json
+import os
 import pexpect
+import pkg_resources
+import re
 import sys
 import tty
+from bond import protocols
+
+# Host constants
+LANG  = 'Python'           # Identity language
+PROTO = ['PICKLE', 'JSON'] # Supported protocols, in order of preference
 
 
 # pexpect helper
@@ -59,17 +67,21 @@ class RemoteException(BondException):
         return "RemoteException[{lang}]: {msg}".format(lang=self.lang, msg=self.error)
 
 
-# The main base class
+# The main host controller
 class Bond(object):
-    LANG = '<unknown>'
+    lang = '<unknown>'      # TODO: to be removed
+    _proto = protocols.JSON # TODO: to be removed
 
-    def __init__(self, proc, trans_except):
+    def __init__(self, proc, trans_except, lang='<unknown>', proto=protocols.JSON):
         self.channels = {'STDOUT': sys.stdout, 'STDERR': sys.stderr}
         self.bindings = {}
         self.trans_except = trans_except
         self._proc = proc
+        self.lang = lang
+        self._proto = proto
 
 
+    # TODO: to be removed
     def _init_2stage(self, proc, probe, stage1, stage2, trans_except):
         # probe the interpreter
         try:
@@ -102,23 +114,19 @@ class Bond(object):
         Bond.__init__(self, proc, trans_except)
 
 
-    def loads(self, buf):
-        return json.loads(buf.decode('utf-8'))
+    def loads(self, *args):
+        return self._proto.loads(*args)
 
     def dumps(self, *args):
-        return json.dumps(*args, skipkeys=False).encode('utf-8')
-
-
-    def _dumps(self, *args):
         try:
-            return self.dumps(*args)
+            return self._proto.dumps(*args)
         except Exception as e:
-            raise SerializationException(self.LANG, str(e), 'local')
+            raise SerializationException(self.lang, str(e), 'local')
+
 
     def _sendstate(self, cmd, code):
         ret = bytes(cmd.encode('ascii')) + b' ' + code
         self._proc.sendline(ret)
-
 
     def _repl(self):
         while self._proc.expect_exact(b'\n') == 0:
@@ -133,11 +141,11 @@ class Bond(object):
                 self.channels[args[0]].write(args[1])
                 continue
             elif cmd == "EXCEPT":
-                raise RemoteException(self.LANG, str(args), args)
+                raise RemoteException(self.lang, str(args), args)
             elif cmd == "ERROR":
-                raise SerializationException(self.LANG, str(args), 'remote')
+                raise SerializationException(self.lang, str(args), 'remote')
             elif cmd == "BYE":
-                raise TerminatedException(self.LANG, str(args))
+                raise TerminatedException(self.lang, str(args))
             elif cmd == "CALL":
                 ret = None
                 state = "RETURN"
@@ -147,29 +155,29 @@ class Bond(object):
                     state = "EXCEPT"
                     ret = e if self.trans_except else str(e)
                 try:
-                    code = self._dumps(ret)
+                    code = self.dumps(ret)
                 except SerializationException as e:
                     state = "ERROR"
-                    code = self._dumps(str(e))
+                    code = self.dumps(str(e))
                 self._sendstate(state, code)
                 continue
 
-            raise BondException(self.LANG, 'unknown interpreter state')
+            raise BondException(self.lang, 'unknown interpreter state')
 
 
     def eval(self, code):
         '''Evaluate and return the value of a single statement of code in the interpreter.'''
-        self._sendstate('EVAL', self._dumps(code))
+        self._sendstate('EVAL', self.dumps(code))
         return self._repl()
 
     def eval_block(self, code):
         '''Evaluate a "code" block inside the interpreter. Nothing is returned.'''
-        self._sendstate('EVAL_BLOCK', self._dumps(code))
+        self._sendstate('EVAL_BLOCK', self.dumps(code))
         return self._repl()
 
     def call(self, name, *args):
         '''Call a function "name" using *args (apply *args to a callable statement "name")'''
-        self._sendstate('CALL', self._dumps([name, args]))
+        self._sendstate('CALL', self.dumps([name, args]))
         return self._repl()
 
     def close(self):
@@ -181,7 +189,7 @@ class Bond(object):
         If "name" is not specified, use the local function name directly.'''
         if name is None:
             name = func.__name__
-        self._sendstate('EXPORT', self._dumps(name))
+        self._sendstate('EXPORT', self.dumps(name))
         self.bindings[name] = func
         return self._repl()
 
@@ -199,6 +207,100 @@ class Bond(object):
         interact(self, **kwargs)
 
 
+# Drivers
+def query_driver(lang):
+    '''Query an individual driver by language name and return its data'''
+    path = os.path.join('drivers', lang, 'bond.json')
+    try:
+        code = pkg_resources.resource_string(__name__, path).decode('utf-8')
+        data = json.loads(code)
+    except IOError:
+        raise BondException(lang, 'unable to find driver data')
+    except ValueError:
+        raise BondException(lang, 'malformed driver data')
+    return data
+
+
+def list_drivers():
+    '''Return a list of available language drivers'''
+    langs = []
+    drivers_path = pkg_resources.resource_filename(__name__, 'drivers')
+    for path in os.listdir(drivers_path):
+        data_path = os.path.join(drivers_path, path, 'bond.json')
+        if os.path.isfile(data_path):
+            langs.append(path)
+    return langs
+
+
+def _load_stage(lang, data):
+    stage = os.path.join('drivers', lang, data['file'])
+    stage = pkg_resources.resource_string(__name__, stage).decode('utf-8')
+    if 'sub' in data:
+        sub = data['sub']
+        stage = re.sub(sub[0], sub[1], stage)
+    return stage.strip()
+
+def bond(lang=None, cmd=None, args=None, xargs='', cwd=None, env=os.environ,
+        trans_except=None, timeout=60, protocol=None, logfile=None):
+    '''Construct a bond using the specified language/command'''
+
+    # basic command data
+    # TODO: when multiple commands exists, they should probed in sequence
+    # TODO: correctly quote command arguments
+    data = query_driver(lang)
+    if cmd is None: cmd = data['command'][0][0]
+    if args is None: args = ' '.join(data['command'][0][1:])
+
+    # select the highest compatible protocol
+    protocol_list = filter(PROTO.__contains__, data['proto'])
+    if protocol is not None:
+        if not isinstance(protocol, list): protocol = [protocol]
+        protocol_list = filter(protocol_list.__contains__, protocol)
+    protocol_list = list(protocol_list)
+    if len(protocol_list) < 1:
+        raise BondException(lang, 'no compatible protocol supported')
+    protocol = protocol_list[0]
+
+    # determine a good default for trans_except
+    if trans_except is None:
+        trans_except = (lang == LANG and protocol == PROTO[0])
+
+    # probe the interpreter
+    try:
+        probe = data['init']['probe']
+        cmd = ' '.join([cmd, args, xargs])
+        proc = Spawn(cmd, cwd=cwd, env=env, timeout=timeout, logfile=logfile)
+        proc.sendline_noecho(probe)
+        if proc.expect_exact_noecho(['STAGE1\n', 'STAGE1\r\n']) == 1:
+            tty.setraw(proc.child_fd)
+    except pexpect.ExceptionPexpect:
+        raise BondException(lang, 'cannot get an interactive prompt using: ' + str(proc.args))
+
+    # inject base loader
+    try:
+        stage1 = _load_stage(lang, data['init']['stage1'])
+        proc.sendline_noecho(stage1)
+        if proc.expect_exact_noecho(['STAGE2\n', 'STAGE2\r\n']) == 1:
+            raise BondException(lang, 'cannot switch terminal to raw mode')
+    except pexpect.ExceptionPexpect:
+        errors = proc.before.decode('utf-8')
+        raise BondException(lang, 'cannot initialize stage1: ' + errors)
+
+    # load the second stage
+    try:
+        stage2 = _load_stage(lang, data['init']['stage2'])
+        stage2 = protocols.JSON.dumps({'code': stage2, 'start': [protocol, trans_except]})
+        proc.sendline(stage2)
+        proc.expect_exact("READY\n")
+    except pexpect.ExceptionPexpect:
+        errors = proc.before.decode('utf-8')
+        raise BondException(lang, 'cannot initialize stage2: ' + errors)
+
+    # remote environment is ready
+    proto = getattr(protocols, protocol)
+    return Bond(proc, trans_except, lang=lang, proto=proto)
+
+
 
 # Utilities
 def interact(bond, prompt=None):
@@ -212,7 +314,7 @@ def interact(bond, prompt=None):
     You can continue the statement on multiple lines by leaving a trailing "\".
     Type Ctrl+C to abort a multi-line block without executing it.'''
 
-    ps1 = "{lang}> ".format(lang=bond.LANG) if prompt is None else prompt
+    ps1 = "{lang}> ".format(lang=bond.lang) if prompt is None else prompt
     ps1_len = len(ps1.rstrip())
     ps2 = '.' * ps1_len + ' ' * (len(ps1) - ps1_len)
 
