@@ -15,5 +15,5 @@ sub
   my $stage2 = JSON::decode_json($line);
 
   eval $stage2->{code};
-  &{\&{$stage2->{func}}}(@{$stage2->{args}});
+  __PY_BOND_start(@{$stage2->{start}});
 }->();

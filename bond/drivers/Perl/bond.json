@@ -1,0 +1,15 @@
+{
+  "lang": "Perl",
+  "command": [["perl", "-d", "-e1"]],
+  "proto": ["JSON"],
+  "init": {
+    "probe": "print uc(\"stage1\\n\");",
+    "stage1": {
+      "file": "stage1.pl",
+      "sub": ["\\s*(###.*)?\\n\\s*", ""]
+    },
+    "stage2": {
+      "file": "stage2.pl"
+    }
+  }
+}

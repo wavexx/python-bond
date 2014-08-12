@@ -189,9 +189,9 @@ sub __PY_BOND_repl()
   return 0;
 }
 
-sub __PY_BOND_start($)
+sub __PY_BOND_start($$)
 {
-  my $trans_except = shift;
+  my ($proto, $trans_except) = @_;
 
   *STDIN = IO::Handle->new();
   *STDOUT = $__PY_BOND_BUFFERS{STDOUT};
