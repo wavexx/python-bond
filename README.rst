@@ -110,8 +110,8 @@ completely invisible on the remote side: you don't need ``bond`` installed
 remotely at all.
 
 The wire protocol is simple enough to be extended to any language supporting an
-interactive interpreter. In fact, the drivers themselves can be used `from any
-other language <https://github.com/wavexx/bond-drivers>`_.
+interactive interpreter. In fact, `the drivers themselves
+<https://github.com/wavexx/bond-drivers>`_ can be used from any other language.
 
 
 API
