@@ -7,6 +7,12 @@ import sys
 import tty
 from bond import protocols
 
+try:
+    from shlex import quote
+except ImportError:
+    from pipes import quote
+
+
 # Host constants
 LANG  = 'Python'           # Identity language
 PROTO = ['PICKLE', 'JSON'] # Supported protocols, in order of preference
@@ -166,14 +172,14 @@ class Bond(object):
         other.export(self.callable(name), remote or name)
 
     def interact(self, **kwargs):
-        '''Start an interactive session with this bond. See bond.interact() for
-        a full list of keyword options'''
+        '''Start an interactive session with this bond. See ``bond.interact()``
+        for a full list of keyword options'''
         interact(self, **kwargs)
 
 
 # Drivers
 def query_driver(lang):
-    '''Query an individual driver by language name and return its data'''
+    '''Query an individual driver by language name and return its raw data'''
     path = os.path.join('drivers', lang, 'bond.json')
     try:
         code = pkg_resources.resource_string(__name__, path).decode('utf-8')
@@ -186,7 +192,7 @@ def query_driver(lang):
 
 
 def list_drivers():
-    '''Return a list of available language drivers'''
+    '''Return a list of available language driver names'''
     langs = []
     drivers_path = pkg_resources.resource_filename(__name__, 'drivers')
     for path in os.listdir(drivers_path):
@@ -204,16 +210,45 @@ def _load_stage(lang, data):
         stage = re.sub(sub[0], sub[1], stage)
     return stage.strip()
 
-def bond(lang=None, cmd=None, args=None, xargs='', cwd=None, env=os.environ,
+def bond(lang=None, cmd=None, args=None, xargs=None, cwd=None, env=os.environ,
         trans_except=None, timeout=60, protocol=None, logfile=None):
-    '''Construct a bond using the specified language/command'''
+    '''Construct a bond using the specified language/command
+
+    "lang": a valid, supported language name (see ``list_drivers()``).
+
+    "cmd": a valid shell command used to start the interpreter. If not
+    specified, the default command is taken from the driver.
+
+    "args": a list of command line arguments which are *required* to setup the
+    interpreter. The arguments are normally taken from the driver, but this
+    keyword allows to override the hard-coded values.
+
+    "xargs": a list of command line arguments which are simply appended
+    to the final command line.
+
+    "cwd": the working directory of the interpreter (defaulting to the current
+    working directory)
+
+    "env": the environment passed to the interpreter.
+
+    "trans_except": forces/disables transparent exceptions. When transparent
+    exceptions are enabled, exceptions themselves are serialized and rethrown
+    across the bond. It's disabled by default on all languages except Python.
+
+    "timeout": the default communication timeout.
+
+    "protocol": forces a specific serialization protocol to be chosen. It's
+    automatically selected when not specified, and usually matches "JSON".
+
+    "logfile": a file handle which is used to copy all input/output with the
+    interpreter for debugging purposes.'''
 
     # basic command data
     # TODO: when multiple commands exists, they should probed in sequence
-    # TODO: correctly quote command arguments
     data = query_driver(lang)
     if cmd is None: cmd = data['command'][0][0]
-    if args is None: args = ' '.join(data['command'][0][1:])
+    if args is None: args = data['command'][0][1:]
+    if xargs is None: xargs = []
 
     # select the highest compatible protocol
     protocol_list = filter(PROTO.__contains__, data['proto'])
@@ -231,8 +266,8 @@ def bond(lang=None, cmd=None, args=None, xargs='', cwd=None, env=os.environ,
 
     # probe the interpreter
     try:
+        cmd = ' '.join([cmd] + list(map(quote, args + xargs)))
         probe = data['init']['probe']
-        cmd = ' '.join([cmd, args, xargs])
         proc = Spawn(cmd, cwd=cwd, env=env, timeout=timeout, logfile=logfile)
         proc.sendline_noecho(probe)
         if proc.expect_exact_noecho(['STAGE1\n', 'STAGE1\r\n']) == 1:
