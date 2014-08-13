@@ -111,7 +111,7 @@ remotely at all.
 
 The wire protocol is simple enough to be extended to any language supporting an
 interactive interpreter. In fact, the drivers themselves can be used `from any
-other language <github.com/wavexx/bond-drivers>`_.
+other language <https://github.com/wavexx/bond-drivers>`_.
 
 
 API
