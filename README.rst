@@ -27,8 +27,8 @@ A simple  example
 .. code:: python3
 
   >>> # Let's bond with a PHP interpreter
-  >>> from bond.PHP import PHP
-  >>> php = PHP()
+  >>> from bond import bond
+  >>> php = bond('PHP')
   >>> php.eval_block('echo "Hello world!\n";')
   Hello world!
 
@@ -45,16 +45,15 @@ A simple  example
   Hi, this is Python talking!
 
   >>> # Use some remote resources
-  >>> remote_php = PHP('ssh remote php')
+  >>> remote_php = bond('PHP', 'ssh remote php')
   >>> remote_php.eval_block('function call_me() { echo "Hi from " . system("hostname") . "!"; }')
   >>> remote_php.eval('call_me()')
   Hi from remote!
 
   >>> # Bridge two worlds!
-  >>> from bond.Perl import Perl
-  >>> perl = Perl()
+  >>> perl = bond('Perl')
   >>> php.proxy('explode', perl)
-  >>> # note: explode is now available to Perl
+  >>> # note: explode is now available to Perl, but still executes in PHP
   >>> perl.eval('explode("=", "Mind=blown!")')
   [u'Mind', u'blown!']
 
@@ -69,10 +68,10 @@ function:
 
 .. code:: python3
 
-  from bond.PHP import PHP
+  from bond import bond
   import sys
 
-  php = PHP()
+  php = bond('PHP')
   php.eval_block('include("my_original_program.php");')
 
   def new_function(arg)
@@ -90,9 +89,9 @@ minimal effort:
 .. code:: python3
 
   # setup the workers
-  from bond.Python import Python
+  from bond import bond
   hosts = ['host1', 'host2', 'host3']
-  nodes = [Python('ssh {} python'.format(host)) for host in hosts]
+  nodes = [bond('Python', 'ssh {} python'.format(host)) for host in hosts]
 
   # load our libraries first
   for node in nodes:
@@ -117,28 +116,32 @@ API
 Construction
 ------------
 
-You can construct a ``bond`` by using the appropriate subclass:
+You can construct a ``bond`` by using the ``bond.bond()`` function:
 
 .. code:: python3
 
-  from bond.<language> import <language>
-  interpreter = <language>().
+  import bond
+  interpreter = bond.bond('language')
 
-The following keyword arguments are always allowed in constructors:
+The first argument should be the desired language name ("JavaScript", "PHP",
+"Perl", "Python"). The list of supported languages can be fetched dynamically
+using ``bond.list_drivers()``.
 
-``cmd``:
+You can override the default interpreter command using the second argument,
+which allows to specify any shell command to be executed:
 
-  Command used to execute the interactive interpreter.
+.. code:: python3
 
-``args``:
+  import bond
+  interpreter = bond.bond('Python', 'ssh remote python3')
 
-  Default arguments used to execute the interactive interpreter. These
-  arguments are required to setup the interpreter correctly, and shouldn't
-  normally be changed.
+Several command line arguments are supplied automatically by the driver to
+force an interactive shell: for example, "-i" if Python is requested. You can
+override these using the ``args`` keyword argument. An additional *list* of
+arguments can be provided using ``xargs``. All the provided arguments are
+automatically quoted.
 
-``xargs``:
-
-  Any additional arguments to pass to the interpreter.
+Furthermore, the following keyword arguments are supported:
 
 ``cwd``:
 
@@ -169,10 +172,10 @@ The following keyword arguments are always allowed in constructors:
   remote exception instead, which avoids serialization errors.
 
 
-Methods
--------
+``bond.Bond`` Methods
+---------------------
 
-The ``bond`` class supports the following methods:
+The resulting ``bond.Bond`` class has the following methods:
 
 ``eval(code)``:
 
@@ -248,18 +251,15 @@ Serialization:
 Python 2 / Python 3:
 
 You can freely mix Python versions between hosts/interpreters (that is: you can
-run Python 3 code from a Python 2 host and vice-versa). You'll need to provide
-the correct name for the Python command and use ``compat=True`` in the
-constructor, as follows:
+run Python 3 code from a Python 2 host and vice-versa). You'll need to disable
+transparent exceptions though, as the as the exception hierarchy is different
+between major versions:
 
 .. code:: python3
 
-  from bond.Python import Python
-  py = Python("python3", compat=True)
-
-``compat=True`` is just a shortcut for ``trans_except=False, protocol=0``. It
-disables transparent exceptions (as the exception hierarchy is different
-between Python 2/3) and forces the lowest pickling protocol to be used.
+  # assuming a python2.7 environment
+  from bond import bond
+  py = bond('Python', 'python3', trans_except=False)
 
 
 PHP

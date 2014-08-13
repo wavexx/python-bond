@@ -1,20 +1,19 @@
 from __future__ import print_function
 import bond
-from bond.Perl import Perl
 from test import *
 
 def test_basic():
-    perl = Perl(timeout=1)
+    perl = bond.bond('Perl', timeout=1)
     perl.close()
 
 
 def test_basic_rmt():
-    perl = Perl("ssh localhost perl", timeout=1)
+    perl = bond.bond('Perl', "ssh localhost perl", timeout=1)
     perl.close()
 
 
 def test_call_marshalling():
-    perl = Perl(timeout=1)
+    perl = bond.bond('Perl', timeout=1)
 
     perl.eval(r'sub test_str { "Hello world!"; }')
     assert(str(perl.call('test_str')) == "Hello world!")
@@ -47,7 +46,7 @@ def test_call_marshalling():
 
 
 def test_call_simple():
-    perl = Perl(timeout=1)
+    perl = bond.bond('Perl', timeout=1)
     perl.eval('sub test_simple { "Hello world!"; }')
     perl_simple = perl.callable('test_simple')
     ret = perl_simple()
@@ -60,7 +59,7 @@ def test_call_simple():
 
 
 def test_call_stm():
-    perl = Perl(timeout=1)
+    perl = bond.bond('Perl', timeout=1)
 
     # test the call interface with a normal function
     perl.eval_block('sub copy { shift() }')
@@ -88,7 +87,7 @@ def test_call_stm():
 
 
 def test_call_error():
-    perl = Perl(timeout=1)
+    perl = bond.bond('Perl', timeout=1)
     perl.eval('sub test_simple { 1 / shift() }')
     ret = perl.call('test_simple', 1)
     assert(ret == 1)
@@ -107,7 +106,7 @@ def test_call_error():
 
 
 def test_call_proto():
-    perl = Perl(timeout=1)
+    perl = bond.bond('Perl', timeout=1)
 
     # without prototypes
     perl.eval('sub test_simple { "Hello world!"; }')
@@ -136,7 +135,7 @@ def test_call_proto():
 
 
 def test_call_builtin():
-    perl = Perl(timeout=1)
+    perl = bond.bond('Perl', timeout=1)
 
     # NOTE: sprintf is a built-in, and thus more compliated to call with
     #       the same semantics
@@ -149,7 +148,7 @@ def test_call_builtin():
 
 
 def test_eval():
-    perl = Perl(timeout=1)
+    perl = bond.bond('Perl', timeout=1)
 
     # literal values
     assert(perl.eval('1') == 1)
@@ -177,7 +176,7 @@ def test_eval():
 
 
 def test_eval_sentinel():
-    perl = Perl(timeout=1)
+    perl = bond.bond('Perl', timeout=1)
 
     # ensure the sentinel is not accessible
     failed = False
@@ -190,7 +189,7 @@ def test_eval_sentinel():
 
 
 def test_eval_rec():
-    perl = Perl(timeout=1)
+    perl = bond.bond('Perl', timeout=1)
 
     # in a recursive call, we should still be able to see our global scope
     def call_me():
@@ -204,7 +203,7 @@ def test_eval_rec():
 
 
 def test_ser_err():
-    perl = Perl(timeout=1, trans_except=True)
+    perl = bond.bond('Perl', timeout=1, trans_except=True)
 
     # construct an unserializable type
     perl.eval_block(r'''
@@ -251,7 +250,7 @@ def test_ser_err():
 
 
 def test_eval_error():
-    perl = Perl(timeout=1)
+    perl = bond.bond('Perl', timeout=1)
 
     # try a correct statement before
     assert(perl.eval('1;') == 1)
@@ -270,7 +269,7 @@ def test_eval_error():
 
 
 def test_exception():
-    perl = Perl(timeout=1)
+    perl = bond.bond('Perl', timeout=1)
 
     # remote exception
     perl.eval_block('sub exceptional() { die $@; }')
@@ -307,13 +306,13 @@ def test_export():
     def call_me():
         return 42
 
-    perl = Perl(timeout=1)
+    perl = bond.bond('Perl', timeout=1)
     perl.export(call_me, 'call_me')
     assert(perl.call('call_me') == 42)
 
 
 def test_export_redef():
-    perl = Perl(timeout=1)
+    perl = bond.bond('Perl', timeout=1)
 
     def call_me():
         return 42
@@ -328,7 +327,7 @@ def test_export_redef():
 
 
 def test_export_invalid():
-    perl = Perl(timeout=1)
+    perl = bond.bond('Perl', timeout=1)
 
     def call_me():
         return 42
@@ -342,7 +341,7 @@ def test_export_invalid():
 
 
 def test_export_recursive():
-    perl = Perl(timeout=1)
+    perl = bond.bond('Perl', timeout=1)
 
     # define a remote function
     perl.eval(r'sub func_perl { shift() + 1; }')
@@ -379,7 +378,7 @@ def test_export_ser_err():
     def call_me(arg):
         pass
 
-    perl = Perl(timeout=1)
+    perl = bond.bond('Perl', timeout=1)
     perl.export(call_me, 'call_me')
     perl.eval_block(r'''
     use IO::File;
@@ -399,7 +398,7 @@ def test_export_ser_err():
 
 
 def test_export_except():
-    perl = Perl(timeout=1)
+    perl = bond.bond('Perl', timeout=1)
 
     def gen_exception():
         raise Exception("test")
@@ -418,7 +417,7 @@ def test_export_except():
 
 
 def test_output_redirect():
-    perl = Perl(timeout=1)
+    perl = bond.bond('Perl', timeout=1)
 
     # stdout
     perl.eval_block(r'print "stdout: Hello world!\n";')
@@ -434,8 +433,8 @@ def test_output_redirect():
 
 
 def test_trans_except():
-    perl_trans = Perl(timeout=1, trans_except=True)
-    perl_not_trans = Perl(timeout=1, trans_except=False)
+    perl_trans = bond.bond('Perl', timeout=1, trans_except=True)
+    perl_not_trans = bond.bond('Perl', timeout=1, trans_except=False)
 
     code = r'''sub func() { die \&func; }'''
 
@@ -467,8 +466,8 @@ def test_trans_except():
 
 
 def test_export_trans_except():
-    perl_trans = Perl(timeout=1, trans_except=True)
-    perl_not_trans = Perl(timeout=1, trans_except=False)
+    perl_trans = bond.bond('Perl', timeout=1, trans_except=True)
+    perl_not_trans = bond.bond('Perl', timeout=1, trans_except=False)
 
     def call_me():
        raise RuntimeError("a runtime error")
@@ -512,17 +511,17 @@ def test_stack_depth():
         return lambda x: x
 
     # check normal stack depth
-    perl = Perl(timeout=1)
+    perl = bond.bond('Perl', timeout=1)
     assert(bond_repl_depth(perl) == 1)
 
     # check stack depth after calling a normal function
-    perl = Perl(timeout=1)
+    perl = bond.bond('Perl', timeout=1)
     perl.export(no_exception)
     perl.call('no_exception')
     assert(bond_repl_depth(perl) == 1)
 
     # check stack depth after returning a serializable exception
-    perl = Perl(timeout=1)
+    perl = bond.bond('Perl', timeout=1)
     perl.export(gen_exception)
     got_except = False
     try:
@@ -534,7 +533,7 @@ def test_stack_depth():
     assert(bond_repl_depth(perl) == 1)
 
     # check stack depth after a remote serialization error
-    perl = Perl(timeout=1)
+    perl = bond.bond('Perl', timeout=1)
     perl.export(gen_ser_err)
     got_except = False
     try:
@@ -556,9 +555,9 @@ def _test_buf_size(perl):
         assert(ret == str(ret))
 
 def test_buf_size():
-    perl = Perl(timeout=1)
+    perl = bond.bond('Perl', timeout=1)
     _test_buf_size(perl)
 
 def test_buf_size_rmt():
-    perl = Perl("ssh localhost perl", timeout=1)
+    perl = bond.bond('Perl', "ssh localhost perl", timeout=1)
     _test_buf_size(perl)

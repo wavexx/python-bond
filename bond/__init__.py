@@ -210,7 +210,7 @@ def _load_stage(lang, data):
         stage = re.sub(sub[0], sub[1], stage)
     return stage.strip()
 
-def bond(lang=None, cmd=None, args=None, xargs=None, cwd=None, env=os.environ,
+def bond(lang, cmd=None, args=None, xargs=None, cwd=None, env=os.environ,
         trans_except=None, timeout=60, protocol=None, logfile=None):
     '''Construct a bond using the specified language/command
 
