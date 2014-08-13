@@ -12,9 +12,7 @@ def test_basic_rmt():
     py.close()
 
 
-def test_call_marshalling():
-    py = bond.bond('Python', timeout=1)
-
+def _test_call_marshalling(py):
     py.eval_block(r'''def test_str():
         return "Hello world!"
     ''')
@@ -57,6 +55,14 @@ def test_call_marshalling():
         ret = py_nested(value)
         print("{} => {}".format(value, ret))
         assert(str(ret) == str(value))
+
+def test_call_marshalling_native():
+    py = bond.bond('Python', timeout=1)
+    _test_call_marshalling(py)
+
+def test_call_marshalling_baseline():
+    py = bond.bond('Python', protocol='JSON', timeout=1)
+    _test_call_marshalling(py)
 
 
 def test_call_simple():
