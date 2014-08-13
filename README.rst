@@ -105,9 +105,13 @@ minimal effort:
   # collect the results
   results = [thread.join() for thread in threads]
 
-``bond`` aims to be completely invisible on the remote side (you don't need
-``bond`` installed remotely at all). The wire protocol is simple enough to be
-extended to any language supporting an interactive interpreter.
+You can also use ``bond`` to mix Python 2/3 code. ``bond`` aims to be
+completely invisible on the remote side: you don't need ``bond`` installed
+remotely at all.
+
+The wire protocol is simple enough to be extended to any language supporting an
+interactive interpreter. In fact, the drivers themselves can be used `from any
+other language <github.com/wavexx/bond-drivers>`_.
 
 
 API
