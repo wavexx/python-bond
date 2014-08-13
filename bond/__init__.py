@@ -251,11 +251,10 @@ def bond(lang, cmd=None, args=None, xargs=None, cwd=None, env=os.environ,
     if xargs is None: xargs = []
 
     # select the highest compatible protocol
-    protocol_list = filter(PROTO.__contains__, data['proto'])
+    protocol_list = list(filter(PROTO.__contains__, data['proto']))
     if protocol is not None:
         if not isinstance(protocol, list): protocol = [protocol]
-        protocol_list = filter(protocol_list.__contains__, protocol)
-    protocol_list = list(protocol_list)
+        protocol_list = list(filter(protocol_list.__contains__, protocol))
     if len(protocol_list) < 1:
         raise BondException(lang, 'no compatible protocol supported')
     protocol = protocol_list[0]
