@@ -197,9 +197,7 @@ def test_eval_error():
     assert(py.eval('1') == 1)
 
 
-def test_ser_err():
-    py = bond.bond('Python', timeout=1)
-
+def _test_ser_err(py):
     # construct an unserializable type
     py.eval_block(r'''if True:
     import os
@@ -245,6 +243,14 @@ def test_ser_err():
 
     # ensure the env didn't just die
     assert(py.eval('1') == 1)
+
+def test_ser_err_native():
+    py = bond.bond('Python', timeout=1)
+    _test_ser_err(py)
+
+def test_ser_err_baseline():
+    py = bond.bond('Python', trans_except=True, protocol='JSON', timeout=1)
+    _test_ser_err(py)
 
 
 def test_exception():
