@@ -117,10 +117,11 @@ interactive interpreter. In fact, `the drivers themselves
 API
 ===
 
-Construction
-------------
+Initialization
+--------------
 
-You can construct a ``bond`` by using the ``bond.bond()`` function:
+A ``bond.Bond`` object is not normally constructed directly, but by using the
+``bond.bond()`` function:
 
 .. code:: python3
 
@@ -231,6 +232,35 @@ The resulting ``bond.Bond`` class has the following methods:
   execute a single statement with bond.eval() and print it's return value. You
   can continue the statement on multiple lines by leaving a trailing "\\". Type
   Ctrl+C to abort a multi-line block without executing it.
+
+
+Exceptions
+----------
+
+All exceptions thrown by the ``bond`` module are of base type ``RuntimeError``
+<= ``BondException``.
+
+``BondException``:
+  Thrown during initialization or unrecoverable errors.
+
+``TerminatedException``:
+  Thrown when the bond exists unexpectedly.
+
+``SerializationException``:
+  Thrown when an object/exception which is sent *or* received cannot be
+  serialized by the current protocol. The ``side`` attribute can be either
+  "local" (when attempting to *send*) or "remote" (when *receiving*). A
+  ``SerializationException`` is not fatal.
+
+``RemoteException``:
+  Thrown for uncaught remote exceptions. The "data" attribute contains either
+  the error message (with ``trans_except=False``) or the remote exception
+  itself (``trans_except=True``).
+
+Beware that both ``SerializationException`` (with ``side="remote"``) and
+``RemoteException`` may actually be originating from uncaught *local*
+exceptions when an exported function is called. Pay attention to the error
+text/data in these cases, as it will contain several nested exceptions.
 
 
 Language support

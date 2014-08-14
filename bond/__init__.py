@@ -76,6 +76,14 @@ class RemoteException(BondException):
 # The main host controller
 class Bond(object):
     def __init__(self, proc, trans_except, lang='<unknown>', proto=protocols.JSON):
+        '''Construct a bond using an already-initialized interpreter.
+        Use ``bond.bond()`` to initialize it using a language driver.
+
+        "proc": a pexpect object, with an open communication to a bond driver
+        "trans_except": local behavior for transparent exceptions
+        "lang": language name
+        "proto": serialization object supporting "dumps/loads"'''
+
         self.channels = {'STDOUT': sys.stdout, 'STDERR': sys.stderr}
         self.bindings = {}
         self.trans_except = trans_except
@@ -184,10 +192,10 @@ def query_driver(lang):
     try:
         code = pkg_resources.resource_string(__name__, path).decode('utf-8')
         data = json.loads(code)
-    except IOError:
-        raise BondException(lang, 'unable to find driver data')
-    except ValueError:
-        raise BondException(lang, 'malformed driver data')
+    except IOError as e:
+        raise BondException(lang, 'unable to load driver data: {error}'.format(error=str(e)))
+    except ValueError as e:
+        raise BondException(lang, 'malformed driver data: {error}'.format(error=str(e)))
     return data
 
 
@@ -212,7 +220,7 @@ def _load_stage(lang, data):
 
 def bond(lang, cmd=None, args=None, xargs=None, cwd=None, env=os.environ,
         trans_except=None, timeout=60, protocol=None, logfile=None):
-    '''Construct a bond using the specified language/command
+    '''Construct a ``Bond`` using the specified language/command.
 
     "lang": a valid, supported language name (see ``list_drivers()``).
 
