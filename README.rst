@@ -244,7 +244,7 @@ All exceptions thrown by the ``bond`` module are of base type ``RuntimeError``
   Thrown during initialization or unrecoverable errors.
 
 ``TerminatedException``:
-  Thrown when the bond exists unexpectedly.
+  Thrown when the bond exits unexpectedly.
 
 ``SerializationException``:
   Thrown when an object/exception which is sent *or* received cannot be
