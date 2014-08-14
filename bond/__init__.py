@@ -309,8 +309,8 @@ def interact(bond, prompt=None):
     pre-pended, execute a single statement with bond.eval() and print it's
     return value.
 
-    You can continue the statement on multiple lines by leaving a trailing "\".
-    Type Ctrl+C to abort a multi-line block without executing it.'''
+    You can continue the statement on multiple lines by leaving a trailing
+    "\\". Type Ctrl+C to abort a multi-line block without executing it.'''
 
     ps1 = "{lang}> ".format(lang=bond.lang) if prompt is None else prompt
     ps1_len = len(ps1.rstrip())
