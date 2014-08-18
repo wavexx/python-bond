@@ -77,7 +77,7 @@ class RemoteException(BondException):
 class Bond(object):
     def __init__(self, proc, trans_except, lang='<unknown>', proto=protocols.JSON):
         '''Construct a bond using an already-initialized interpreter.
-        Use ``bond.bond()`` to initialize it using a language driver.
+        Use ``bond.make_bond()`` to initialize it using a language driver.
 
         "proc": a pexpect object, with an open communication to a bond driver
         "trans_except": local behavior for transparent exceptions
@@ -218,8 +218,8 @@ def _load_stage(lang, data):
         stage = re.sub(sub[0], sub[1], stage)
     return stage.strip()
 
-def bond(lang, cmd=None, args=None, xargs=None, cwd=None, env=os.environ,
-        trans_except=None, timeout=60, protocol=None, logfile=None):
+def make_bond(lang, cmd=None, args=None, xargs=None, cwd=None, env=os.environ,
+              trans_except=None, timeout=60, protocol=None, logfile=None):
     '''Construct a ``Bond`` using the specified language/command.
 
     "lang": a valid, supported language name (see ``list_drivers()``).

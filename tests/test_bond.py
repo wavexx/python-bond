@@ -2,7 +2,7 @@ from __future__ import print_function
 import bond
 
 def test_ser_err():
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
 
     # test a local serialization error
     x = lambda x: x
@@ -16,7 +16,7 @@ def test_ser_err():
 
 
 def test_export():
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
 
     def call_me():
         return 42
@@ -34,18 +34,18 @@ def test_export_noret():
     def call_me():
         pass
 
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
     py.export(call_me)
     assert(py.call('call_me') is None)
 
 
 def test_proxy():
-    py1 = bond.bond('Python', timeout=1)
+    py1 = bond.make_bond('Python', timeout=1)
     py1.eval_block(r'''def func_py1(arg):
         return arg + 1
     ''')
 
-    py2 = bond.bond('Python', timeout=1)
+    py2 = bond.make_bond('Python', timeout=1)
     py1.proxy('func_py1', py2)
 
     assert(py2.call('func_py1', 0) == 1)

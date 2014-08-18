@@ -1,19 +1,19 @@
 from __future__ import print_function
 import bond
-from test import *
+from tests import *
 
 def test_basic():
-    js = bond.bond('JavaScript', timeout=1)
+    js = bond.make_bond('JavaScript', timeout=1)
     js.close()
 
 
 def test_basic_rmt():
-    js = bond.bond('JavaScript', "ssh localhost nodejs", timeout=1)
+    js = bond.make_bond('JavaScript', "ssh localhost nodejs", timeout=1)
     js.close()
 
 
 def test_call_marshalling():
-    js = bond.bond('JavaScript', timeout=1)
+    js = bond.make_bond('JavaScript', timeout=1)
 
     js.eval_block(r'function test_str() { return "Hello world!"; }')
     assert(str(js.call('test_str')) == "Hello world!")
@@ -56,7 +56,7 @@ def test_call_marshalling():
 
 
 def test_call_simple():
-    js = bond.bond('JavaScript', timeout=1)
+    js = bond.make_bond('JavaScript', timeout=1)
 
     # define a function and call it
     js.eval_block('function test_simple() { return "Hello world!"; }')
@@ -73,7 +73,7 @@ def test_call_simple():
 
 
 def test_call_stm():
-    js = bond.bond('JavaScript', timeout=1)
+    js = bond.make_bond('JavaScript', timeout=1)
 
     # test the call interface with a normal function
     js.eval_block('function copy(arg) { return arg; }')
@@ -90,7 +90,7 @@ def test_call_stm():
 
 
 def test_call_error():
-    js = bond.bond('JavaScript', timeout=1)
+    js = bond.make_bond('JavaScript', timeout=1)
     js.eval_block('function test_simple(arg) { return eval(arg); }')
     ret = js.call('test_simple', 1)
     assert(ret == 1)
@@ -109,7 +109,7 @@ def test_call_error():
 
 
 def test_eval():
-    js = bond.bond('JavaScript', timeout=1)
+    js = bond.make_bond('JavaScript', timeout=1)
 
     # literal values
     assert(js.eval('1') == 1)
@@ -129,7 +129,7 @@ def test_eval():
 
 
 def test_eval_sentinel():
-    js = bond.bond('JavaScript', timeout=1)
+    js = bond.make_bond('JavaScript', timeout=1)
 
     # ensure the sentinel is not accessible
     failed = False
@@ -142,7 +142,7 @@ def test_eval_sentinel():
 
 
 def test_eval_rec():
-    js = bond.bond('JavaScript', timeout=1)
+    js = bond.make_bond('JavaScript', timeout=1)
 
     # in a recursive call, we should still be able to see our global scope
     def call_me():
@@ -163,7 +163,7 @@ def test_eval_rec():
 
 
 def test_eval_error():
-    js = bond.bond('JavaScript', timeout=1)
+    js = bond.make_bond('JavaScript', timeout=1)
 
     # try a correct statement before
     assert(js.eval('1') == 1)
@@ -182,7 +182,7 @@ def test_eval_error():
 
 
 def test_ser_err():
-    js = bond.bond('JavaScript', timeout=1, trans_except=True)
+    js = bond.make_bond('JavaScript', timeout=1, trans_except=True)
 
     # construct an unserializable type
     js.eval_block(r'''
@@ -255,7 +255,7 @@ def test_ser_err():
 
 
 def test_exception():
-    js = bond.bond('JavaScript', timeout=1)
+    js = bond.make_bond('JavaScript', timeout=1)
 
     # remote exception
     js.eval_block('function exceptional() { throw new Error("an error") }')
@@ -292,13 +292,13 @@ def test_export():
     def call_me():
         return 42
 
-    js = bond.bond('JavaScript', timeout=1)
+    js = bond.make_bond('JavaScript', timeout=1)
     js.export(call_me, 'call_me')
     assert(js.call('call_me') == 42)
 
 
 def test_export_redef():
-    js = bond.bond('JavaScript', timeout=1)
+    js = bond.make_bond('JavaScript', timeout=1)
 
     def call_me():
         return 42
@@ -313,7 +313,7 @@ def test_export_redef():
 
 
 def test_export_invalid():
-    js = bond.bond('JavaScript', timeout=1)
+    js = bond.make_bond('JavaScript', timeout=1)
 
     def call_me():
         return 42
@@ -329,7 +329,7 @@ def test_export_invalid():
 
 
 def test_export_recursive():
-    js = bond.bond('JavaScript', timeout=1)
+    js = bond.make_bond('JavaScript', timeout=1)
 
     # define a remote function
     js.eval_block(r'function func_js(arg) { return arg + 1; }')
@@ -366,7 +366,7 @@ def test_export_ser_err():
     def call_me(arg):
         pass
 
-    js = bond.bond('JavaScript', timeout=1)
+    js = bond.make_bond('JavaScript', timeout=1)
     js.export(call_me, 'call_me')
     js.eval_block('var fd = function(){};')
 
@@ -383,7 +383,7 @@ def test_export_ser_err():
 
 
 def test_export_except():
-    js = bond.bond('JavaScript', timeout=1)
+    js = bond.make_bond('JavaScript', timeout=1)
 
     def gen_exception():
         raise Exception("test")
@@ -402,7 +402,7 @@ def test_export_except():
 
 
 def test_output_redirect():
-    js = bond.bond('JavaScript', timeout=1)
+    js = bond.make_bond('JavaScript', timeout=1)
 
     # stdout
     js.eval_block(r'console.log("console.log: Hello world!");')
@@ -416,8 +416,8 @@ def test_output_redirect():
 
 
 def test_trans_except():
-    js_trans = bond.bond('JavaScript', timeout=1, trans_except=True)
-    js_not_trans = bond.bond('JavaScript', timeout=1, trans_except=False)
+    js_trans = bond.make_bond('JavaScript', timeout=1, trans_except=True)
+    js_not_trans = bond.make_bond('JavaScript', timeout=1, trans_except=False)
 
     code = r'''function func() { throw func; }'''
 
@@ -449,8 +449,8 @@ def test_trans_except():
 
 
 def test_export_trans_except():
-    js_trans = bond.bond('JavaScript', timeout=1, trans_except=True)
-    js_not_trans = bond.bond('JavaScript', timeout=1, trans_except=False)
+    js_trans = bond.make_bond('JavaScript', timeout=1, trans_except=True)
+    js_not_trans = bond.make_bond('JavaScript', timeout=1, trans_except=False)
 
     def call_me():
        raise RuntimeError("a runtime error")
@@ -502,17 +502,17 @@ def test_stack_depth():
         return lambda x: x
 
     # check normal stack depth
-    js = bond.bond('JavaScript', timeout=1)
+    js = bond.make_bond('JavaScript', timeout=1)
     assert(bond_repl_depth(js) == 1)
 
     # check stack depth after calling a normal function
-    js = bond.bond('JavaScript', timeout=1)
+    js = bond.make_bond('JavaScript', timeout=1)
     js.export(no_exception)
     js.call('no_exception')
     assert(bond_repl_depth(js) == 1)
 
     # check stack depth after returning a serializable exception
-    js = bond.bond('JavaScript', timeout=1)
+    js = bond.make_bond('JavaScript', timeout=1)
     js.export(gen_exception)
     got_except = False
     try:
@@ -524,7 +524,7 @@ def test_stack_depth():
     assert(bond_repl_depth(js) == 1)
 
     # check stack depth after a remote serialization error
-    js = bond.bond('JavaScript', timeout=1)
+    js = bond.make_bond('JavaScript', timeout=1)
     js.export(gen_ser_err)
     got_except = False
     try:
@@ -545,9 +545,9 @@ def _test_buf_size(js):
         assert(ret == str(ret))
 
 def test_buf_size():
-    js = bond.bond('JavaScript', timeout=1)
+    js = bond.make_bond('JavaScript', timeout=1)
     _test_buf_size(js)
 
 def test_buf_size_rmt():
-    js = bond.bond('JavaScript', "ssh localhost nodejs", timeout=1)
+    js = bond.make_bond('JavaScript', "ssh localhost nodejs", timeout=1)
     _test_buf_size(js)

@@ -27,8 +27,8 @@ A simple  example
 .. code:: python3
 
   >>> # Let's bond with a PHP interpreter
-  >>> from bond import bond
-  >>> php = bond('PHP')
+  >>> from bond import make_bond
+  >>> php = make_bond('PHP')
   >>> php.eval_block('echo "Hello world!\n";')
   Hello world!
 
@@ -45,13 +45,13 @@ A simple  example
   Hi, this is Python talking!
 
   >>> # Use some remote resources
-  >>> remote_php = bond('PHP', 'ssh remote php')
+  >>> remote_php = make_bond('PHP', 'ssh remote php')
   >>> remote_php.eval_block('function call_me() { echo "Hi from " . system("hostname") . "!"; }')
   >>> remote_php.eval('call_me()')
   Hi from remote!
 
   >>> # Bridge two worlds!
-  >>> perl = bond('Perl')
+  >>> perl = make_bond('Perl')
   >>> php.proxy('explode', perl)
   >>> # note: explode is now available to Perl, but still executes in PHP
   >>> perl.eval('explode("=", "Mind=blown!")')
@@ -68,10 +68,10 @@ function:
 
 .. code:: python3
 
-  from bond import bond
+  from bond import make_bond
   import sys
 
-  php = bond('PHP')
+  php = make_bond('PHP')
   php.eval_block('include("my_original_program.php");')
 
   def new_function(arg)
@@ -89,9 +89,9 @@ minimal effort:
 .. code:: python3
 
   # setup the workers
-  from bond import bond
+  from bond import make_bond
   hosts = ['host1', 'host2', 'host3']
-  nodes = [bond('Python', 'ssh {} python'.format(host)) for host in hosts]
+  nodes = [make_bond('Python', 'ssh {} python'.format(host)) for host in hosts]
 
   # load our libraries first
   for node in nodes:
@@ -121,12 +121,12 @@ Initialization
 --------------
 
 A ``bond.Bond`` object is not normally constructed directly, but by using the
-``bond.bond()`` function:
+``bond.make_bond()`` function:
 
 .. code:: python3
 
   import bond
-  interpreter = bond.bond('language')
+  interpreter = bond.make_bond('language')
 
 The first argument should be the desired language name ("JavaScript", "PHP",
 "Perl", "Python"). The list of supported languages can be fetched dynamically
@@ -138,7 +138,7 @@ which allows to specify any shell command to be executed:
 .. code:: python3
 
   import bond
-  interpreter = bond.bond('Python', 'ssh remote python3')
+  interpreter = bond.make_bond('Python', 'ssh remote python3')
 
 Several command line arguments are supplied automatically by the driver to
 force an interactive shell: for example, "-i" if Python is requested. You can
@@ -292,8 +292,8 @@ between major versions:
 .. code:: python3
 
   # assuming a python2.7 environment
-  from bond import bond
-  py = bond('Python', 'python3', trans_except=False)
+  from bond import make_bond
+  py = make_bond('Python', 'python3', trans_except=False)
 
 
 PHP

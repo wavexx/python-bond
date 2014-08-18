@@ -1,19 +1,19 @@
 from __future__ import print_function
 import bond
-from test import *
+from tests import *
 
 def test_basic():
-    php = bond.bond('PHP', timeout=1)
+    php = bond.make_bond('PHP', timeout=1)
     php.close()
 
 
 def test_basic_rmt():
-    php = bond.bond('PHP', "ssh localhost php", timeout=1)
+    php = bond.make_bond('PHP', "ssh localhost php", timeout=1)
     php.close()
 
 
 def test_call_marshalling():
-    php = bond.bond('PHP', timeout=1)
+    php = bond.make_bond('PHP', timeout=1)
 
     php.eval_block(r'function test_str() { return "Hello world!"; }')
     assert(str(php.call('test_str')) == "Hello world!")
@@ -49,14 +49,14 @@ def test_call_marshalling():
 
 
 def test_call_simple():
-    php = bond.bond('PHP', timeout=1)
+    php = bond.make_bond('PHP', timeout=1)
     php_print = php.callable('sprintf')
     ret = php_print("Hello world!")
     assert(str(ret) == "Hello world!")
 
 
 def test_call_stm():
-    php = bond.bond('PHP', timeout=1)
+    php = bond.make_bond('PHP', timeout=1)
 
     # call a function reference
     php.eval_block('$fun = function($arg){ return $arg; };')
@@ -79,7 +79,7 @@ def test_call_stm():
 
 
 def test_ser_err():
-    php = bond.bond('PHP', timeout=1)
+    php = bond.make_bond('PHP', timeout=1)
 
     # construct an unserializable type
     php.eval_block(r'''
@@ -116,7 +116,7 @@ def test_ser_err():
 
 
 def test_call_error():
-    php = bond.bond('PHP', timeout=1)
+    php = bond.make_bond('PHP', timeout=1)
 
     # test a regular working function
     php.eval_block('function test_simple($arg) { return 1 / $arg; }')
@@ -135,7 +135,7 @@ def test_call_error():
 
 @knownfail
 def test_fatal_error():
-    php = bond.bond('PHP', timeout=1)
+    php = bond.make_bond('PHP', timeout=1)
 
     failed = True
     try:
@@ -149,7 +149,7 @@ def test_fatal_error():
 
 
 def test_eval():
-    php = bond.bond('PHP', timeout=1)
+    php = bond.make_bond('PHP', timeout=1)
 
     # check the distrinction
     assert(php.eval_block('1;') is None)
@@ -169,7 +169,7 @@ def test_eval():
 
 
 def test_eval_sentinel():
-    php = bond.bond('PHP', timeout=1)
+    php = bond.make_bond('PHP', timeout=1)
 
     # ensure the sentinel is not accessible
     failed = False
@@ -182,7 +182,7 @@ def test_eval_sentinel():
 
 
 def test_eval_rec():
-    php = bond.bond('PHP', timeout=1)
+    php = bond.make_bond('PHP', timeout=1)
 
     # in a recursive call, we should still be able to see our global scope
     def call_me():
@@ -196,7 +196,7 @@ def test_eval_rec():
 
 
 def test_eval_error():
-    php = bond.bond('PHP', timeout=1)
+    php = bond.make_bond('PHP', timeout=1)
 
     # try a correct statement before
     assert(php.eval('1') == 1)
@@ -227,7 +227,7 @@ def test_eval_error():
 
 
 def test_exception():
-    php = bond.bond('PHP', timeout=1)
+    php = bond.make_bond('PHP', timeout=1)
 
     # local exception
     php.eval_block('function exceptional() { throw new Exception("exception"); }')
@@ -273,13 +273,13 @@ def test_export():
     def call_me():
         return 42
 
-    php = bond.bond('PHP', timeout=1)
+    php = bond.make_bond('PHP', timeout=1)
     php.export(call_me, 'call_me')
     assert(php.call('call_me') == 42)
 
 
 def test_export_redef():
-    php = bond.bond('PHP', timeout=1)
+    php = bond.make_bond('PHP', timeout=1)
 
     def call_me():
         return 42
@@ -294,7 +294,7 @@ def test_export_redef():
 
 
 def test_export_invalid():
-    php = bond.bond('PHP', timeout=1)
+    php = bond.make_bond('PHP', timeout=1)
 
     def call_me():
         return 42
@@ -308,7 +308,7 @@ def test_export_invalid():
 
 
 def test_export_recursive():
-    php = bond.bond('PHP', timeout=1)
+    php = bond.make_bond('PHP', timeout=1)
 
     # define a remote function
     php.eval_block(r'function func_php($arg) { return $arg + 1; }')
@@ -345,7 +345,7 @@ def test_export_ser_err():
     def call_me(arg):
         pass
 
-    php = bond.bond('PHP', timeout=1)
+    php = bond.make_bond('PHP', timeout=1)
     php.export(call_me, 'call_me')
     php.eval_block('$fd = fopen("php://stdout", "w");')
 
@@ -362,7 +362,7 @@ def test_export_ser_err():
 
 
 def test_export_except():
-    php = bond.bond('PHP', timeout=1)
+    php = bond.make_bond('PHP', timeout=1)
 
     def gen_exception():
         raise Exception("test")
@@ -381,7 +381,7 @@ def test_export_except():
 
 
 def test_output_redirect():
-    php = bond.bond('PHP', timeout=1);
+    php = bond.make_bond('PHP', timeout=1);
 
     # standard output
     php.eval_block(r'echo "echo: Hello world!\n";')
@@ -396,8 +396,8 @@ def test_output_redirect():
 
 
 def test_trans_except():
-    php_trans = bond.bond('PHP', timeout=1, trans_except=True)
-    php_not_trans = bond.bond('PHP', timeout=1, trans_except=False)
+    php_trans = bond.make_bond('PHP', timeout=1, trans_except=True)
+    php_not_trans = bond.make_bond('PHP', timeout=1, trans_except=False)
 
     code = r'''
     class MyException extends Exception implements jsonSerializable
@@ -442,8 +442,8 @@ def test_trans_except():
 
 
 def test_export_trans_except():
-    php_trans = bond.bond('PHP', timeout=1, trans_except=True)
-    php_not_trans = bond.bond('PHP', timeout=1, trans_except=False)
+    php_trans = bond.make_bond('PHP', timeout=1, trans_except=True)
+    php_not_trans = bond.make_bond('PHP', timeout=1, trans_except=False)
 
     def call_me():
        raise RuntimeError("a runtime error")
@@ -493,17 +493,17 @@ def test_stack_depth():
         return lambda x: x
 
     # check normal stack depth
-    php = bond.bond('PHP', timeout=1)
+    php = bond.make_bond('PHP', timeout=1)
     assert(bond_repl_depth(php) == 1)
 
     # check stack depth after calling a normal function
-    php = bond.bond('PHP', timeout=1)
+    php = bond.make_bond('PHP', timeout=1)
     php.export(no_exception)
     php.call('no_exception')
     assert(bond_repl_depth(php) == 1)
 
     # check stack depth after returning a serializable exception
-    php = bond.bond('PHP', timeout=1)
+    php = bond.make_bond('PHP', timeout=1)
     php.export(gen_exception)
     got_except = False
     try:
@@ -515,7 +515,7 @@ def test_stack_depth():
     assert(bond_repl_depth(php) == 1)
 
     # check stack depth after a remote serialization error
-    php = bond.bond('PHP', timeout=1)
+    php = bond.make_bond('PHP', timeout=1)
     php.export(gen_ser_err)
     got_except = False
     try:
@@ -538,9 +538,9 @@ def _test_buf_size(php):
         assert(ret == str(ret))
 
 def test_buf_size():
-    php = bond.bond('PHP', timeout=1)
+    php = bond.make_bond('PHP', timeout=1)
     _test_buf_size(php)
 
 def test_buf_size_rmt():
-    php = bond.bond('PHP', "ssh localhost php", timeout=1)
+    php = bond.make_bond('PHP', "ssh localhost php", timeout=1)
     _test_buf_size(php)

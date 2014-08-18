@@ -1,14 +1,14 @@
 from __future__ import print_function
 import bond
-from test import *
+from tests import *
 
 def test_basic():
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
     py.close()
 
 
 def test_basic_rmt():
-    py = bond.bond('Python', "ssh localhost python", timeout=1)
+    py = bond.make_bond('Python', "ssh localhost python", timeout=1)
     py.close()
 
 
@@ -57,16 +57,16 @@ def _test_call_marshalling(py):
         assert(str(ret) == str(value))
 
 def test_call_marshalling_native():
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
     _test_call_marshalling(py)
 
 def test_call_marshalling_baseline():
-    py = bond.bond('Python', protocol='JSON', timeout=1)
+    py = bond.make_bond('Python', protocol='JSON', timeout=1)
     _test_call_marshalling(py)
 
 
 def test_call_simple():
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
 
     # define a function and call it
     py.eval_block(r'''def test_simple():
@@ -89,7 +89,7 @@ def test_call_simple():
 
 
 def test_call_stm():
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
 
     # test the call interface with a normal function
     py.eval_block('from copy import copy')
@@ -107,7 +107,7 @@ def test_call_stm():
 
 
 def test_call_error():
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
 
     # define a function and call it
     py.eval_block(r'''def test_simple(arg):
@@ -129,7 +129,7 @@ def test_call_error():
 
 
 def test_eval():
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
     assert(py.eval('None') is None)
     assert(py.eval('1') == 1)
 
@@ -145,7 +145,7 @@ def test_eval():
 
 
 def test_eval_sentinel():
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
 
     # ensure the sentinel is not accessible
     failed = False
@@ -158,7 +158,7 @@ def test_eval_sentinel():
 
 
 def test_eval_rec():
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
 
     # in a recursive call, we should still be able to see our global scope
     def call_me():
@@ -179,7 +179,7 @@ def test_eval_rec():
 
 
 def test_eval_error():
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
 
     # try a correct statement before
     assert(py.eval('1') == 1)
@@ -245,16 +245,16 @@ def _test_ser_err(py):
     assert(py.eval('1') == 1)
 
 def test_ser_err_native():
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
     _test_ser_err(py)
 
 def test_ser_err_baseline():
-    py = bond.bond('Python', trans_except=True, protocol='JSON', timeout=1)
+    py = bond.make_bond('Python', trans_except=True, protocol='JSON', timeout=1)
     _test_ser_err(py)
 
 
 def test_exception():
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
 
     # remote exception
     py.eval_block(r'''def exceptional():
@@ -293,13 +293,13 @@ def test_export():
     def call_me():
         return 42
 
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
     py.export(call_me, 'call_me')
     assert(py.call('call_me') == 42)
 
 
 def test_export_redef():
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
 
     def call_me():
         return 42
@@ -314,7 +314,7 @@ def test_export_redef():
 
 
 def test_export_invalid():
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
 
     def call_me():
         return 42
@@ -330,7 +330,7 @@ def test_export_invalid():
 
 
 def test_export_recursive():
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
 
     # define a remote function
     py.eval_block(r'''def func_remote(arg):
@@ -376,7 +376,7 @@ def test_export_ser_err():
     def call_me(arg):
         pass
 
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
     py.export(call_me, 'call_me')
 
     failed = False
@@ -392,7 +392,7 @@ def test_export_ser_err():
 
 
 def test_export_except():
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
 
     def gen_exception():
         raise Exception("test")
@@ -412,7 +412,7 @@ def test_export_except():
 
 
 def test_export_except_ser_err():
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
 
     def call_me():
         return lambda x: x
@@ -432,7 +432,7 @@ def test_export_except_ser_err():
 
 
 def test_output_redirect():
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
     py.eval_block(r'import sys')
 
     # stdout
@@ -445,8 +445,8 @@ def test_output_redirect():
 
 
 def test_trans_except():
-    py_trans = bond.bond('Python', timeout=1, trans_except=True)
-    py_not_trans = bond.bond('Python', timeout=1, trans_except=False)
+    py_trans = bond.make_bond('Python', timeout=1, trans_except=True)
+    py_not_trans = bond.make_bond('Python', timeout=1, trans_except=False)
 
     code = r'''def func():
         raise RuntimeError("a runtime error")
@@ -479,8 +479,8 @@ def test_trans_except():
 
 
 def test_export_trans_except():
-    py_trans = bond.bond('Python', timeout=1, trans_except=True)
-    py_not_trans = bond.bond('Python', timeout=1, trans_except=False)
+    py_trans = bond.make_bond('Python', timeout=1, trans_except=True)
+    py_not_trans = bond.make_bond('Python', timeout=1, trans_except=False)
 
     def call_me():
        raise RuntimeError("a runtime error")
@@ -520,17 +520,17 @@ def test_stack_depth():
         return lambda x: x
 
     # check normal stack depth
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
     assert(bond_repl_depth(py) == 1)
 
     # check stack depth after calling a normal function
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
     py.export(no_exception)
     py.call('no_exception')
     assert(bond_repl_depth(py) == 1)
 
     # check stack depth after returning a serializable exception
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
     py.export(gen_exception)
     got_except = False
     try:
@@ -542,7 +542,7 @@ def test_stack_depth():
     assert(bond_repl_depth(py) == 1)
 
     # check stack depth after a remote serialization error
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
     py.export(gen_ser_err)
     got_except = False
     try:
@@ -563,9 +563,9 @@ def _test_buf_size(py):
         assert(ret == str(ret))
 
 def test_buf_size():
-    py = bond.bond('Python', timeout=1)
+    py = bond.make_bond('Python', timeout=1)
     _test_buf_size(py)
 
 def test_buf_size_rmt():
-    py = bond.bond('Python', "ssh localhost python", timeout=1)
+    py = bond.make_bond('Python', "ssh localhost python", timeout=1)
     _test_buf_size(py)
