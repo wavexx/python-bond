@@ -5,6 +5,15 @@ python:
   - 2.7
   - 3.4
 
+before_install:
+  # update the system
+  - sudo apt-get update -qq
+
+  # allow ssh loopback
+  - ssh-keygen -t rsa -N '' -C '' -f ~/.ssh/id_rsa
+  - cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+  - ssh -o StrictHostKeyChecking=no localhost true
+
 install:
   - sudo apt-get install -qq nodejs
   - sudo apt-get install -qq php5-cli
