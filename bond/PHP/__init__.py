@@ -14,7 +14,13 @@ class PHP(Bond):
     def __new__(cls, cmd=None, args=None, xargs='', cwd=None, env=os.environ,
                 trans_except=False, protocol=None, compat=None, timeout=60,
                 logfile=None):
-        if args is not None: args = shlex.split(args)
-        if xargs is not None: xargs = shlex.split(xargs)
-        return make_bond('PHP', cmd, args, xargs, cwd=cwd, env=env,
+        def_args = True
+        if args is None:
+            args = []
+        else:
+            def_args = False
+            args = shlex.split(args)
+        if xargs is not None:
+            args = args + shlex.split(xargs)
+        return make_bond('PHP', cmd, args, cwd=cwd, env=env, def_args=def_args,
                          trans_except=trans_except, timeout=timeout, logfile=logfile)

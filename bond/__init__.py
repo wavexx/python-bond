@@ -76,7 +76,7 @@ class RemoteException(BondException):
 # The main host controller
 class Bond(object):
     def __init__(self, proc, trans_except, lang='<unknown>', proto=protocols.JSON):
-        '''Construct a bond using an already-initialized interpreter.
+        '''Construct a bond using an pre-initialized interpreter.
         Use ``bond.make_bond()`` to initialize it using a language driver.
 
         "proc": a pexpect object, with an open communication to a bond driver
@@ -218,7 +218,7 @@ def _load_stage(lang, data):
         stage = re.sub(sub[0], sub[1], stage)
     return stage.strip()
 
-def make_bond(lang, cmd=None, args=None, xargs=None, cwd=None, env=os.environ,
+def make_bond(lang, cmd=None, args=None, cwd=None, env=os.environ, def_args=True,
               trans_except=None, timeout=60, protocol=None, logfile=None):
     '''Construct a ``Bond`` using the specified language/command.
 
@@ -227,17 +227,16 @@ def make_bond(lang, cmd=None, args=None, xargs=None, cwd=None, env=os.environ,
     "cmd": a valid shell command used to start the interpreter. If not
     specified, the default command is taken from the driver.
 
-    "args": a list of command line arguments which are *required* to setup the
-    interpreter. The arguments are normally taken from the driver, but this
-    keyword allows to override the hard-coded values.
-
-    "xargs": a list of command line arguments which are simply appended
-    to the final command line.
+    "args": a list of command line arguments which are automatically quoted
+    and appended to the final command line.
 
     "cwd": the working directory of the interpreter (defaulting to the current
     working directory)
 
     "env": the environment passed to the interpreter.
+
+    "def_args": enable (default) or suppress default, extra command-line
+    arguments provided by the driver.
 
     "trans_except": forces/disables transparent exceptions. When transparent
     exceptions are enabled, exceptions themselves are serialized and rethrown
@@ -255,8 +254,8 @@ def make_bond(lang, cmd=None, args=None, xargs=None, cwd=None, env=os.environ,
     # TODO: when multiple commands exists, they should probed in sequence
     data = query_driver(lang)
     if cmd is None: cmd = data['command'][0][0]
-    if args is None: args = data['command'][0][1:]
-    if xargs is None: xargs = []
+    if args is None: args = []
+    if def_args: args = data['command'][0][1:] + args
 
     # select the highest compatible protocol
     protocol_list = list(filter(PROTO.__contains__, data['proto']))
@@ -273,7 +272,7 @@ def make_bond(lang, cmd=None, args=None, xargs=None, cwd=None, env=os.environ,
 
     # probe the interpreter
     try:
-        cmd = ' '.join([cmd] + list(map(quote, args + xargs)))
+        cmd = ' '.join([cmd] + list(map(quote, args)))
         probe = data['init']['probe']
         proc = Spawn(cmd, cwd=cwd, env=env, timeout=timeout, logfile=logfile)
         proc.sendline_noecho(probe)

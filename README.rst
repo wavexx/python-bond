@@ -138,15 +138,23 @@ which allows to specify any shell command to be executed:
 .. code:: python3
 
   import bond
-  interpreter = bond.make_bond('Python', 'ssh remote python3')
+  py = bond.make_bond('Python', 'ssh remote python3')
 
-Several command line arguments are supplied automatically by the driver to
-force an interactive shell: for example, "-i" if Python is requested. You can
-override these using the ``args`` keyword argument. An additional *list* of
-arguments can be provided using ``xargs``. All the provided arguments are
-automatically quoted.
+An additional *list* of arguments to the interpreter can be provided using the
+third argument, ``args``:
 
-Furthermore, the following keyword arguments are supported:
+.. code:: python3
+
+  import bond
+  py = bond.make_bond('Python', 'ssh remote python3', ['-E', '-OO'])
+
+The *arguments*, contrarily to the command, are automatically quoted.
+
+Some command line arguments may be supplied automatically by the driver to
+force an interactive shell; for example "-i" is supplied if Python is
+requested. You can disable default arguments by using ``def_args=False``.
+
+The following keyword arguments are supported:
 
 ``cwd``:
 
@@ -156,6 +164,11 @@ Furthermore, the following keyword arguments are supported:
 ``env``:
 
   Environment for the interpreter (defaults to ``os.environ``).
+
+``def_args``:
+
+  Enable (default) or suppress default, extra command-line arguments to the
+  interpreter.
 
 ``timeout``:
 
