@@ -250,12 +250,7 @@ def make_bond(lang, cmd=None, args=None, cwd=None, env=os.environ, def_args=True
     "logfile": a file handle which is used to copy all input/output with the
     interpreter for debugging purposes.'''
 
-    # basic command data
-    # TODO: when multiple commands exists, they should probed in sequence
     data = query_driver(lang)
-    if cmd is None: cmd = data['command'][0][0]
-    if args is None: args = []
-    if def_args: args = data['command'][0][1:] + args
 
     # select the highest compatible protocol
     protocol_list = list(filter(PROTO.__contains__, data['proto']))
@@ -270,16 +265,37 @@ def make_bond(lang, cmd=None, args=None, cwd=None, env=os.environ, def_args=True
     if trans_except is None:
         trans_except = (lang == LANG and protocol == PROTO[0])
 
+    # find a suitable command
+    proc = None
+    cmdline = None
+    if args is None: args = []
+    if cmd is not None:
+        xargs = data['command'][0][1:] if def_args else []
+        cmdline = ' '.join([cmd] + list(map(quote, xargs + args)))
+        try:
+            proc = Spawn(cmdline, cwd=cwd, env=env, timeout=timeout, logfile=logfile)
+        except pexpect.ExceptionPexpect:
+            raise BondException(lang, 'cannot execute: ' + cmdline)
+    else:
+        for cmd in data['command']:
+            xargs = cmd[1:] if def_args else []
+            cmdline = ' '.join([cmd[0]] + list(map(quote, xargs + args)))
+            try:
+                proc = Spawn(cmdline, cwd=cwd, env=env, timeout=timeout, logfile=logfile)
+                break
+            except pexpect.ExceptionPexpect:
+                pass
+        if proc is None:
+            raise BondException(lang, 'no suitable interpreter found')
+
     # probe the interpreter
     try:
-        cmd = ' '.join([cmd] + list(map(quote, args)))
         probe = data['init']['probe']
-        proc = Spawn(cmd, cwd=cwd, env=env, timeout=timeout, logfile=logfile)
         proc.sendline_noecho(probe)
         if proc.expect_exact_noecho(['STAGE1\n', 'STAGE1\r\n']) == 1:
             tty.setraw(proc.child_fd)
     except pexpect.ExceptionPexpect:
-        raise BondException(lang, 'cannot get an interactive prompt using: ' + cmd)
+        raise BondException(lang, 'cannot get an interactive prompt using: ' + cmdline)
 
     # inject base loader
     try:
