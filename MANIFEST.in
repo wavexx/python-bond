@@ -1,2 +1,2 @@
 graft bond/drivers
-global-exclude .git*
+global-exclude .git* .travis.*
