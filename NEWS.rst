@@ -1,3 +1,23 @@
+python-bond 1.0
+---------------
+
+* The API has been streamlined: ``make_bond()`` is now the primary method of
+  constructing ``Bond`` objects, independently of the interpreter language.
+  The old language constructors are still supported, but are deprecated and
+  will be removed in a future release.
+* All functions/objects/methods are now documented with docstrings.
+* Bond initialization errors, especially errors related to missing
+  dependencies, are now much easier to understand.
+* Serialization exceptions on the remote side have been renamed to
+  ``__BOND_SerializationException`` for consistency with other languages.
+* JavaScript/Node.js support was previously limited to versions >= 0.10. Any
+  version of Node.js starting with 0.6.12 is now supported.
+* PHP support was previously limited to versions >= 5.6. Any version of PHP
+  starting with 5.3 is now supported.
+* A Perl dependency on ``IO::String`` was previously missing, and has now been
+  correctly documented.
+
+
 python-bond 0.5
 ---------------
 
