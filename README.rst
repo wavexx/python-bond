@@ -347,8 +347,9 @@ experienced Perl developer.
 
 Requirements:
 
-* The ``JSON`` and ``Data::Dump`` modules are required (``libjson-perl`` and
-  ``libdata-dump-perl`` in Debian/Ubuntu).
+* The ``JSON``, ``Data::Dump`` and ``IO::String`` modules are required
+  (``libjson-perl``, ``libdata-dump-perl`` and ``libio-string-perl``) in
+  Debian/Ubuntu).
 
 Serialization:
 
