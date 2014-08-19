@@ -9,7 +9,7 @@ python-bond 1.0
 * Bond initialization errors, especially errors related to missing
   dependencies, are now much easier to understand.
 * Serialization exceptions on the remote side have been renamed to
-  ``__BOND_SerializationException`` for consistency with other languages.
+  ``_BOND_SerializationException`` for consistency with other languages.
 * JavaScript/Node.js support was previously limited to versions >= 0.10. Any
   version of Node.js starting with 0.6.12 is now supported.
 * PHP support was previously limited to versions >= 5.6. Any version of PHP
