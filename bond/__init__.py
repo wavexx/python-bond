@@ -279,7 +279,7 @@ def make_bond(lang, cmd=None, args=None, cwd=None, env=os.environ, def_args=True
         if proc.expect_exact_noecho(['STAGE1\n', 'STAGE1\r\n']) == 1:
             tty.setraw(proc.child_fd)
     except pexpect.ExceptionPexpect:
-        raise BondException(lang, 'cannot get an interactive prompt using: ' + str(proc.args))
+        raise BondException(lang, 'cannot get an interactive prompt using: ' + cmd)
 
     # inject base loader
     try:
