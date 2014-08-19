@@ -1,0 +1,15 @@
+language: python
+os: linux
+
+python:
+  - 2.7
+  - 3.4
+
+install:
+  - sudo apt-get install -qq nodejs
+  - sudo apt-get install -qq php5-cli
+  - sudo apt-get install -qq perl libdata-dump-perl libjson-perl
+  - python setup.py -q install
+
+script:
+  - nosetests -v
