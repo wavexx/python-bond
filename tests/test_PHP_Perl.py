@@ -2,8 +2,8 @@ from __future__ import print_function
 import bond
 
 def test_call_PHP_Perl():
-    php = bond.make_bond('PHP', timeout=1)
-    perl = bond.make_bond('Perl', timeout=1)
+    php = bond.make_bond('PHP', timeout=TIMEOUT)
+    perl = bond.make_bond('Perl', timeout=TIMEOUT)
     assert(php and perl)
 
     php.eval_block(r'function func_php($arg) { return $arg + 1; }')
@@ -15,8 +15,8 @@ def test_call_PHP_Perl():
 
 
 def test_call_Perl_PHP():
-    php = bond.make_bond('PHP', timeout=1)
-    perl = bond.make_bond('Perl', timeout=1)
+    php = bond.make_bond('PHP', timeout=TIMEOUT)
+    perl = bond.make_bond('Perl', timeout=TIMEOUT)
     assert(php and perl)
 
     perl.eval_block(r'sub func_perl { shift() + 1; }')
