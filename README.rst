@@ -314,9 +314,8 @@ PHP
 
 Requirements:
 
-* The PHP's command line interpreter needs to be installed, along with the
-  ``JSON`` extension. On Debian/Ubuntu, the required packages are ``php5-cli``
-  and ``php5-json``.
+* The PHP's >= 5.3 command line interpreter needs to be installed. On
+  Debian/Ubuntu, the required packages is ``php5-cli``.
 
 Serialization:
 

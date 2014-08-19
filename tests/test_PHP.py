@@ -18,7 +18,7 @@ def test_call_marshalling():
     php.eval_block(r'function test_str() { return "Hello world!"; }')
     assert(str(php.call('test_str')) == "Hello world!")
 
-    php.eval_block(r'function test_array() { return [42]; }')
+    php.eval_block(r'function test_array() { return array(42); }')
     assert(php.call('test_array') == [42])
 
     php.eval_block(r'function test_number() { return 42; }')
@@ -400,18 +400,29 @@ def test_trans_except():
     php_not_trans = bond.make_bond('PHP', timeout=TIMEOUT, trans_except=False)
 
     code = r'''
-    class MyException extends Exception implements jsonSerializable
+    if(PHP_VERSION_ID >= 50400)
     {
-        public function jsonSerialize()
+        class MyException extends Exception implements jsonSerializable
         {
-            return "MyException";
+            public function jsonSerialize()
+            {
+                return "MyException";
+            }
+        }
+
+        function func()
+        {
+            throw new MyException("an exception");
         }
     }
-
-    function func()
+    else
     {
-        throw new MyException("an exception");
-    }'''
+        function func()
+        {
+            throw new Exception("an exception");
+        }
+    }
+    '''
 
     # with transparent exceptions the following should try to serialize the
     # code block and call our jsonSerialize method
@@ -421,7 +432,7 @@ def test_trans_except():
         ret = php_trans.call('func')
     except bond.RemoteException as e:
         print(e)
-        failed = (str(e.data) == "MyException")
+        failed = (str(e.data) == "MyException" or str(e.data) == "{}")
     assert(failed)
 
     # ensure the env didn't just die
