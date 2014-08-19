@@ -2,7 +2,7 @@ import nose.plugins.skip
 import bond
 import pexpect
 
-TIMEOUT = 5
+TIMEOUT = 1
 
 def knownfail(func):
     def wrapper():
