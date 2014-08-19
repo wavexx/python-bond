@@ -404,8 +404,8 @@ JavaScript is supported through `Node.js <http://nodejs.org/>`_.
 
 Requirements:
 
-* Only Node.js v0.10.29 has been tested. On Debian/Ubuntu, the required package
-  is ``nodejs``.
+* Node.js v0.6.12 and v0.10.29 have been tested. On Debian/Ubuntu, the required
+  package is ``nodejs``.
 
 Serialization:
 

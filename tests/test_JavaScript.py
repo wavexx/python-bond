@@ -8,7 +8,7 @@ def test_basic():
 
 
 def test_basic_rmt():
-    js = bond.make_bond('JavaScript', "ssh localhost 'nodejs -i || node -i'",
+    js = bond.make_bond('JavaScript', "ssh localhost 'nodejs -i || node'",
                         timeout=TIMEOUT, def_args=False)
     js.close()
 
@@ -550,6 +550,6 @@ def test_buf_size():
     _test_buf_size(js)
 
 def test_buf_size_rmt():
-    js = bond.make_bond('JavaScript', "ssh localhost 'nodejs -i || node -i'",
+    js = bond.make_bond('JavaScript', "ssh localhost 'nodejs -i || node'",
                         timeout=TIMEOUT, def_args=False)
     _test_buf_size(js)
