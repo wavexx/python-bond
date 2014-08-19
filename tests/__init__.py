@@ -2,7 +2,11 @@ import nose.plugins.skip
 import bond
 import pexpect
 
-TIMEOUT = 1
+# We keep the global timeout for testing way shorter than the default of 60.
+# This is done to limit execution time when tests are borken and also to spot
+# performance regressions
+TIMEOUT = 2
+
 
 def knownfail(func):
     def wrapper():

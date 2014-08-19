@@ -330,12 +330,16 @@ Serialization:
 
 Limitations:
 
-* You cannot use "call" on a built-in function such as "echo" (use "eval" in
-  that case). You have to use a real function instead, like "print".
+* PHP <= 5.3 doesn't support the ``JsonSerializable`` interface, and thus lacks
+  transparent exceptions.
+
+* You cannot use ``call`` on a built-in function such as "echo". You have to
+  use a real function instead, like "print". You can still call "echo" by using
+  ``eval`` or ``eval_block``.
 
 * Unfortunately, you cannot catch "fatal errors" in PHP. If the evaluated code
-  triggers a "fatal error" it will terminate the bond without appeal. A common
-  example of "fatal error" in PHP is attempting to use an undefined variable or
+  triggers a fatal error it will terminate the bond without appeal. A common
+  example of such errors in PHP is attempting to use an undefined variable or
   function (which could happen while prototyping).
 
 
@@ -347,9 +351,14 @@ experienced Perl developer.
 
 Requirements:
 
-* The ``JSON``, ``Data::Dump`` and ``IO::String`` modules are required
-  (``libjson-perl``, ``libdata-dump-perl`` and ``libio-string-perl``) in
-  Debian/Ubuntu).
+* Perl >= 5.14 is required, with the following modules:
+
+  - ``JSON``
+  - ``Data::Dump``
+  - ``IO::String``
+
+  On Debian/Ubuntu, the required packages are ``libjson-perl``
+  ``libdata-dump-perl`` and ``libio-string-perl``.
 
 Serialization:
 
@@ -424,6 +433,18 @@ Limitations:
 * Since there's no distinction between "plain" objects (dictionaries) and any
   other object, almost everything will be silently serialized. Define a custom
   "toJSON" property on your "real" objects to control this behavior.
+
+* When executing a remote JavaScript bond with Node.js <= 0.6, you need to
+  manually invoke the REPL, as follows:
+
+  .. code:: python3
+
+    js = make_bond('JavaScript',
+		   "ssh remote node -e 'require\(\\\"repl\\\"\).start\(\)'",
+		   def_args=False)
+
+  When executing "node" locally, or when using Node.js >= 0.10, this is not
+  required (the "-i" flag is automatically provided).
 
 
 Common traits/limitations
