@@ -299,8 +299,8 @@ Python 2 / Python 3:
 
 You can freely mix Python versions between hosts/interpreters (that is: you can
 run Python 3 code from a Python 2 host and vice-versa). You'll need to disable
-transparent exceptions though, as the as the exception hierarchy is different
-between major versions:
+transparent exceptions though, as the exception hierarchy is different between
+major versions:
 
 .. code:: python3
 
