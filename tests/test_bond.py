@@ -1,5 +1,6 @@
 from __future__ import print_function
 import bond
+from tests import *
 
 def test_ser_err():
     py = bond.make_bond('Python', timeout=TIMEOUT)

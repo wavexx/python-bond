@@ -1,5 +1,6 @@
 from __future__ import print_function
 import bond
+from tests import *
 
 def test_call_PHP_Perl():
     php = bond.make_bond('PHP', timeout=TIMEOUT)

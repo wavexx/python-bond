@@ -1,5 +1,6 @@
 from __future__ import print_function
 import bond
+from tests import *
 
 def test_api_v0():
     # TODO: language constructors (as supported in v0) are deprecated in favor
