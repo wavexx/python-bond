@@ -10,7 +10,7 @@ def test_basic():
 def test_basic_rmt():
     js = bond.make_bond('JavaScript',
 			"ssh localhost 'nodejs -i || node -e require\(\\\"repl\\\"\).start\(\)'",
-                        timeout=TIMEOUT, def_args=False, logfile=open("log", "w"))
+                        timeout=TIMEOUT, def_args=False)
     js.close()
 
 
