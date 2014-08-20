@@ -181,11 +181,14 @@ def test_eval_sentinel():
     # ensure the sentinel is not accessible
     failed = False
     try:
-        perl.eval('$SENTINEL')
+        # without strict subs this just returns null
+        ret = perl.eval('$SENTINEL')
+        failed = (ret != 1)
     except bond.RemoteException as e:
+        # ... but an exception is fine too
         print(e)
         failed = True
-    assert(True)
+    assert(failed)
 
 
 def test_eval_rec():

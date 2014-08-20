@@ -140,7 +140,7 @@ def test_eval_sentinel():
     except bond.RemoteException as e:
         print(e)
         failed = True
-    assert(True)
+    assert(failed)
 
 
 def test_eval_rec():
