@@ -9,7 +9,7 @@ def test_basic():
 
 def test_basic_rmt():
     js = bond.make_bond('JavaScript',
-			"ssh localhost 'nodejs -i || node -e require\(\\\"repl\\\"\).start\(\)'",
+                        "ssh localhost 'nodejs -i || node -e require\(\\\"repl\\\"\).start\(\)'",
                         timeout=TIMEOUT, def_args=False)
     js.close()
 
@@ -404,17 +404,39 @@ def test_export_except():
 
 
 def test_output_redirect():
-    js = bond.make_bond('JavaScript', timeout=TIMEOUT)
+    capture = OutputCapture()
 
-    # stdout
-    js.eval_block(r'console.log("console.log: Hello world!");')
-    js.eval_block(r'process.stdout.write("stdout: Hello world!\n");')
-    assert(js.eval('1') == 1)
+    # stdout (console)
+    with capture:
+        js = bond.make_bond('JavaScript', timeout=TIMEOUT)
+        js.eval_block(r'console.log("Hello world!");')
+        assert(js.eval('1') == 1)
+    ret = capture.stdout
+    assert(str(ret) == "Hello world!\n")
 
-    # stderr
-    js.eval_block(r'console.error("console.error: Hello world!");')
-    js.eval_block(r'process.stderr.write("stderr: Hello world!\n");')
-    assert(js.eval('1') == 1)
+    # stdout (stdout)
+    with capture:
+        js = bond.make_bond('JavaScript', timeout=TIMEOUT)
+        js.eval_block(r'process.stdout.write("Hello world!\n");')
+        assert(js.eval('1') == 1)
+    ret = capture.stdout
+    assert(str(ret) == "Hello world!\n")
+
+    # stderr (console)
+    with capture:
+        js = bond.make_bond('JavaScript', timeout=TIMEOUT)
+        js.eval_block(r'console.error("Hello world!");')
+        assert(js.eval('1') == 1)
+    ret = capture.stderr
+    assert(str(ret) == "Hello world!\n")
+
+    # stderr (stderr)
+    with capture:
+        js = bond.make_bond('JavaScript', timeout=TIMEOUT)
+        js.eval_block(r'process.stderr.write("Hello world!\n");')
+        assert(js.eval('1') == 1)
+    ret = capture.stderr
+    assert(str(ret) == "Hello world!\n")
 
 
 def test_trans_except():
@@ -552,6 +574,6 @@ def test_buf_size():
 
 def test_buf_size_rmt():
     js = bond.make_bond('JavaScript',
-			"ssh localhost 'nodejs -i || node -e require\(\\\"repl\\\"\).start\(\)'",
+                        "ssh localhost 'nodejs -i || node -e require\(\\\"repl\\\"\).start\(\)'",
                         timeout=TIMEOUT, def_args=False)
     _test_buf_size(js)
