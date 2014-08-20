@@ -35,7 +35,7 @@ def bond_repl_depth(repl):
 
 
 def _buffer_stdio(obj):
-    if isinstance(obj, io.TextIOWrapper):
+    if isinstance(obj, io.TextIOBase):
         ret = io.TextIOWrapper(io.BytesIO())
         ret.getvalue = lambda: ret.buffer.getvalue().decode(ret.encoding)
     else:
