@@ -172,13 +172,8 @@ def test_eval_sentinel():
     php = bond.make_bond('PHP', timeout=TIMEOUT)
 
     # ensure the sentinel is not accessible
-    failed = False
-    try:
-        php.eval('$SENTINEL')
-    except bond.RemoteException as e:
-        print(e)
-        failed = True
-    assert(failed)
+    ret = php.eval('$SENTINEL')
+    assert(ret != 1)
 
 
 def test_eval_rec():
@@ -422,6 +417,14 @@ def test_output_redirect():
         assert(php.eval('1') == 1)
     ret = capture.stderr
     assert(str(ret) == "Hello world!\n")
+
+    # error reporting
+    with capture:
+        php = bond.make_bond('PHP', timeout=TIMEOUT)
+        php.eval_block(r'trigger_error("Hello world!");')
+        assert(php.eval('1') == 1)
+    ret = capture.stderr
+    assert(str(ret).find("Hello world!") >= 0)
 
 
 def test_trans_except():
