@@ -420,19 +420,31 @@ def test_export_except():
 
 
 def test_output_redirect():
-    perl = bond.make_bond('Perl', timeout=TIMEOUT)
+    capture = OutputCapture()
 
     # stdout
-    perl.eval_block(r'print "stdout: Hello world!\n";')
-    assert(perl.eval('1') == 1)
+    with capture:
+        perl = bond.make_bond('Perl', timeout=TIMEOUT)
+        perl.eval_block(r'print "Hello world!\n";')
+        assert(perl.eval('1') == 1)
+    ret = capture.stdout
+    assert(str(ret) == "Hello world!\n")
 
     # stderr
-    perl.eval_block(r'print STDERR "stderr: Hello world!\n"')
-    assert(perl.eval('1') == 1)
+    with capture:
+        perl = bond.make_bond('Perl', timeout=TIMEOUT)
+        perl.eval_block(r'print STDERR "Hello world!\n"')
+        assert(perl.eval('1') == 1)
+    ret = capture.stderr
+    assert(str(ret) == "Hello world!\n")
 
     # warnings
-    perl.eval_block(r'use warnings; "$warning_expected_on_stderr";')
-    assert(perl.eval('1') == 1)
+    with capture:
+        perl = bond.make_bond('Perl', timeout=TIMEOUT)
+        perl.eval_block(r'use warnings; "$warning_expected_on_stderr";')
+        assert(perl.eval('1') == 1)
+    ret = capture.stderr
+    assert(str(ret).find('$warning_expected_on_stderr') >= 0)
 
 
 def test_trans_except():
