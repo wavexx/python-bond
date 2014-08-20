@@ -381,18 +381,47 @@ def test_export_except():
 
 
 def test_output_redirect():
-    php = bond.make_bond('PHP', timeout=TIMEOUT);
+    capture = OutputCapture()
 
-    # standard output
-    php.eval_block(r'echo "echo: Hello world!\n";')
-    php.eval_block(r'fwrite(STDOUT, "STDOUT: Hello world!\n");')
-    php.eval_block(r'file_put_contents("php://stdout", "php://stdout: Hello world!\n");')
-    assert(php.eval('1') == 1)
+    # standard output (echo)
+    with capture:
+        php = bond.make_bond('PHP', timeout=TIMEOUT)
+        php.eval_block(r'echo "Hello world!\n";')
+        assert(php.eval('1') == 1)
+    ret = capture.stdout
+    assert(str(ret) == "Hello world!\n")
 
-    # standard error
-    php.eval_block(r'fwrite(STDERR, "STDERR: Hello world!\n");')
-    php.eval_block(r'file_put_contents("php://stderr", "php://stderr: Hello world!\n");')
-    assert(php.eval('1') == 1)
+    # standard output (STDOUT)
+    with capture:
+        php = bond.make_bond('PHP', timeout=TIMEOUT)
+        php.eval_block(r'fwrite(STDOUT, "Hello world!\n");')
+        assert(php.eval('1') == 1)
+    ret = capture.stdout
+    assert(str(ret) == "Hello world!\n")
+
+    # standard output (php://stdout)
+    with capture:
+        php = bond.make_bond('PHP', timeout=TIMEOUT)
+        php.eval_block(r'file_put_contents("php://stdout", "Hello world!\n");')
+        assert(php.eval('1') == 1)
+    ret = capture.stdout
+    assert(str(ret) == "Hello world!\n")
+
+    # standard error (STDERR)
+    with capture:
+        php = bond.make_bond('PHP', timeout=TIMEOUT)
+        php.eval_block(r'fwrite(STDERR, "Hello world!\n");')
+        assert(php.eval('1') == 1)
+    ret = capture.stderr
+    assert(str(ret) == "Hello world!\n")
+
+    # standard error (php://stderr)
+    with capture:
+        php = bond.make_bond('PHP', timeout=TIMEOUT)
+        php.eval_block(r'file_put_contents("php://stderr", "Hello world!\n");')
+        assert(php.eval('1') == 1)
+    ret = capture.stderr
+    assert(str(ret) == "Hello world!\n")
 
 
 def test_trans_except():
