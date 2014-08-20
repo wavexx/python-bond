@@ -178,14 +178,16 @@ def test_eval():
 def test_eval_sentinel():
     perl = bond.make_bond('Perl', timeout=TIMEOUT)
 
-    # ensure the sentinel is not accessible
+    # without strict subs this just returns null
+    ret = perl.eval('$SENTINEL')
+    failed = (ret != 1)
+
+    # with strict an exception is generated
     failed = False
     try:
         # without strict subs this just returns null
-        ret = perl.eval('$SENTINEL')
-        failed = (ret != 1)
+        perl.eval('use strict; $SENTINEL')
     except bond.RemoteException as e:
-        # ... but an exception is fine too
         print(e)
         failed = True
     assert(failed)
