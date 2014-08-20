@@ -432,16 +432,25 @@ def test_export_except_ser_err():
 
 
 def test_output_redirect():
-    py = bond.make_bond('Python', timeout=TIMEOUT)
-    py.eval_block(r'import sys')
+    capture = OutputCapture()
 
     # stdout
-    py.eval_block(r'sys.stdout.write("stdout: Hello world!\n")')
-    assert(py.eval('1') == 1)
+    with capture:
+        py = bond.make_bond('Python', timeout=TIMEOUT)
+        py.eval_block(r'import sys')
+        py.eval_block(r'sys.stdout.write("Hello world!\n")')
+        assert(py.eval('1') == 1)
+    ret = capture.stdout
+    assert(str(ret) == "Hello world!\n")
 
     # stderr
-    py.eval_block(r'sys.stderr.write("stderr: Hello world!\n")')
-    assert(py.eval('1') == 1)
+    with capture:
+        py = bond.make_bond('Python', timeout=TIMEOUT)
+        py.eval_block(r'import sys')
+        py.eval_block(r'sys.stderr.write("Hello world!\n")')
+        assert(py.eval('1') == 1)
+    ret = capture.stderr
+    assert(str(ret) == "Hello world!\n")
 
 
 def test_trans_except():
