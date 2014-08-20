@@ -418,13 +418,23 @@ def test_output_redirect():
     ret = capture.stderr
     assert(str(ret) == "Hello world!\n")
 
-    # error reporting
+    # error reporting (on)
     with capture:
         php = bond.make_bond('PHP', timeout=TIMEOUT)
+        php.eval_block(r'ini_set("display_errors", "1");')
         php.eval_block(r'trigger_error("Hello world!");')
         assert(php.eval('1') == 1)
     ret = capture.stderr
     assert(str(ret).find("Hello world!") >= 0)
+
+    # error reporting (off)
+    with capture:
+        php = bond.make_bond('PHP', timeout=TIMEOUT)
+        php.eval_block(r'ini_set("display_errors", "0");')
+        php.eval_block(r'trigger_error("Hello world!");')
+        assert(php.eval('1') == 1)
+    ret = capture.stderr
+    assert(str(ret).find("Hello world!") < 0)
 
 
 def test_trans_except():
