@@ -1,3 +1,11 @@
+python-bond 1.1
+---------------
+
+* PHP output redirection was broken in 1.0; it's now fixed.
+* PHP now also redirects error messages to stderr, honouring correctly
+  ``error_reporting()`` and ``display_errors``.
+
+
 python-bond 1.0
 ---------------
 
