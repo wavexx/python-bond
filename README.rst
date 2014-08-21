@@ -21,8 +21,8 @@ interpreters on different hosts through "ssh" efficiently.
 ``bond`` currently supports PHP, Perl, JavaScript (Node.js) and Python itself.
 
 
-A simple  example
-=================
+Overview
+========
 
 .. code:: python3
 
@@ -58,13 +58,13 @@ A simple  example
   [u'Mind', u'blown!']
 
 
-Why?
-====
+A more concrete example
+=======================
 
-I needed ``bond`` for refactoring a large ``PHP`` project, *mostly*. With
-``bond`` you can rewrite your program incrementally, while still executing all
-your existing code unchanged. You can start by rewriting just a single
-function:
+I needed ``bond`` for migrating a large PHP project to Python. With ``bond``
+you can rewrite a program incrementally, while still executing all the existing
+code unchanged. You can start by rewriting just a single function in an empty
+shell that wraps your existing code, as follows:
 
 .. code:: python3
 
@@ -81,9 +81,13 @@ function:
   php.export(new_function, 'function_to_be_replaced')
   php.call('main', sys.argv)
 
-It turns out that with the same approach you can easily perform remote/parallel
-computation as well. Nobody stops you from having multiple interpreters at the
-same time: you can use ``bond`` to setup a poor-man's distributed system with
+You can also use ``bond`` to mix Python 2/3 code. Python <=> Python bonds
+automatically use pickling as a protocol, which makes serialization almost
+invisible.
+
+Thanks to that, you can easily use ``bond`` to perform remote/parallel
+computation. Nobody stops you from having multiple interpreters at the same
+time: you can create bonds to setup a poor-man's distributed system with
 minimal effort:
 
 .. code:: python3
@@ -105,13 +109,33 @@ minimal effort:
   # collect the results
   results = [thread.join() for thread in threads]
 
-You can also use ``bond`` to mix Python 2/3 code. ``bond`` aims to be
-completely invisible on the remote side: you don't need ``bond`` installed
-remotely at all.
+Distributed producer/consumer schemes also come for free by proxying calls:
 
-The wire protocol is simple enough to be extended to any language supporting an
-interactive interpreter. In fact, `the drivers themselves
-<https://github.com/wavexx/bond-drivers>`_ can be used from any other language.
+.. code:: python3
+
+  host1.eval_block(r'''def consumer(data):
+     # do something with data
+     pass
+  ''')
+
+  host2.eval_block(r'''def producer():
+      while True:
+	 data = function()
+	 consumer(data)
+  ''')
+
+  host1.proxy('consumer', host2)
+  host2.call('producer')
+
+It's even more interesting if you realize that the producers/consumers don't
+even need to be written in the same language, and don't know that the call is
+actually being forwarded.
+
+``bond`` doesn't even need to be installed remotely: the required setup is
+injected directly into a live interpreter. The wire protocol is simple enough
+that any language supporting an interactive REPL can be called. In fact, `the
+drivers themselves <https://github.com/wavexx/bond-drivers>`_ are designed to
+be used from any other language.
 
 
 API
@@ -202,8 +226,8 @@ The resulting ``bond.Bond`` class has the following methods:
 
 ``eval_block(code)``:
 
-  Execute a "code" block inside the interpreter. Any construct which is legal
-  by the current interpreter is allowed. Nothing is returned.
+  Execute a "code" block inside the top-level of the interpreter. Any construct
+  which is legal by the current interpreter is allowed. Nothing is returned.
 
 ``close()``:
 
@@ -331,7 +355,7 @@ Serialization:
 Limitations:
 
 * PHP <= 5.3 doesn't support the ``JsonSerializable`` interface, and thus lacks
-  transparent exceptions.
+  the ability of serializing arbitrary objects.
 
 * You cannot use ``call`` on a built-in function such as "echo". You have to
   use a real function instead, like "print". You can still call "echo" by using
@@ -339,13 +363,13 @@ Limitations:
 
 * Unfortunately, you cannot catch "fatal errors" in PHP. If the evaluated code
   triggers a fatal error it will terminate the bond without appeal. A common
-  example of such errors in PHP is attempting to use an undefined variable or
+  example of such error can be attempting to use an undefined variable or
   function (which could happen while prototyping).
 
-* Due to the inability to override built-in functions, ``error_reporting()``
-  always returns 0 and shouldn't be used to control the display error level.
-  Use ``_BOND_error_reporting()`` instead, which has the same usage/signature
-  as the built-in function.
+* Due to the inability to override built-in functions, ``error_reporting()`` is
+  not completely transparent and always returns 0. It shouldn't be used to
+  control the display error level. Use ``_BOND_error_reporting()`` instead,
+  which has the same usage/signature as the built-in function.
 
 
 Perl
