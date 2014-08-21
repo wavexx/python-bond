@@ -342,6 +342,11 @@ Limitations:
   example of such errors in PHP is attempting to use an undefined variable or
   function (which could happen while prototyping).
 
+* Due to the inability to override built-in functions, ``error_reporting()``
+  always returns 0 and shouldn't be used to control the display error level.
+  Use ``_BOND_error_reporting()`` instead, which has the same usage/signature
+  as the built-in function.
+
 
 Perl
 ----

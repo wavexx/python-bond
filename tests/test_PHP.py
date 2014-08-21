@@ -437,6 +437,41 @@ def test_output_redirect():
     assert(str(ret).find("Hello world!") < 0)
 
 
+def test_BOND_error_reporting():
+    php = bond.make_bond('PHP', timeout=TIMEOUT)
+
+    # test that the default reporting level is non-zero
+    ret = php.call('_BOND_error_reporting')
+    assert(ret)
+
+    # ensure changes are maintained
+    ret = php.call('_BOND_error_reporting', 22527)
+    ret = php.call('_BOND_error_reporting')
+    assert(ret == 22527)
+
+
+@knownfail
+def test_error_reporting_default():
+    php = bond.make_bond('PHP', timeout=TIMEOUT)
+
+    # test that the default reporting level is non-zero
+    ret = php.call('error_reporting')
+    assert(ret)
+
+
+@knownfail
+def test_error_reporting_noise():
+    php = bond.make_bond('PHP', timeout=TIMEOUT)
+
+    # ensure no noise is generated in the I/O stream, ever
+    try:
+        php.eval_block('error_reporting(E_ALL); echo $undefined;')
+    except bond.RemoteException as e:
+        print(e)
+        pass
+    assert(php.eval('1') == 1)
+
+
 def test_trans_except():
     php_trans = bond.make_bond('PHP', timeout=TIMEOUT, trans_except=True)
     php_not_trans = bond.make_bond('PHP', timeout=TIMEOUT, trans_except=False)
