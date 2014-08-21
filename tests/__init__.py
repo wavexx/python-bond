@@ -9,7 +9,7 @@ import sys
 # This is done to limit execution time when tests are broken and also to spot
 # performance regressions. travis-ci though has truly unpredictable lag, so
 # we still make an exception.
-TIMEOUT = 10 if 'TRAVIS' in os.environ else 1
+TIMEOUT = 5 if 'TRAVIS' in os.environ else 1
 
 
 def knownfail(func):
