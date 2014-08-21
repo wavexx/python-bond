@@ -21,4 +21,4 @@ install:
   - python setup.py -q install
 
 script:
-  - nosetests -v
+  - BOND_TIMEOUT=5 nosetests -v
