@@ -503,10 +503,21 @@ Common traits/limitations
   fraction of time.
 
 
+General/support mailing list
+============================
+
+If you are interested in announcements and development discussions about
+``bond``, you can subscribe to the `bond-devel` mailing list by sending an
+empty email to <bond-devel+subscribe@thregr.org>.
+
+You can contact the main author directly at <wavexx@thregr.org>, though using
+the general list is encouraged.
+
+
 Authors and Copyright
 =====================
 
-| "python-bond" is distributed under GPL2 (see COPYING) WITHOUT ANY WARRANTY.
+| "python-bond" is distributed under the GNU GPLv2+ license (see COPYING).
 | Copyright(c) 2014 by wave++ "Yuri D'Elia" <wavexx@thregr.org>.
 
 python-bond's GIT repository is publicly accessible at::

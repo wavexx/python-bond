@@ -1,3 +1,15 @@
+python-bond 1.2
+---------------
+
+* PHP's error level can now be controlled through the ``_BOND_error_level()``
+  function (see the PHP "Limitations" section).
+* An initialization race with PHP <= 5.3 (causing intermittent initialization
+  issues) has been fixed.
+* The license has been changed from GPLv2 to GNU GPLv2+.
+* A new mailing list for announcements and development discussions has been
+  created (see the README).
+
+
 python-bond 1.1
 ---------------
 

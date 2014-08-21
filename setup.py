@@ -8,7 +8,7 @@ long_description = (readme + "\n\nLatest release notes\n====================\n"
                     + '\n'.join(news.split('\n\n\n', 1)[0].splitlines()[2:]))
 
 # the actual setup
-setup(name='python-bond', version='1.1',
+setup(name='python-bond', version='1.2',
       description='transparent remote/recursive evaluation between Python and other languages',
 
       author="Yuri D'Elia",
@@ -21,7 +21,7 @@ setup(name='python-bond', version='1.1',
                    'Environment :: Console',
                    'Environment :: No Input/Output (Daemon)',
                    'Intended Audience :: Developers',
-                   'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
+                   'License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)',
                    'Operating System :: POSIX',
                    'Operating System :: Unix',
                    'Programming Language :: JavaScript',
