@@ -33,6 +33,10 @@ class Spawn(pexpect.spawn):
         self.noecho()
         return self.sendline(*args, **kwargs)
 
+    def expect_noecho(self, *args, **kwargs):
+        self.noecho()
+        return self.expect(*args, **kwargs)
+
     def expect_exact_noecho(self, *args, **kwargs):
         self.noecho()
         return self.expect_exact(*args, **kwargs)
@@ -288,8 +292,12 @@ def make_bond(lang, cmd=None, args=None, cwd=None, env=os.environ, def_args=True
         if proc is None:
             raise BondException(lang, 'no suitable interpreter found')
 
-    # probe the interpreter
     try:
+        # wait for a prompt if needed
+        if 'wait' in data['init']:
+            proc.expect_noecho(data['init']['wait'])
+
+        # probe the interpreter
         probe = data['init']['probe']
         proc.sendline_noecho(probe)
         if proc.expect_exact_noecho(['STAGE1\n', 'STAGE1\r\n']) == 1:
