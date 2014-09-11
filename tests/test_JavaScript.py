@@ -591,10 +591,15 @@ def test_ref_call():
     js = bond.make_bond('JavaScript', timeout=TIMEOUT)
     js.eval_block('function copy(arg) { return arg; }')
     js.eval_block('function istype(arg, type) { return (typeof arg === type); }')
-    ret = js.call('copy', '1')
-    assert(ret == '1')
-    ret = js.call('copy', js.ref('1 + 1'))
+
+    # the second (ignored) argument enforces XCALL
+    ret = js.call('copy', 1, js.ref('1 + 1'))
+    assert(ret == 1)
+    ret = js.call('copy', [1], js.ref('1 + 1'))
+    assert(ret == [1])
+    ret = js.call('copy', js.ref('1 + 1'), '1')
     assert(ret == 2)
+
     js.eval_block(r'var func = function() {};')
     ret = js.call('istype', js.ref('func'), 'function')
     assert(ret == True)

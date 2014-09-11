@@ -590,11 +590,18 @@ def test_ref_basic():
 
 def test_ref_call():
     py = bond.make_bond('Python', timeout=TIMEOUT)
-    py.eval_block('from copy import copy')
-    ret = py.call('copy', '1')
-    assert(ret == '1')
-    ret = py.call('copy', py.ref('1 + 1'))
+    py.eval_block(r'''def copy(arg, *args):
+        return arg
+    ''')
+
+    # the second (ignored) argument enforces XCALL
+    ret = py.call('copy', 1, py.ref('1 + 1'))
+    assert(ret == 1)
+    ret = py.call('copy', [1], py.ref('1 + 1'))
+    assert(ret == [1])
+    ret = py.call('copy', py.ref('1 + 1'), '1')
     assert(ret == 2)
+
     py.eval_block(r'func = lambda x: x')
     ret = py.call('hasattr', py.ref('func'), '__call__')
     assert(ret == True)
