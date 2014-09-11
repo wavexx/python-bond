@@ -492,12 +492,12 @@ not nested) argument to ``call()``.
 ``ref()`` allows to "call" methods that take un-serializable arguments, such as
 file descriptors, without the use of a support function:
 
-  .. code:: python3
+.. code:: python3
 
-    pl = make_bond('Perl')
-    pl.eval_block('open($fd "<file.txt");')
-    fd = pl.ref('$fd')
-    pl.call('close', fd)
+  pl = make_bond('Perl')
+  pl.eval_block('open($fd, "<file.txt");')
+  fd = pl.ref('$fd')
+  pl.call('close', fd)
 
 
 Common limitations
