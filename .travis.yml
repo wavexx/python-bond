@@ -21,4 +21,7 @@ install:
   - python setup.py -q install
 
 script:
-  - BOND_TIMEOUT=5 nosetests -v
+  - BOND_TIMEOUT=5 nosetests --with-coverage --cover-package bond -v
+
+after_success:
+  - coveralls
