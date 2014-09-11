@@ -162,8 +162,8 @@ class Bond(object):
 
 
     def ref(self, code):
-        '''Return a reference to an *unevaluated, single statement* of code,
-        which can be later used in eval(), eval_block() or as an immediate
+        '''Return a reference to an *single, unevaluated statement* of code,
+        which can be later used in eval(), eval_block() or as an *immediate*
         argument to call()'''
         return Ref(self, code)
 

@@ -58,8 +58,8 @@ Overview
   [u'Mind', u'blown!']
 
 
-A more concrete example
-=======================
+A concrete example
+==================
 
 I needed ``bond`` for migrating a large PHP project to Python. With ``bond``
 you can rewrite a program incrementally, while still executing all the existing
@@ -228,6 +228,11 @@ The resulting ``bond.Bond`` class has the following methods:
 
   Execute a "code" block inside the top-level of the interpreter. Any construct
   which is legal by the current interpreter is allowed. Nothing is returned.
+
+``ref(code)``:
+
+  Return a reference to an *single, unevaluated statement* of code, which can
+  be later used in eval(), eval_block() or as an *immediate* argument to call().
 
 ``close()``:
 
@@ -476,8 +481,27 @@ Limitations:
   required (the "-i" flag is automatically provided).
 
 
-Common traits/limitations
--------------------------
+Suspended evaluation
+--------------------
+
+``Bond`` has minimal support for suspended evaluation, through the use of
+``Bond.ref()``. ``ref()`` returns a reference to an unevaluated statement that
+can be fed back to ``eval()``, ``eval_block()``, or as an *immediate* (i.e.:
+not nested) argument to ``call()``.
+
+``ref()`` allows to "call" methods that take un-serializable arguments, such as
+file descriptors, without the use of a support function:
+
+  .. code:: python3
+
+    pl = make_bond('Perl')
+    pl.eval_block('open($fd "<file.txt");')
+    fd = pl.ref('$fd')
+    pl.call('close', fd)
+
+
+Common limitations
+------------------
 
 * Except for Python, only basic types (booleans, numbers, strings, lists/arrays
   and maps/dictionaries) can be transferred between the interpreters.
