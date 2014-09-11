@@ -578,3 +578,28 @@ def test_buf_size():
 def test_buf_size_rmt():
     perl = bond.make_bond('Perl', "ssh localhost perl", timeout=TIMEOUT)
     _test_buf_size(perl)
+
+
+def test_ref_basic():
+    pl = bond.make_bond('Perl', timeout=TIMEOUT)
+    ref = pl.ref('1')
+    assert(pl.eval(ref) == 1)
+    pl.eval_block(ref)
+    assert(pl.eval('1') == 1)
+
+
+def test_ref_call():
+    pl = bond.make_bond('Perl', timeout=TIMEOUT)
+    pl.eval_block('sub copy { shift() }')
+
+    # the second (ignored) argument enforces XCALL
+    ret = pl.call('copy', 1, pl.ref('1 + 1'))
+    assert(ret == 1)
+    ret = pl.call('copy', [1], pl.ref('1 + 1'))
+    assert(ret == [1])
+    ret = pl.call('copy', pl.ref('1 + 1'), '1')
+    assert(ret == 2)
+
+    pl.eval_block(r'our $func = sub {};')
+    ret = pl.call('ref', pl.ref('$func'))
+    assert(ret == 'CODE')
