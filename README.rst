@@ -128,7 +128,7 @@ Distributed producer/consumer schemes also come for free by proxying calls:
   host2.call('producer')
 
 It's even more interesting if you realize that the producers/consumers don't
-even need to be written in the same language, and don't know that the call is
+even have to be written in the same language, and don't know that the call is
 actually being forwarded.
 
 ``bond`` doesn't even need to be installed remotely: the required setup is
@@ -339,7 +339,7 @@ PHP
 Requirements:
 
 * The PHP's >= 5.3 command line interpreter needs to be installed. On
-  Debian/Ubuntu, the required packages is ``php5-cli``.
+  Debian/Ubuntu, the required package is ``php5-cli``.
 
 Serialization:
 
