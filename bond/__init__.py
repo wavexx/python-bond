@@ -78,6 +78,11 @@ class RemoteException(BondException):
 
 
 # The main host controller
+class Ref(object):
+    def __init__(self, bond, code):
+        self.bond = bond
+        self.code = code
+
 class Bond(object):
     def __init__(self, proc, trans_except, lang='<unknown>', proto=protocols.JSON):
         '''Construct a bond using an pre-initialized interpreter.
@@ -147,19 +152,40 @@ class Bond(object):
             raise BondException(self.lang, 'unknown interpreter state')
 
 
+    def _data(self, maybe_ref):
+        if not isinstance(maybe_ref, Ref):
+            return maybe_ref
+        if maybe_ref.bond is self:
+            return maybe_ref.code
+        raise BondException(self.lang,
+                            'cannot use a reference coming from a different bond')
+
+
+    def ref(self, code):
+        '''Return a reference to an *unevalued, single statement* of code,
+        which can be later used in eval(), eval_block() or as an immediate
+        argument to call()'''
+        return Ref(self, code)
+
     def eval(self, code):
         '''Evaluate and return the value of a single statement of code in the interpreter.'''
-        self._sendstate('EVAL', self.dumps(code))
+        self._sendstate('EVAL', self.dumps(self._data(code)))
         return self._repl()
 
     def eval_block(self, code):
         '''Evaluate a "code" block inside the interpreter. Nothing is returned.'''
-        self._sendstate('EVAL_BLOCK', self.dumps(code))
+        self._sendstate('EVAL_BLOCK', self.dumps(self._data(code)))
         return self._repl()
 
     def call(self, name, *args):
         '''Call a function "name" using *args (apply *args to a callable statement "name")'''
-        self._sendstate('CALL', self.dumps([name, args]))
+        if not any(isinstance(arg, Ref) for arg in args):
+            self._sendstate('CALL', self.dumps([name, args]))
+        else:
+            xargs = []
+            for arg in args:
+                xargs.append([int(isinstance(arg, Ref)), self._data(arg)])
+            self._sendstate('XCALL', self.dumps([name, xargs]))
         return self._repl()
 
     def close(self):

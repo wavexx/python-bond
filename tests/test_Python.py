@@ -578,3 +578,23 @@ def test_buf_size():
 def test_buf_size_rmt():
     py = bond.make_bond('Python', "ssh localhost python", timeout=TIMEOUT)
     _test_buf_size(py)
+
+
+def test_ref_basic():
+    py = bond.make_bond('Python', timeout=TIMEOUT)
+    ref = py.ref('1')
+    assert(py.eval(ref) == 1)
+    py.eval_block(ref)
+    assert(py.eval('1') == 1)
+
+
+def test_ref_call():
+    py = bond.make_bond('Python', timeout=TIMEOUT)
+    py.eval_block('from copy import copy')
+    ret = py.call('copy', '1')
+    assert(ret == '1')
+    ret = py.call('copy', py.ref('1 + 1'))
+    assert(ret == 2)
+    py.eval_block(r'func = lambda x: x')
+    ret = py.call('hasattr', py.ref('func'), '__call__')
+    assert(ret == True)
