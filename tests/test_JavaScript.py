@@ -577,3 +577,24 @@ def test_buf_size_rmt():
                         "ssh localhost 'nodejs -i || node -e require\(\\\"repl\\\"\).start\(\)'",
                         timeout=TIMEOUT, def_args=False)
     _test_buf_size(js)
+
+
+def test_ref_basic():
+    js = bond.make_bond('JavaScript', timeout=TIMEOUT)
+    ref = js.ref('1')
+    assert(js.eval(ref) == 1)
+    js.eval_block(ref)
+    assert(js.eval('1') == 1)
+
+
+def test_ref_call():
+    js = bond.make_bond('JavaScript', timeout=TIMEOUT)
+    js.eval_block('function copy(arg) { return arg; }')
+    js.eval_block('function istype(arg, type) { return (typeof arg === type); }')
+    ret = js.call('copy', '1')
+    assert(ret == '1')
+    ret = js.call('copy', js.ref('1 + 1'))
+    assert(ret == 2)
+    js.eval_block(r'var func = function() {};')
+    ret = js.call('istype', js.ref('func'), 'function')
+    assert(ret == True)
