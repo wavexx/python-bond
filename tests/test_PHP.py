@@ -632,3 +632,28 @@ def test_buf_size():
 def test_buf_size_rmt():
     php = bond.make_bond('PHP', "ssh localhost php", timeout=TIMEOUT)
     _test_buf_size(php)
+
+
+def test_ref_basic():
+    php = bond.make_bond('PHP', timeout=TIMEOUT)
+    ref = php.ref('1')
+    assert(php.eval(ref) == 1)
+    php.eval_block(ref)
+    assert(php.eval('1') == 1)
+
+
+def test_ref_call():
+    php = bond.make_bond('PHP', timeout=TIMEOUT, logfile=open("log", "wb"))
+    php.eval_block(r'function my_copy($arg) { return $arg; }')
+
+    # the second (ignored) argument enforces XCALL
+    ret = php.call('my_copy', 1, php.ref('1 + 1'))
+    assert(ret == 1)
+    ret = php.call('my_copy', [1], php.ref('1 + 1'))
+    assert(ret == [1])
+    ret = php.call('my_copy', php.ref('1 + 1'), '1')
+    assert(ret == 2)
+
+    php.eval_block(r'$func = function() {};')
+    ret = php.call('is_callable', php.ref('$func'))
+    assert(ret == True)
