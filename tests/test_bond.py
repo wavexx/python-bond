@@ -50,3 +50,21 @@ def test_proxy():
     py1.proxy('func_py1', py2)
 
     assert(py2.call('func_py1', 0) == 1)
+
+
+def test_ref_xref():
+    py1 = bond.make_bond('Python', timeout=TIMEOUT)
+    py2 = bond.make_bond('Python', timeout=TIMEOUT)
+
+    failed = False
+    try:
+        py2.eval(py1.ref('1'))
+    except bond.BondException as e:
+        print(e)
+        failed = True
+    assert(failed)
+
+
+def test_list_drivers():
+    drivers = bond.list_drivers()
+    assert('Python' in drivers)

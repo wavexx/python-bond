@@ -643,7 +643,7 @@ def test_ref_basic():
 
 
 def test_ref_call():
-    php = bond.make_bond('PHP', timeout=TIMEOUT, logfile=open("log", "wb"))
+    php = bond.make_bond('PHP', timeout=TIMEOUT)
     php.eval_block(r'function my_copy($arg) { return $arg; }')
 
     # the second (ignored) argument enforces XCALL
