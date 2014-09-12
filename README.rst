@@ -321,9 +321,29 @@ such as file descriptors, without the use of a support function and/or eval:
 .. code:: python3
 
   pl = make_bond('Perl')
-  pl.eval_block('open($fd, "<file.txt");')
+  pl.eval_block('open($fd, ">file.txt");')
   fd = pl.ref('$fd')
+  pl.call('syswrite', fd, "Hello world!")
   pl.call('close', fd)
+
+Since ``ref()`` objects cannot be nested, there are still cases where it might
+be necessary to use a support function. To demonstrate, we rewrite the above
+example without quoted expressions, while still allowing an argument ("Hello
+world!") to be local:
+
+.. code:: python3
+
+  pl = make_bond('Perl')
+  pl.eval_block('open($fd, ">file.txt");')
+  pl.eval_block('sub syswrite_fd { syswrite($fd, shift()); };')
+  pl.call('syswrite_fd', "Hello world!")
+  pl.eval('close($fd)')
+
+Or more succinctly:
+
+.. code:: python3
+
+  pl.call('sub { syswrite($fd, shift()); }', "Hello world!")
 
 
 Language support

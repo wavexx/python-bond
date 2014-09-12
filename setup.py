@@ -8,7 +8,7 @@ long_description = (readme + "\n\nLatest release notes\n====================\n"
                     + '\n'.join(news.split('\n\n\n', 1)[0].splitlines()[2:]))
 
 # the actual setup
-setup(name='python-bond', version='1.2',
+setup(name='python-bond', version='1.3',
       description='transparent remote/recursive evaluation between Python and other languages',
 
       author="Yuri D'Elia",

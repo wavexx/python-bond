@@ -1,3 +1,11 @@
+python-bond 1.3
+---------------
+
+* Added support for "Quoted expressions". ``call()`` can now be used on remote
+  functions expecting one or more remote unserializable objects as their
+  arguments, without the need of a support function and/or ``eval()``.
+
+
 python-bond 1.2
 ---------------
 
