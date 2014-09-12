@@ -233,6 +233,7 @@ The resulting ``bond.Bond`` class has the following methods:
 
   Return a reference to an *single, unevaluated statement* of code, which can
   be later used in eval(), eval_block() or as an *immediate* argument to call().
+  See `Quoted expressions`_.
 
 ``close()``:
 
@@ -303,6 +304,26 @@ Beware that both ``SerializationException`` (with ``side="remote"``) and
 ``RemoteException`` may actually be originating from uncaught *local*
 exceptions when an exported function is called. Pay attention to the error
 text/data in these cases, as it will contain several nested exceptions.
+
+
+Quoted expressions
+------------------
+
+``bond`` has minimal support for quoted expressions, through the use of
+``Bond.ref()``. ``ref()`` returns a reference to a unevaluated statement that
+can be fed back to ``eval()``, ``eval_block()``, or as an *immediate* (i.e.:
+not nested) argument to ``call()``. References are bound to the interpreter
+that created them.
+
+``ref()`` allows to "call" methods that take remote un-serializable arguments,
+such as file descriptors, without the use of a support function and/or eval:
+
+.. code:: python3
+
+  pl = make_bond('Perl')
+  pl.eval_block('open($fd, "<file.txt");')
+  fd = pl.ref('$fd')
+  pl.call('close', fd)
 
 
 Language support
@@ -479,25 +500,6 @@ Limitations:
 
   When executing "node" locally, or when using Node.js >= 0.10, this is not
   required (the "-i" flag is automatically provided).
-
-
-Suspended evaluation
---------------------
-
-``Bond`` has minimal support for suspended evaluation, through the use of
-``Bond.ref()``. ``ref()`` returns a reference to an unevaluated statement that
-can be fed back to ``eval()``, ``eval_block()``, or as an *immediate* (i.e.:
-not nested) argument to ``call()``.
-
-``ref()`` allows to "call" methods that take un-serializable arguments, such as
-file descriptors, without the use of a support function:
-
-.. code:: python3
-
-  pl = make_bond('Perl')
-  pl.eval_block('open($fd, "<file.txt");')
-  fd = pl.ref('$fd')
-  pl.call('close', fd)
 
 
 Common limitations
