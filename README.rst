@@ -563,6 +563,9 @@ the general list is encouraged.
 Authors and Copyright
 =====================
 
+`python-bond` can be found at
+http://www.thregr.org/~wavexx/software/python-bond/
+
 | "python-bond" is distributed under the GNU GPLv2+ license (see COPYING).
 | Copyright(c) 2014 by wave++ "Yuri D'Elia" <wavexx@thregr.org>.
 
