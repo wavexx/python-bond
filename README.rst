@@ -207,11 +207,12 @@ The following keyword arguments are supported:
 
 ``trans_except``:
 
-  Enables/disables "transparent exceptions". If ``trans_except`` is enabled,
-  exceptions will be forwarded across the bond using the original data-type. If
-  ``trans_except`` is disabled (the default for all languages except Python),
-  then local exceptions will always contain a string representation of the
-  remote exception instead, which avoids serialization errors.
+  Enables/disables "transparent exceptions". Exceptions are always first class,
+  but when ``trans_except`` is enabled, the exception objects themselves will
+  be forwarded across the bond. If ``trans_except`` is disabled (the default
+  for all languages except Python), then local exceptions will always contain a
+  string representation of the remote exception instead, which avoids
+  serialization errors.
 
 
 ``bond.Bond`` Methods
@@ -573,4 +574,4 @@ python-bond's GIT repository is publicly accessible at::
 
   git://src.thregr.org/python-bond
 
-or at `GitHub <https://github.com/wavexx/python-bond>`_.
+or at https://github.com/wavexx/python-bond
