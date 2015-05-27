@@ -352,6 +352,7 @@ def make_bond(lang, cmd=None, args=None, cwd=None, env=os.environ, def_args=True
         raise BondException(lang, 'cannot initialize stage2: ' + errors)
 
     # remote environment is ready
+    proc.delaybeforesend = 0
     proto = getattr(protocols, protocol)
     return Bond(proc, trans_except, lang=lang, proto=proto)
 
