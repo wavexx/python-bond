@@ -1,3 +1,9 @@
+python-bond 1.4
+---------------
+
+* Performance/documentation tweaks.
+
+
 python-bond 1.3
 ---------------
 
