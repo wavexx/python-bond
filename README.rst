@@ -568,7 +568,7 @@ Authors and Copyright
 http://www.thregr.org/~wavexx/software/python-bond/
 
 | "python-bond" is distributed under the GNU GPLv2+ license (see COPYING).
-| Copyright(c) 2014 by wave++ "Yuri D'Elia" <wavexx@thregr.org>.
+| Copyright(c) 2014-2015 by wave++ "Yuri D'Elia" <wavexx@thregr.org>.
 
 python-bond's GIT repository is publicly accessible at::
 
