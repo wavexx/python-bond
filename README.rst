@@ -58,13 +58,16 @@ Overview
   [u'Mind', u'blown!']
 
 
-A concrete example
+Practical examples
 ==================
 
-I needed ``bond`` for migrating a large PHP project to Python. With ``bond``
-you can rewrite a program incrementally, while still executing all the existing
-code unchanged. You can start by rewriting just a single function in an empty
-shell that wraps your existing code, as follows:
+Incremental code-base migration
+-------------------------------
+
+I originally needed ``bond`` for migrating a large PHP project to Python. With
+``bond`` you can rewrite a program incrementally, while still executing all the
+existing code unchanged. You can start by rewriting just a single function in
+an empty shell, wrapping your existing code:
 
 .. code:: python3
 
@@ -81,14 +84,49 @@ shell that wraps your existing code, as follows:
   php.export(new_function, 'function_to_be_replaced')
   php.call('main', sys.argv)
 
-You can also use ``bond`` to mix Python 2/3 code. Python <=> Python bonds
+
+Mixing Python 2/3 code bases
+----------------------------
+
+You can use ``bond`` to mix Python 2/3 code. Python <=> Python bonds
 automatically use pickling as a protocol, which makes serialization almost
 invisible.
 
-Thanks to that, you can easily use ``bond`` to perform remote/parallel
-computation. Nobody stops you from having multiple interpreters at the same
-time: you can create bonds to setup a poor-man's distributed system with
-minimal effort:
+In this scenario, you can start writing new code directly on Python 3, while
+using Python 2 only for the libraries which are still missing.
+
+For example, you can use ``Mechanize`` on Python 3 with minimal changes:
+
+.. code:: python3
+
+  from bond import make_bond
+  py2 = make_bond('Python', 'python2', trans_except=False)
+  py2.eval_block('import mechanize; br = mechanize.Browser()')
+  py2.call('br.open', 'http://www.example.com')
+  title = py2.call('br.title')
+
+``eval_block`` is only being used as an example here to make it self-contained.
+A more reasonable solution for larger chunks of code is to split the source
+into a distinct file that can be loaded at once in the remote interpreter:
+
+.. code:: python3
+
+  from bond import make_bond
+  py2 = make_bond('Python', 'python2', trans_except=False)
+  py2.eval_block('import .mypython2lib')
+
+This reduces the amount of clutter and keeps the distinction between new and
+legacy code clear. You should also keep in mind that since the remote language
+is itself Python, expressions themselves (for whenever ``call`` is
+insufficient) can be quoted just by using ``repr``.
+
+
+Remote/parallel computation
+---------------------------
+
+You can easily use ``bond`` to perform remote/parallel computation. Nobody
+stops you from having multiple interpreters at the same time: you can create
+multiple bonds to setup a poor-man's distributed system with minimal effort:
 
 .. code:: python3
 
@@ -136,6 +174,51 @@ injected directly into a live interpreter. The wire protocol is simple enough
 that any language supporting an interactive REPL can be called. In fact, `the
 drivers themselves <https://github.com/wavexx/bond-drivers>`_ are designed to
 be used from any other language.
+
+
+Privilege separation
+--------------------
+
+There might be times when it makes sense to create an unprivileged context to
+perform potentially dangerous operations, such as decoding an uploaded file on
+which you have zero trust. A common approach would be to communicate with an
+unprivileged daemon built for the purpose, but it usually requires dedicated
+effort. Running such processes using ``bond`` instead is almost trivial:
+
+.. code:: python3
+
+  # early in the setup phase of our daemon we create a bond using
+  # passwordless sudo, changing to an unprivileged user
+  py = make_bond('Python', 'sudo -u nobody python',
+		 trans_except=False, protocol='JSON')
+  py.eval_block('from mylibrary import decode_file')
+
+  # make decode_file() available as a normal function
+  decode_file = py.callable('decode_file')
+
+  # assuming decode_file() takes a file name which is at least readable by
+  # the unprivileged user, we can just take it's return value
+  data = decode_file(path)
+
+Contrarily to other examples involving Python, here we actually restrict the
+serialization protocol to plain ``JSON``. Nothing changes from the caller (our)
+perspective, except that the bond now can't share with us anything beyond
+trivial types. Python <=> Python bonds "pickle" by default, which is not
+sensible here as ``pickle`` allows arbitrary Python structures and handlers to
+be run (including bytecode itself).
+
+If just running the context as another user is not enough, then setting up an
+LXC container doesn't add much complexity, since we can just use
+``lxc-execute`` to attach directly to the new instance's STDIO:
+
+.. code:: python3
+
+  py = make_bond('Python', 'lxc-execute -n <name> -f <config> /path/to/python',
+		 trans_except=False, protocol='JSON')
+
+This way an ephemeral container is started/destroyed automatically along with
+our daemon. The container itself can expose just a few shared/read-only
+directories, or nothing at all if the entire I/O is built on top of ``bond``.
 
 
 API
@@ -213,6 +296,11 @@ The following keyword arguments are supported:
   for all languages except Python), then local exceptions will always contain a
   string representation of the remote exception instead, which avoids
   serialization errors.
+
+``protocol``:
+
+  Forces a specific serialization protocol to be chosen. It's automatically
+  selected when not specified, and usually matches "JSON".
 
 
 ``bond.Bond`` Methods
