@@ -120,6 +120,14 @@ legacy code clear. You should also keep in mind that since the remote language
 is itself Python, expressions themselves (for whenever ``call`` is
 insufficient) can be quoted just by using ``repr``.
 
+Similarly, you can use ``bond`` to combine regular CPython and PyPy runtimes
+(all the required modules work as expected on PyPy):
+
+.. code:: python3
+
+  from bond import make_bond
+  pypy = make_bond('Python', 'pypy')
+
 
 Remote/parallel computation
 ---------------------------
@@ -203,7 +211,7 @@ effort. Running such processes using ``bond`` instead is almost trivial:
 Contrarily to other examples involving Python, here we actually restrict the
 serialization protocol to plain ``JSON``. Nothing changes from the caller (our)
 perspective, except that the bond now can't share with us anything beyond
-trivial types. Python <=> Python bonds "pickle" by default, which is not
+trivial types. Python <=> Python bonds use ``pickle`` by default, which is not
 sensible here as ``pickle`` allows arbitrary Python structures and handlers to
 be run (including bytecode itself).
 
@@ -454,12 +462,12 @@ Serialization:
   ``TypeError`` <= ``_BOND_SerializationException``.
 
 
-Python 2 / Python 3:
+Python 2 / Python 3 / PyPy:
 
 You can freely mix Python versions between hosts/interpreters (that is: you can
 run Python 3 code from a Python 2 host and vice-versa). You'll need to disable
-transparent exceptions though, as the exception hierarchy is different between
-major versions:
+transparent exceptions between major versions though, as the exception
+hierarchy is different:
 
 .. code:: python3
 
