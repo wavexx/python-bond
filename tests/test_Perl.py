@@ -181,6 +181,7 @@ def test_eval_sentinel():
     # without strict subs this just returns null
     ret = perl.eval('$SENTINEL')
     failed = (ret != 1)
+    assert(failed)
 
     # with strict an exception is generated
     failed = False
