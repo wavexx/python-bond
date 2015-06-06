@@ -319,11 +319,11 @@ The resulting ``bond.Bond`` class has the following methods:
 ``eval(code)``:
 
   Evaluate and return the value of a *single statement* of code in the
-  interpreter.
+  top-level of the interpreter.
 
 ``eval_block(code)``:
 
-  Execute a "code" block inside the top-level of the interpreter. Any construct
+  Execute a "code" block in the top-level of the interpreter. Any construct
   which is legal by the current interpreter is allowed. Nothing is returned.
 
 ``ref(code)``:
@@ -339,7 +339,7 @@ The resulting ``bond.Bond`` class has the following methods:
 ``call(name, *args)``:
 
   Call a function "name" in the interpreter using the supplied list of
-  arguments \*args (apply \*args to a callable statement defined by "name").
+  arguments \*args (apply \*args to a callable *statement* defined by "name").
   The arguments are automatically converted to their other language's
   counterpart. The return value is captured and converted back to Python as
   well.
@@ -358,7 +358,7 @@ The resulting ``bond.Bond`` class has the following methods:
 
   Export a local function "func" so that can be called on the remote language
   as "name". If "name" is not specified, use the local function name directly.
-  Note that "func" must be a function *reference*, not a function name.
+  Note that "func" must be a local function, not a function name.
 
 ``proxy(name, other, remote)``:
 
@@ -406,11 +406,11 @@ text/data in these cases, as it will contain several nested exceptions.
 Quoted expressions
 ------------------
 
-``bond`` has minimal support for quoted expressions, through the use of
-``Bond.ref()``. ``ref()`` returns a reference to a unevaluated statement that
-can be fed back to ``eval()``, ``eval_block()``, or as an *immediate* (i.e.:
-not nested) argument to ``call()``. References are bound to the interpreter
-that created them.
+``bond`` has minimal support for working with quoted expressions, through the
+use of ``Bond.ref()``. ``ref()`` returns a reference to a unevaluated statement
+that can be fed back to ``eval()``, ``eval_block()``, or as an *immediate*
+(i.e.: not nested) argument to ``call()``. References are bound to the
+interpreter that created them.
 
 ``ref()`` allows to "call" methods that take remote un-serializable arguments,
 such as file descriptors, without the use of a support function and/or eval:
