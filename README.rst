@@ -180,7 +180,7 @@ actually being forwarded.
 ``bond`` doesn't even need to be installed remotely: the required setup is
 injected directly into a live interpreter. The wire protocol is simple enough
 that any language supporting an interactive REPL can be called. In fact, `the
-drivers themselves <https://github.com/wavexx/bond-drivers>`_ are designed to
+drivers themselves <https://gitlab.com/wavexx/bond-drivers>`_ are designed to
 be used from any other language.
 
 
@@ -670,4 +670,4 @@ python-bond's GIT repository is publicly accessible at::
 
   git://src.thregr.org/python-bond
 
-or at https://github.com/wavexx/python-bond
+or at https://gitlab.com/wavexx/python-bond
